@@ -1,5 +1,20 @@
 //
 // this code writes a SALT ini file to address zero ... in fram
+// When using realterm it may be handy to create a shortcut with a variant of this setup string:
+//		baud=115200 linedly=100 tab=send display=1 rows=60 fs=8 cols=80 port=10
+// baud and linedly are required to be as specified above the others may be set to your personal preferences
+//
+// This tool is awkward to use.
+//	1. compile and/or load this program into SALT
+//	2. close arduino serial monitor window if open
+//	3. open indows device manager so that you can see all of the ports (click the plus at ports)
+//	4. start realterm
+//	5. choose the the ini file (the ... button)
+//	6. make sure that realterm's port is set to the same port as Teeny USB serial
+//	7. close the port
+//	9. press and release SALT reset
+//	10. in realterm, open the port
+//	11. in realterm, go to the Send tab and click the Send File button to send the ini file to SALT
 //
 
 #include <Systronix_MB85RC256V.h>
@@ -64,65 +79,46 @@ void dump_settings (void)
 		} while (ret_val);
 	}
 
+	char		rx_buf [1024];
+	char		ln_buf [256];
 
 //---------------------------< S E T U P >--------------------------------------------------------------------
 
 void setup()
 	{
-	uint8_t i;
+	uint8_t		i;
+	uint16_t	rcvd_count;
 	
-	Serial.begin(9600);							// start at 9600 and see how we go?
+	Serial.begin(115200);						// 
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 	Serial.println("write config to fram:");
 	
 	fram.setup (0x50);
-	fram.begin ();		// join i2c as master
-	
-	uint8_t		write_buf[][128] =		// the configuration to write
-					{
-					"# lines beginning with '#' are comments\n",
-					"# all values in this setup file are to be decimal; ultimately in standard units where appropriate\n",
-					"# one element per line; beginning at the left margin; no blank lines\n",
-					"#\n",
-					"[system]\n",
-					"# config shall be one of: SS, SSWEC, B2B, B2BWEC, SBS\n",
-					"config = SSWEC\n",
-					"#lights on/off times ultimately in hh:mm (24hr clock); don't really need seconds here\n",
-					"lights on = 07:00\n",		// 25200 seconds = 07:00
-					"lights off = 19:00\n",		// 68400 seconds = 19:00
-					"#fan and other temperatures to be given in degrees F\n",
-					"fan temp 1 = 80.0\n",		// 3413 = 0x0D55 = 80F = 26.6640C
-					"fan temp 2 = 85.0\n",		// 3768 = 0x0EB8 = 85F = 29.4375C
-					"fan temp 3 = 90.0\n",		// 4124 = 0x101C = 90F = 32.21875C
-					"# ethernet settings\n",
-					"ip = 10.2.1.100\n"
-					"mask = 255.255.255.0\n",
-					"server ip = 10.2.1.1\n",
-					"#\n",
-					"# time and date\n",
-					"tz = pst\n",
-					"dst = yes\n",
-					'\4'			// end of file marker; must be the last element in this array
-					};
+	fram.begin ();								// join i2c as master
+	fram.set_addr16 (0);						// set starting address where we will begin writing
 
-
-//-----< W R I T E   I N I   F I L E >-----
-	fram.set_addr16 (0);			// set starting address where we will begin writing
-	for (i=0; i<30; i++)			// i large enough to include all members of the write_buf array
+	Serial.println ("ready");
+	while (!Serial.available());
+	Serial.print ("receiving ");
+	while (1)
 		{
-		if ('\4' == write_buf[i][0])		// if end of file marker
+		rcvd_count = Serial.readBytesUntil ('\n', ln_buf, 256);		// 1 second timeout
+		if (0 == rcvd_count)
 			break;
-		fram.control.wr_buf_ptr = (uint8_t*)write_buf[i];
-		fram.control.rd_wr_len = strlen ((char*)write_buf[i]);
+		
+		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
+		fram.control.rd_wr_len = strlen ((char*)ln_buf);
 		fram.page_write();
+		Serial.print (".");
 		}
 
 	fram.control.wr_byte = '\4';	// EOF marker
 	fram.byte_write();
 
-	dump_settings ();				// dump the settings to the monitor
-	Serial.println("\n\ndone");
+	Serial.println("\r\n\r\nfram write complete\r\n\r\n");
 
+	dump_settings ();				// dump the settings to the monitor
+	Serial.println("\r\n\r\ndone");
 	}
 
 void loop()
