@@ -7,7 +7,7 @@
 // This tool is awkward to use.
 //	1. compile and/or load this program into SALT
 //	2. close arduino serial monitor window if open
-//	3. open indows device manager so that you can see all of the ports (click the plus at ports)
+//	3. open windows device manager so that you can see all of the ports (click the plus at ports)
 //	4. start realterm
 //	5. choose the the ini file (the ... button)
 //	6. make sure that realterm's port is set to the same port as Teeny USB serial
@@ -89,7 +89,7 @@ void setup()
 	uint8_t		i;
 	uint16_t	rcvd_count;
 	
-	Serial.begin(115200);						// 
+	Serial.begin(5);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 	Serial.println("write config to fram:");
 	
@@ -104,20 +104,23 @@ void setup()
 		{
 		rcvd_count = Serial.readBytesUntil ('\n', ln_buf, 256);		// 1 second timeout
 		if (0 == rcvd_count)
-			break;
+			break;								// timed out
+		if (1 == rcvd_count)
+			continue;							// newline; we don't save newlines in fram
 		
+//		Serial.println (rcvd_count);
 		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
 		fram.control.rd_wr_len = strlen ((char*)ln_buf);
 		fram.page_write();
 		Serial.print (".");
 		}
 
-	fram.control.wr_byte = '\4';	// EOF marker
+	fram.control.wr_byte = '\4';				// EOF marker
 	fram.byte_write();
 
 	Serial.println("\r\n\r\nfram write complete\r\n\r\n");
 
-	dump_settings ();				// dump the settings to the monitor
+	dump_settings ();							// dump the settings to the monitor
 	Serial.println("\r\n\r\ndone");
 	}
 
