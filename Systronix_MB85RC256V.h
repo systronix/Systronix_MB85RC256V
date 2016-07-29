@@ -19,6 +19,7 @@ class Systronix_MB85RC256V
 	protected:
 		uint8_t _base;								// base address, eight possible values
 		void adv_addr16 (void);						// advance control.addr.u16 by control.rd_wr_len
+		void inc_addr16 (void);						// increment control.addr.u16 by 1
 
 	public:
 		union fram_addr
@@ -50,7 +51,6 @@ class Systronix_MB85RC256V
 		void init (void);							// does nothing
 
 		uint8_t set_addr16 (uint16_t);
-		void inc_addr16 (void);
 		
 		void byte_write (void);						// write 1 byte to address
 		void page_write (void);						// write n number of bytes beginning at address
@@ -58,7 +58,7 @@ class Systronix_MB85RC256V
 		void byte_read (void);						// read 1 byte from address
 		void default_byte_read (void);				// read 1 byte from fram's current address pointer
 		void page_read (void);						// read n number of bytes beginning at address
-		void device_id (uint16_t *, uint16_t *);						// get the device id
+		void device_id (uint16_t *, uint16_t *);	// get the device id
 	private:
 	};
 

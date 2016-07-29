@@ -147,26 +147,24 @@ void Systronix_MB85RC256V::page_read (void)
 
 //---------------------------< D E V I C E _ I D >------------------------------------------------------------
 
-void Systronix_MB85RC256V::device_id (uint16_t *manufID, uint16_t *prodID)
+void Systronix_MB85RC256V::device_id (uint16_t *manuf_id_ptr, uint16_t *prod_id_ptr)
 	{
 	uint8_t a[3];
-	uint8_t i;
 
-	Wire.beginTransmission(RSVD_SLAVE_ID >> 1);
-	Wire.write(_base << 1);
-	Wire.endTransmission(false);
+	Wire.beginTransmission (RSVD_SLAVE_ID >> 1);
+	Wire.write (_base << 1);
+	Wire.endTransmission (false);
 
-	Wire.requestFrom(RSVD_SLAVE_ID >> 1, 3);
+	Wire.requestFrom (RSVD_SLAVE_ID >> 1, 3);
 	
-	for (i=0; i<3; i++)
-		a[i] = Wire.read();
-//	a[1] = Wire.read();
-//	a[2] = Wire.read();
+	a[0] = Wire.read();
+	a[1] = Wire.read();
+	a[2] = Wire.read();
 
 	/* Shift values to separate manuf and prod IDs */
 	/* See p.10 of http://www.fujitsu.com/downloads/MICRO/fsa/pdf/products/memory/fram/MB85RC256V-DS501-00017-3v0-E.pdf */
-	*manufID = (a[0] << 4) + (a[1]  >> 4);
-	*prodID = ((a[1] & 0x0F) << 8) + a[2];
+	*manuf_id_ptr = (a[0] << 4) + (a[1]  >> 4);
+	*prod_id_ptr = ((a[1] & 0x0F) << 8) + a[2];
 	}
 
 
