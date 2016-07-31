@@ -68,6 +68,7 @@ uint16_t fram_get_line (uint8_t* buf)
 void dump_settings (void)
 	{
 	uint16_t	ret_val;
+	uint16_t	line_num = 1;
 	char		read_buf[256];
 	
 	fram.set_addr16 (0);			// reset the address
@@ -75,9 +76,19 @@ void dump_settings (void)
 		{
 		ret_val = fram_get_line ((uint8_t*)read_buf);
 		if (ret_val)
+			{
+			if (10 > line_num)
+				Serial.print ("  ");	// two spaces before line number
+			else if (100 > line_num)
+				Serial.print (" ");		// one space before line number
+			Serial.print (line_num);
+			Serial.print (": ");
 			Serial.println (read_buf);
+			line_num++;
+			}
 		} while (ret_val);
 	}
+
 
 	char		rx_buf [1024];
 	char		ln_buf [256];
@@ -107,7 +118,8 @@ void setup()
 			break;								// timed out
 		if (1 == rcvd_count)
 			continue;							// newline; we don't save newlines in fram
-		
+		if (strstr (ln_buf, "#"))
+			continue;							// comment; we don't save comments in fram
 //		Serial.println (rcvd_count);
 		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
 		fram.control.rd_wr_len = strlen ((char*)ln_buf);
