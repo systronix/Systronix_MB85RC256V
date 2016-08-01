@@ -61,5 +61,7 @@ class Systronix_MB85RC256V
 		void device_id (uint16_t *, uint16_t *);	// get the device id
 	private:
 	};
+	
+extern Systronix_MB85RC256V fram;
 
 #endif	// MB85RC256V_H_

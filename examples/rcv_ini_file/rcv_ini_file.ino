@@ -18,86 +18,20 @@
 //
 
 #include <Systronix_MB85RC256V.h>
+#include <SALT_settings.h>
 
 Systronix_MB85RC256V fram;
+SALT_settings settings;
 
-//---------------------------< F R A M _ G E T _ L I N E >----------------------------------------------------
-//
-// call this after setting the appropriate values in the fram control struct.  This function reads characters
-// until it encounters any control character (0x00 to 0x1F; 0x7F +), or gets to the end
-// of the fram memory address space (address rolls over to zero)
-//
+//---------------------------< P A G E   S C O P E   V A R I A B L E S >--------------------------------------
 
-uint16_t fram_get_line (uint8_t* buf)
-	{
-	uint16_t count = 0;
-	
-	fram.byte_read ();						// get the first byte
-	if ((' ' > fram.control.rd_byte) || (0x7F <= fram.control.rd_byte) || (0 == fram.control.addr.as_u16))
-		{
-		*buf = '\0';
-		return 0;
-		}
-	else
-		{
-		*buf++ = fram.control.rd_byte;		// save the byte and 
-		count ++;							// bump the counter
-		}
-	
-	do
-		{
-		fram.current_address_read ();		// get next byte
-		if ((' ' > fram.control.rd_byte) || (0x7F <= fram.control.rd_byte) || (0 == fram.control.addr.as_u16))
-			{								// not printable or we wrapped the address pointer back to zero
-			*buf = '\0';					// null terminate the receiving buffer
-			return count;					// and return number of bytes we read
-			}
-
-		*buf++ = fram.control.rd_byte;		// save the byte we read
-		count++;							// tally it
-		} while (1);
-
-	}
-
-
-//---------------------------< D U M P _ S E T T I N G S >----------------------------------------------------
-//
-// Dumps the system settings 'imi' file from fram to the serial monitor.
-//
-
-void dump_settings (void)
-	{
-	uint16_t	ret_val;
-	uint16_t	line_num = 1;
-	char		read_buf[256];
-	
-	fram.set_addr16 (0);			// reset the address
-	do
-		{
-		ret_val = fram_get_line ((uint8_t*)read_buf);
-		if (ret_val)
-			{
-			if (10 > line_num)
-				Serial.print ("  ");	// two spaces before line number
-			else if (100 > line_num)
-				Serial.print (" ");		// one space before line number
-			Serial.print (line_num);
-			Serial.print (": ");
-			Serial.println (read_buf);
-			line_num++;
-			}
-		} while (ret_val);
-	}
-
-
-	char		rx_buf [1024];
-	char		ln_buf [256];
+char		rx_buf [1024];
+char		ln_buf [256];
 
 //---------------------------< S E T U P >--------------------------------------------------------------------
 
 void setup()
 	{
-	uint8_t		i;
 	uint16_t	rcvd_count;
 	
 	Serial.begin(5);						// usb; could be any value
@@ -132,11 +66,10 @@ void setup()
 
 	Serial.println("\r\n\r\nfram write complete\r\n\r\n");
 
-	dump_settings ();							// dump the settings to the monitor
+	settings.dump_settings ();							// dump the settings to the monitor
 	Serial.println("\r\n\r\ndone");
 	}
 
 void loop()
-{
-
-}
+	{
+	}
