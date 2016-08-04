@@ -1,0 +1,10 @@
+{
+  "builtInLibrariesFolders": "D:\\arduino-1.6.9\\libraries",
+  "customBuildProperties": "",
+  "fqbn": "teensy:avr:teensy31:usb=serial,speed=48opt,keys=en-us",
+  "hardwareFolders": "D:\\arduino-1.6.9\\hardware,C:\\Users\\BAB\\AppData\\Local\\Arduino15\\packages",
+  "otherLibrariesFolders": "C:\\Users\\BAB\\Documents\\code\\Arduino\\libraries",
+  "runtime.ide.version": "10609",
+  "sketchLocation": "C:\\Users\\BAB\\Documents\\code\\Arduino\\libraries\\Systronix_MB85RC256V\\examples\\rcv_ini_file\\rcv_ini_file.ino",
+  "toolsFolders": "D:\\arduino-1.6.9\\tools-builder,C:\\Users\\BAB\\AppData\\Local\\Arduino15\\packages"
+}
