@@ -1,8 +1,9 @@
 //
 // this code writes a SALT ini file to address zero ... in fram
 // When using realterm it may be handy to create a shortcut with a variant of this setup string:
-//		baud=115200 linedly=100 tab=send display=1 rows=60 fs=8 cols=80 port=10
-// baud and linedly are required to be as specified above the others may be set to your personal preferences
+//		baud=115200 tab=send display=1 rows=60 fs=8 cols=80 port=10
+// baud required to be as specified above the others may be set to your personal preferences
+// this version does not require line delay
 //
 // This tool is awkward to use.
 //	1. compile and/or load this program into SALT
