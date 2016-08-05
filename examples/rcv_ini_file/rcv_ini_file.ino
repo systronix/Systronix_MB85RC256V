@@ -82,8 +82,9 @@ void setup()
 	{
 	uint16_t	rcvd_count;
 	uint16_t	crc = 0xFFFF;
-	uint32_t	millis_prev;
+	uint32_t	millis_prev, millis_now;
 	uint8_t		waiting_counter = 0;
+	uint16_t	line_cnt = 0;
 	
 	pinMode(PERIPH_RST, OUTPUT);
 	digitalWrite(PERIPH_RST, LOW);				// resets asserted
@@ -94,7 +95,12 @@ void setup()
 
 	Serial.begin(115200);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
-	Serial.println("write config to fram:");
+	Serial.print ("8k write config to fram: ");
+	Serial.print ("build time: ");				// assemble
+	Serial.print (__TIME__);					// the
+	Serial.print (" ");							// startup
+	Serial.print (__DATE__);					// message
+
 	
 	fram.setup (0x50);
 	fram.begin ();								// join i2c as master
@@ -102,7 +108,7 @@ void setup()
 
 	char* rx_ptr = rx_buf;						// point to start of rx_buf
 	
-	Serial.println ("ready");
+	Serial.println ("\r\nready");
 	millis_prev = millis();						// init
 	while (!Serial.available())
 		{
@@ -116,11 +122,15 @@ void setup()
 		}
 
 	Serial.println ("receiving");
+	millis_prev = millis();
 	while (1)
 		{
 		rcvd_count = Serial.readBytesUntil ('\n', ln_buf, 256);		// 1 second timeout
 		if (0 == rcvd_count)
 			break;								// timed out
+		
+		line_cnt++;								// if here we got a line
+		
 		if (1 == rcvd_count)
 			continue;							// newline; we don't save newlines in fram
 		if (strstr (ln_buf, "#"))
@@ -139,13 +149,22 @@ void setup()
 		Serial.print (".");
 //-------/old
 		}
-
+	millis_now = millis();
+	Serial.print ("\r\nrecieved ");
+	Serial.print (line_cnt);
+	Serial.print (" lines in ");
+	Serial.print (millis_now-millis_prev);
+	Serial.println ("ms");
+	
 	Serial.println ("\r\nwriting");
+	millis_prev = millis();
 
+	line_cnt = 0;
 	rx_ptr = rx_buf;
 	while (rx_ptr)
 		{
 		rx_ptr = array_get_line (ln_buf, rx_ptr);
+		line_cnt++;
 
 		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
 		fram.control.rd_wr_len = strlen ((char*)ln_buf);
@@ -184,6 +203,13 @@ void setup()
 	
 	fram.control.wr_byte = '\4';				// EOF marker
 	fram.byte_write();
+	millis_now = millis();
+
+	Serial.print ("\r\nwrote ");
+	Serial.print (line_cnt);
+	Serial.print (" lines to fram in ");
+	Serial.print (millis_now-millis_prev);
+	Serial.println ("ms");
 
 	Serial.print("\r\n\r\nfram write complete\r\n\r\n");
 	settings.dump_settings ();							// dump the settings to the monitor
