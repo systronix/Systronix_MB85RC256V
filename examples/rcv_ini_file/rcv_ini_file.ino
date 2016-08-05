@@ -4,6 +4,7 @@
 //		baud=115200 tab=send display=1 rows=60 fs=8 cols=80 port=10
 // baud required to be as specified above the others may be set to your personal preferences
 // this version does not require line delay
+// added timing and diagnostic messaging
 //
 // This tool is awkward to use.
 //	1. compile and/or load this program into SALT
