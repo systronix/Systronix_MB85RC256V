@@ -28,10 +28,22 @@ SALT_FETs FETs;
 Systronix_MB85RC256V fram;
 SALT_settings settings;
 
+
+//---------------------------< D E F I N E S >----------------------------------------------------------------
+
+//#define		BY_LINE			// characters line-by-line
+//#define		HOMEBREW		// ignored if BY_LINE not defined
+
+#ifndef		BY_LINE			// if not defined
+#define		BY_CHAR			// then fetch character-by-character
+#endif
+
+
 //---------------------------< P A G E   S C O P E   V A R I A B L E S >--------------------------------------
 
 char		rx_buf [8192];
 char		ln_buf [256];
+
 
 //---------------------------< C R C 1 6 _ U P D A T E >------------------------------------------------------
 //
@@ -77,6 +89,93 @@ char* array_get_line (char* dest, char* array)
 	}
 
 
+//---------------------------< G E T _ S E R I A L _ L I N E >------------------------------------------------
+//
+// 1360ms
+//
+
+uint16_t serial_get_line (char* ln_ptr)
+	{
+	uint16_t	char_cnt = 0;
+	time_t		last_char_time = millis();	// initialize to current time so we don't immediately fall out
+	
+	while (1)
+		{
+		while (Serial.available())				// while stuff to get
+			{
+			*ln_ptr = Serial.read();			// read and save the byte
+			if ('\n' == *ln_ptr)
+				{
+				*ln_ptr ='\0';					// was a newline so null terminate
+				return char_cnt;
+				}
+
+			char_cnt++;							// tally
+			ln_ptr++;							// bump the next character
+			if (255 <= char_cnt)
+				{
+				*ln_ptr = '\0';					// null terminate at ln_buf[255]
+				return char_cnt;
+				}
+			last_char_time = millis();			// reset the timer
+			}
+		
+		while (!Serial.available())
+			{
+			if (1000 < (millis()-last_char_time))
+				return char_cnt;
+			}
+		}
+	}
+
+
+//---------------------------< G E T _ S E R I A L _ C H A R S >----------------------------------------------
+//
+// 1260mS
+//
+
+uint16_t serial_get_chars (char* rx_ptr)
+	{
+	uint16_t	char_cnt = 0;
+	time_t		last_char_time = millis();		// initialize to current time so we don't immediately fall out
+	char		c;								// temp holding variable
+	
+	while (1)
+		{
+		while (Serial.available())				// while stuff to get
+			{
+			c = Serial.read();					// read and save the byte
+			last_char_time = millis();			// reset the timer
+			if ('\n' == c)
+				{
+				char_cnt++;						// tally
+				
+				Serial.print (".");
+				continue;
+				}
+			else
+				{
+				char_cnt++;						// tally
+				*rx_ptr++ = c;					// save and bump the pointer
+				*rx_ptr = '\0';					// null terminate whether we need to or not
+				}
+
+			if (8191 <= char_cnt)
+				{
+				*rx_ptr = '\0';					// null terminate at rx_buf[8191]
+				return char_cnt;
+				}
+			}
+		
+		while (!Serial.available())
+			{
+			if (1000 < (millis()-last_char_time))
+				return char_cnt;
+			}
+		}
+	}
+
+
 //---------------------------< S E T U P >--------------------------------------------------------------------
 
 void setup()
@@ -96,7 +195,16 @@ void setup()
 
 	Serial.begin(115200);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
-	Serial.print ("8k write config to fram: ");
+#ifdef		BY_LINE
+#ifdef		HOMEBREW	
+	Serial.print ("8k (fetch by line - HB): write config to fram: ");
+#else
+	Serial.print ("8k (fetch by line): write config to fram: ");
+#endif
+#endif
+#ifdef		BY_CHAR
+	Serial.print ("8k (fetch by character): write config to fram: ");
+#endif
 	Serial.print ("build time: ");				// assemble
 	Serial.print (__TIME__);					// the
 	Serial.print (" ");							// startup
@@ -124,9 +232,18 @@ void setup()
 
 	Serial.println ("receiving");
 	millis_prev = millis();
+#ifdef		BY_CHAR
+	rcvd_count = serial_get_chars (rx_buf);
+#endif
+
+#ifdef		BY_LINE
 	while (1)
 		{
+#ifdef		HOMEBREW
+		rcvd_count = serial_get_line (ln_buf);
+#else
 		rcvd_count = Serial.readBytesUntil ('\n', ln_buf, 256);		// 1 second timeout
+#endif
 		if (0 == rcvd_count)
 			break;								// timed out
 		
@@ -150,10 +267,18 @@ void setup()
 		Serial.print (".");
 //-------/old
 		}
+#endif
+
 	millis_now = millis();
 	Serial.print ("\r\nrecieved ");
+#ifdef		BY_CHAR
+	Serial.print (rcvd_count);
+	Serial.print (" characters in ");
+#endif
+#ifdef		BY_LINE
 	Serial.print (line_cnt);
 	Serial.print (" lines in ");
+#endif
 	Serial.print (millis_now-millis_prev);
 	Serial.println ("ms");
 	
@@ -165,6 +290,12 @@ void setup()
 	while (rx_ptr)
 		{
 		rx_ptr = array_get_line (ln_buf, rx_ptr);
+
+		if (1 == strlen (ln_buf))
+			continue;							// newline; we don't save newlines in fram
+		if (strstr (ln_buf, "#"))
+			continue;							// comment; we don't save comments in fram
+												// TODO: trim leading and trailing white space?
 		line_cnt++;
 
 		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
@@ -201,9 +332,10 @@ void setup()
 	Serial.print ("crc: ");						// should be 0
 	Serial.println (crc, HEX);					
 ----------------------------*/	
-	
-	fram.control.wr_byte = '\4';				// EOF marker
+
+	fram.control.wr_byte = '\x04';				// EOF marker
 	fram.byte_write();
+
 	millis_now = millis();
 
 	Serial.print ("\r\nwrote ");
