@@ -1,0 +1,10 @@
+'SALT_INI_File_Issues'
+What works and what doesn't in sending ini file to Teensy/SALT
+
+rcv_ini_file		LineDel		ini comments 		PC			Win7/10	Pro/Home	RT2/3	Results
+8K Aug 5 10:44		100			shorter	0805		Yoga S1		10		Home		2		seems works
+ditto				100			long 0804													rcv 173 in 21329 ms, write 126 in 262ms								
+ditto				0			long														rcv 173 in 1296 ms, write 126 in 262ms
+--------
+Recompile to include Scott's fix to SALT_settings
+8K Aug 5 21:48		
