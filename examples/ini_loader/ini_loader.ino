@@ -820,16 +820,6 @@ boolean get_user_yes_no (char* query, boolean yesno)
 
 void setup()
 	{
-	uint16_t	rcvd_count;
-	uint16_t	crc = 0xFFFF;
-	uint32_t	millis_prev, millis_now;
-	uint8_t		waiting_counter = 0;
-	uint8_t		ret_val;
-	uint8_t		heading = 0;
-
-	char* rx_ptr = rx_buf;						// point to start of rx_buf
-	char* out_ptr = out_buf;					// point to start of out_buf
-
 	pinMode(PERIPH_RST, OUTPUT);
 	digitalWrite(PERIPH_RST, LOW);				// resets asserted
 	digitalWrite(PERIPH_RST, HIGH);				// resets released
@@ -857,6 +847,25 @@ void setup()
 	
 	fram.setup (0x50);
 	fram.begin ();								// join i2c as master
+	}
+
+
+//---------------------------< L O O P >----------------------------------------------------------------------
+//
+//
+//
+
+void loop()
+	{
+	uint16_t	rcvd_count;
+	uint16_t	crc = 0xFFFF;
+	uint32_t	millis_prev, millis_now;
+	uint8_t		waiting_counter = 0;
+	uint8_t		ret_val;
+	uint8_t		heading = 0;
+	char* rx_ptr = rx_buf;						// point to start of rx_buf
+	char* out_ptr = out_buf;					// point to start of out_buf
+
 
 	millis_prev = millis();						// init
 	Serial.print ("\r\n\r\nloader> waiting for file ...");
@@ -885,65 +894,62 @@ void setup()
 		rcvd_count = Serial.readBytesUntil ('\n', ln_buf, 256);		// 1 second timeout
 #endif
 		if (0 == rcvd_count)
-			break;								// timed out
-//		if (1 == rcvd_count)
-//			continue;							// newline; we don't save newlines in fram
-//		if (strstr (ln_buf, "#"))
-//			continue;							// comment; we don't save comments in fram
-		settings.line_num++;								// if here we got a line
-												// TODO: trim leading and trailing white space?
+			break;									// timed out
+
+		settings.line_num++;						// if here we got a line
+
 		strcpy (rx_ptr, ln_buf);
-		rx_ptr += strlen (ln_buf);				// advance the rx_ptr
+		rx_ptr += strlen (ln_buf);					// advance the rx_ptr
 		Serial.print (".");
 		}
 #endif
 
-	millis_now = millis();
+	millis_now = millis();							// capture the time
 	Serial.print ("\r\nrecieved ");
 #ifdef		BY_CHAR
-	Serial.print (rcvd_count);
+	Serial.print (rcvd_count);						// number of characters received
 	Serial.print (" characters in ");
 #endif
 #ifdef		BY_LINE
-	Serial.print (line_cnt);
+	Serial.print (line_cnt);						// number of lines received
 	Serial.print (" lines in ");
 #endif
-	Serial.print (millis_now-millis_prev);
+	Serial.print (millis_now-millis_prev);			// elapsed time
 	Serial.println ("ms");
 
-	settings.line_num = 0;
+	settings.line_num = 0;							// reset to count lines taken from rx_buf
 	Serial.println ("\r\nchecking");
-	millis_prev = millis();
+	millis_prev = millis();							// reset
 
-	rx_ptr = rx_buf;
+	rx_ptr = rx_buf;								// initialize
 	while (rx_ptr)
 		{
-		rx_ptr = array_get_line (ln_buf, rx_ptr);
-		settings.line_num ++;
+		rx_ptr = array_get_line (ln_buf, rx_ptr);	// returns null pointer when no more characters in buffer
+		settings.line_num ++;						// tally
 
 		if (('\r' == *ln_buf) || ('\n' == *ln_buf))	// do these here so we have source line numbers for error messages
 			continue;								// cr or lf; we don't save newlines in fram
 		if (strstr (ln_buf, "#"))
 			continue;								// comment; we don't save comments in fram
 
-		ret_val = normalize_kv_pair (ln_buf);
+		ret_val = normalize_kv_pair (ln_buf);		// trim, spaces to underscores
 
-		if (ret_val)
+		if (ret_val)								// if an error or a heading (otherwise returns SUCCESS)
 			{
 			if (INI_ERROR == ret_val)				// not a heading, missing assignment operator
 				settings.err_msg ((char *)"not key/value pair");
-			else								// found a new heading
+			else									// found a new heading
 				{
-				heading = ret_val;				// so remember it
-				strcpy (out_ptr, ln_buf);		// save it in the output buffer
-				out_ptr += strlen (ln_buf);		// advance the pointer
-				*out_ptr++ = '\n';				// add the end-of-line marker
-				*out_ptr = '\0';				// and null terminate
+				heading = ret_val;					// so remember which heading we found
+				strcpy (out_ptr, ln_buf);			// save it in the output buffer
+				out_ptr += strlen (ln_buf);			// advance the pointer
+				*out_ptr++ = '\n';					// add the end-of-line marker
+				*out_ptr = '\0';					// and null terminate
 				}
-			continue;
+			continue;								// get the next line
 			}
 
-		if (SYSTEM == heading)					// validate the various settings according to their headings
+		if (SYSTEM == heading)						// validate the various settings according to their headings
 			check_ini_system (ln_buf);
 		else if (HABITAT_A == heading)
 			check_ini_habitat_A (ln_buf);
@@ -954,44 +960,44 @@ void setup()
 		else if (USERS == heading)
 			check_ini_users (ln_buf);
 		
-		strcpy (out_ptr, ln_buf);		// write the setting to the output buffer
-		out_ptr += strlen(ln_buf);		// advance the pointer
-		*out_ptr++ = '\n';				// add the end-of-line marker
-		*out_ptr = '\0';				// and null terminate
+		strcpy (out_ptr, ln_buf);					// write the setting to the output buffer
+		out_ptr += strlen(ln_buf);					// advance the pointer
+		*out_ptr++ = '\n';							// add the end-of-line marker
+		*out_ptr = '\0';							// and null terminate
 		}
 
-	millis_now = millis();
+	millis_now = millis();							// capture the time
 	Serial.print ("\r\nchecked ");
-	Serial.print (settings.line_num);
+	Serial.print (settings.line_num);				// number of lines
 	Serial.print (" lines in ");
-	Serial.print (millis_now-millis_prev);
+	Serial.print (millis_now-millis_prev);			// elapsed time
 	Serial.print ("ms; ");
-	if (total_errs)
+	if (total_errs)									// if there have been any errors
 		{
 		Serial.print (total_errs);
 		Serial.print (" error(s); ");
-		Serial.print (warn_cnt);
+		Serial.print (warn_cnt);					// number of warnings
 		Serial.println (" warning(s); ");
 		Serial.println ("configuration not written.");
 		}
 	else
 		{
-		Serial.print ("0 error(s); ");
-		Serial.print (warn_cnt);
+		Serial.print ("0 error(s); ");				// no errors
+		Serial.print (warn_cnt);					// number of warnings
 		Serial.println (" warning(s).");
 		}
 
-	if (warn_cnt && !total_errs)
+	if (warn_cnt && !total_errs)					// warnings but no errors
 		{
 		if (!get_user_yes_no ((char*)"ignore warnings and write settings to fram?", false))		// default answer no
 			total_errs = warn_cnt;					// spoof to prevent writing fram
 		}
 
-	if (!total_errs)
+	if (!total_errs)								// if there have been errors, no writing fram
 		{
-		settings.line_num = 0;
+		settings.line_num = 0;						// reset
 		Serial.println ("\r\nwriting");
-		millis_prev = millis();
+		millis_prev = millis();						// reset
 
 	/*-----------------------------
 		// calculate the crc across the entire buffer
@@ -1027,33 +1033,35 @@ void setup()
 		out_ptr = out_buf;							// point to the buffer
 		while (out_ptr)
 			{
-			out_ptr = array_get_line (ln_buf, out_ptr);			// get a line
-			settings.line_num ++;										// tally
+			out_ptr = array_get_line (ln_buf, out_ptr);		// returns null pointer when no more characters in buffer
+			settings.line_num ++;							// tally
 			fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
 			fram.control.rd_wr_len = strlen ((char*)ln_buf);
-			fram.page_write();									// write it
+			fram.page_write();								// write it
 			Serial.print (".");
 			}
 		
-		fram.control.wr_byte = '\x04';				// EOF marker
+		fram.control.wr_byte = '\x04';				// write the EOF marker
 		fram.byte_write();
 
-		millis_now = millis();
+		millis_now = millis();						// capture the time
 
 		Serial.print ("\r\nwrote ");
-		Serial.print (settings.line_num);
+		Serial.print (settings.line_num);			// number of lines
 		Serial.print (" lines to fram in ");
-		Serial.print (millis_now-millis_prev);
+		Serial.print (millis_now-millis_prev);		// elapsed time
 		Serial.println ("ms");
 
 		Serial.print("\r\n\r\nfram write complete\r\n\r\n");
 
 		if (get_user_yes_no ((char*)"dump settings from fram?", true))	// default answer yes
-			settings.dump_settings ();							// dump the settings to the monitor
+			settings.dump_settings ();				// dump the settings to the monitor
 		}
 	Serial.println("\n\ndone");
-	}
-
-void loop()
-	{
+	
+	if (!get_user_yes_no ((char*)"load another file", false))	// default answer no
+		{
+		Serial.println("\r\nquitting");				// give up and enter and endless
+		while(1);									// loop
+		}
 	}
