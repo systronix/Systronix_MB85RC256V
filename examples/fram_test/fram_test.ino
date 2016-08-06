@@ -2,10 +2,11 @@
 
 #include <Systronix_MB85RC256V.h>
 #include <SALT.h>
-#include "../../SALT_reptile/SALT_reptile.h"
+#include <SALT_settings.h>
 
 Systronix_MB85RC256V fram;
-sys_settings system_settings;	// in SALT_reptile.h
+
+SALT_settings settings;				// settings class in SALT_settings
 
 //---------------------------< T R I M >----------------------------------------------------------------------
 //
@@ -103,97 +104,97 @@ void parse_ini (void)
 			Serial.print (": ");
 			Serial.print ("config: ");
 			if (!stricmp (value, "SS"))
-				system_settings.config = SS;
+				settings.sys_settings.config = SS;
 			else if (!stricmp (value, "SSWEC"))
-				system_settings.config = SSWEC;
+				settings.sys_settings.config = SSWEC;
 			else if (!stricmp (value, "B2B"))
-				system_settings.config = B2B;
+				settings.sys_settings.config = B2B;
 			else if (!stricmp (value, "B2BWEC"))
-				system_settings.config = B2BWEC;
+				settings.sys_settings.config = B2BWEC;
 			else if (!stricmp (value, "SBS"))
-				system_settings.config = SBS;
+				settings.sys_settings.config = SBS;
 			else
 				{
 				Serial.print ("unknown config in line ");
 				Serial.println (line_num);
 				}
 
-			Serial.println (system_settings.config);
+			Serial.println (settings.sys_settings.config);
 			}
 		else if (!stricmp (key, "lights on"))
 			{
 			Serial.print (line_num);
 			Serial.print (": ");
 			Serial.println ("lights on");
-			system_settings.time_lights_on = (time_t)atoi(value);
+			settings.sys_settings.time_lights_on = (time_t)atoi(value);
 			
-			if (0 == system_settings.time_lights_on)
+			if (0 == settings.sys_settings.time_lights_on)
 				{
 				Serial.print ("invalid time in line ");
 				Serial.println (line_num);
 				}
 			
-			Serial.println (system_settings.time_lights_on);
+			Serial.println (settings.sys_settings.time_lights_on);
 			}
 		else if (!stricmp (key, "lights off"))
 			{
 			Serial.print (line_num);
 			Serial.print (": ");
 			Serial.println ("lights off");
-			system_settings.time_lights_off = (time_t)atoi(value);
+			settings.sys_settings.time_lights_off = (time_t)atoi(value);
 			
-			if (0 == system_settings.time_lights_off)
+			if (0 ==settings.sys_settings.time_lights_off)
 				{
 				Serial.print ("invalid time in line ");
 				Serial.println (line_num);
 				}
 			
-			Serial.println (system_settings.time_lights_off);
+			Serial.println (settings.sys_settings.time_lights_off);
 			}
 		else if (!stricmp (key, "fan temp 1"))
 			{
 			Serial.print (line_num);
 			Serial.print (": ");
 			Serial.println ("fan temp 1");
-			system_settings.temperature_auto_fan_1 = (uint16_t)atoi(value);
+			settings.sys_settings.temperature_auto_fan_1 = (uint16_t)atoi(value);
 			
-			if (0 == system_settings.temperature_auto_fan_1)
+			if (0 ==settings.sys_settings.temperature_auto_fan_1)
 				{
 				Serial.print ("invalid temperature in line ");
 				Serial.println (line_num);
 				}
 			
-			Serial.println (system_settings.temperature_auto_fan_1);
+			Serial.println (settings.sys_settings.temperature_auto_fan_1);
 			}
 		else if (!stricmp (key, "fan temp 2"))
 			{
 			Serial.print (line_num);
 			Serial.print (": ");
 			Serial.println ("fan temp 2");
-			system_settings.temperature_auto_fan_2 = (uint16_t)atoi(value);
+			settings.sys_settings.temperature_auto_fan_2 = (uint16_t)atoi(value);
 			
-			if (0 == system_settings.temperature_auto_fan_2)
+			if (0 == settings.sys_settings.temperature_auto_fan_2)
 				{
 				Serial.print ("invalid temperature in line ");
 				Serial.println (line_num);
 				}
 			
-			Serial.println (system_settings.temperature_auto_fan_2);
+			Serial.println (settings.sys_settings.temperature_auto_fan_2);
 			}
 		else if (!stricmp (key, "fan temp 3"))
 			{
 			Serial.print (line_num);
 			Serial.print (": ");
 			Serial.println ("fan temp 3");
-			system_settings.temperature_auto_fan_3 = (uint16_t)atoi(value);
+			settings.sys_settings.temperature_auto_fan_3 = (uint16_t)atoi(value);
 			
-			if (0 == system_settings.temperature_auto_fan_3)
+			if (0 == settings.sys_settings.temperature_auto_fan_3)
 				{
 				Serial.print ("invalid temperature in line ");
 				Serial.println (line_num);
 				}
 			
-			Serial.println (system_settings.temperature_auto_fan_3);
+			Serial.println (settings.sys_settings.temperature_auto_fan_3);
 			}
 		else if (!stricmp (key, "ip"))
 			{
