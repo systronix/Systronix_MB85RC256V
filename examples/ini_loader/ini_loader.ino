@@ -26,16 +26,12 @@ SALT_FETs FETs;
 Systronix_MB85RC256V fram;
 SALT_settings settings;
 
+
 //---------------------------< D E F I N E S >----------------------------------------------------------------
 
-//#define		BY_LINE			// characters line-by-line
-//#define		HOMEBREW		// ignored if BY_LINE not defined
+#define		END_OF_FILE		0xFFFF
 
-#ifndef		BY_LINE			// if not defined
-#define		BY_CHAR			// then fetch character-by-character
-#endif
-
-#define		SYSTEM	0xDF	// TODO: move these to SALT.h?
+#define		SYSTEM	0xDF
 #define		USERS	0xEF
 
 
@@ -49,30 +45,29 @@ uint16_t	total_errs = 0;
 uint16_t	warn_cnt = 0;
 
 
-//---------------------------< C R C 1 6 _ U P D A T E >------------------------------------------------------
+//---------------------------< G E T _ C R C _ A R R A Y >----------------------------------------------------
 //
-// Used to calculte the settings crc.  Seed with 0xFFFF.  When checking a data with a crc, Seed with 0xFFFF,
-// separate the current crc into high and low bytes.  Calculate a new crc across the data then include crc low
-// byte followed by crc high byte.  The result should be zero.
+// calculate a crc16 across a end-of-file marker terminated array
 //
 
-uint16_t crc16_update (uint16_t crc, uint8_t data)
+uint16_t get_crc_array (uint8_t* array_ptr)
 	{
-	unsigned int i;
-
-	crc ^= data;
-	for (i = 0; i < 8; ++i)
+	uint16_t	crc = 0xFFFF;
+	uint16_t	byte_count = 0;
+	
+	while (EOF_MARKER != *array_ptr)					// while not end-of-file marker
 		{
-		if (crc & 1)
-			crc = (crc >> 1) ^ 0xA001;
-		else
-			crc = (crc >> 1);
+		crc = settings.crc16_update (crc, *array_ptr);		// calc crc for this byte
+		byte_count++;
+		array_ptr++;								// bump the pointer
 		}
+	Serial.print ("byte count: ");
+	Serial.println (byte_count);
 	return crc;
 	}
 
 
-//---------------------------<  A R R A Y _ G E T _L I N E >--------------------------------------------------
+//---------------------------<  A R R A Y _ G E T _ L I N E >-------------------------------------------------
 //
 // copies settings line by line into a separate buffer for error checking, formatting before the setting is
 // written to fram.
@@ -80,16 +75,37 @@ uint16_t crc16_update (uint16_t crc, uint8_t data)
 
 char* array_get_line (char* dest, char* array)
 	{
-	while (*array && (('\r' != *array) && ('\n' != *array)))
+	while ((EOF_MARKER != *array) && ('\r' != *array) && ('\n' != *array))
 		*dest++ = *array++;						// copy array to destination until we find \n or \0
 
 	if (('\r' == *array) || ('\n' == *array))	// if we stopped copying because \r or \n
+		{
 		*dest++ = *array++;						// add it to the destination
-	*dest = '\0';								// null terminate for safety
-
-	if ('\0' == *array)							// if we stopped copying because \0
+		*dest = '\0';							// null terminate for safety
+		return array;							// else return a pointer to the start of the next line
+		}
+	else										// must be end-of-file marker
+		{
+		*dest = '\0';							// null terminate for safety
 		return NULL;							// return a null pointer
-	return array;								// else return a pointer to the start of the next line
+		}
+	}
+
+
+//---------------------------<  A R R A Y _ A D D _ L I N E >-------------------------------------------------
+//
+// copies a line of text into a buffer and adds an end-of-file marker; returns a pointer to the eof marker.
+// source is a null-terminated string without eof terminator.
+//
+
+char* array_add_line (char* array_ptr, char* source_ptr)
+	{
+	while (*source_ptr)
+		*array_ptr++ = *source_ptr++;			// copy source into array
+
+	*array_ptr++ = '\n';						// add end-of-line marker
+	*array_ptr = EOF_MARKER;						// add end-of-file marker
+	return array_ptr;							// return a pointer to the end-of-line character
 	}
 
 
@@ -110,15 +126,15 @@ uint8_t normalize_kv_pair (char* key_ptr)
 		key_ptr = settings.trim (key_ptr);
 		if (settings.is_section_header (key_ptr))
 			{
-			if (!stricmp (key_ptr, "[system]"))
+			if (strstr (key_ptr, "[system]"))
 				return SYSTEM;
-			else if (!stricmp (key_ptr, "[habitat A]"))
+			else if (strstr (key_ptr, "[habitat A]"))
 				return HABITAT_A;
-			else if (!stricmp (key_ptr, "[habitat B]"))
+			else if (strstr (key_ptr, "[habitat B]"))
 				return HABITAT_B;
-			else if (!stricmp (key_ptr, "[habitat EC]"))
+			else if (strstr (key_ptr, "[habitat EC]"))
 				return HABITAT_EC;
-			else if (!stricmp (key_ptr, "[users]"))
+			else if (strstr (key_ptr, "[users]"))
 				return USERS;
 			}
 		return INI_ERROR;					// missing assignment operator or just junk text
@@ -172,6 +188,7 @@ void check_ini_system (char* key_ptr)
 	if (NULL == value_ptr)
 		{
 		settings.err_msg ((char *)"(char *)not key/value pair");		// should never get here
+		total_errs++;						// make sure that we don't write to fram
 		return;
 		}
 	
@@ -288,6 +305,7 @@ void check_ini_habitat_A (char* key_ptr)
 	if (NULL == value_ptr)
 		{
 		settings.err_msg ((char *)"(char *)not key/value pair");		// should never get here
+		total_errs++;						// make sure that we don't write to fram
 		return;
 		}
 	
@@ -397,6 +415,7 @@ void check_ini_habitat_B (char* key_ptr)
 	if (NULL == value_ptr)
 		{
 		settings.err_msg ((char *)"(char *)not key/value pair");		// should never get here
+		total_errs++;						// make sure that we don't write to fram
 		return;
 		}
 	
@@ -505,6 +524,7 @@ void check_ini_habitat_EC (char* key_ptr)
 	if (NULL == value_ptr)
 		{
 		settings.err_msg ((char *)"(char *)not key/value pair");		// should never get here
+		total_errs++;						// make sure that we don't write to fram
 		return;
 		}
 	
@@ -634,6 +654,7 @@ void check_ini_users (char*	key_ptr)
 	if (NULL == value_ptr)
 		{
 		settings.err_msg ((char *)"(char *)not key/value pair");		// should never get here
+		total_errs++;						// make sure that we don't write to fram
 		return;
 		}
 	
@@ -694,7 +715,7 @@ void check_ini_users (char*	key_ptr)
 	}
 
 
-//---------------------------< G E T _ S E R I A L _ L I N E >------------------------------------------------
+//---------------------------< S E R I A L _ G E T _ L I N E >------------------------------------------------
 //
 // 1360ms
 //
@@ -734,7 +755,7 @@ uint16_t serial_get_line (char* ln_ptr)
 	}
 
 
-//---------------------------< G E T _ S E R I A L _ C H A R S >----------------------------------------------
+//---------------------------< S E R I A L _ G E T _ C H A R S >----------------------------------------------
 //
 // 1260mS
 //
@@ -754,15 +775,24 @@ uint16_t serial_get_chars (char* rx_ptr)
 			if ('\n' == c)
 				{
 				char_cnt++;						// tally
+				*rx_ptr++ = c;					// save and bump the pointer
+				*rx_ptr = EOF_MARKER;				// add end-of-file whether we need to or not
+				*(rx_ptr+1) = '\0';				// null terminate whether we need to or not
 				
 				Serial.print (".");
 				continue;
+				}
+			else if ('\r' == c)
+				{
+				char_cnt ++;					// tally
+				continue;						// but don't save; we only want the newline as a line marker
 				}
 			else
 				{
 				char_cnt++;						// tally
 				*rx_ptr++ = c;					// save and bump the pointer
-				*rx_ptr = '\0';					// null terminate whether we need to or not
+				*rx_ptr = EOF_MARKER;				// add end-of-file whether we need to or not
+				*(rx_ptr+1) = '\0';				// null terminate whether we need to or not
 				}
 
 			if (8191 <= char_cnt)
@@ -778,6 +808,57 @@ uint16_t serial_get_chars (char* rx_ptr)
 				return char_cnt;
 			}
 		}
+	}
+
+//---------------------------< Z E R O _ P A D _ S E T T I N G >----------------------------------------------
+//
+// Pad the setting value with '\0' characters.  Return the number of byte that the setting occupies in memory.
+//
+
+uint8_t zero_pad_setting (char* setting_ptr)
+	{
+	char* 		value_ptr = strchr (setting_ptr, '=') + 1;
+	char*		padding_ptr;
+	uint8_t		value_len = strlen (value_ptr);
+	uint8_t		setting_len = strlen (setting_ptr);
+	uint8_t		limit = 8;						// for most settings
+	
+	if (strstr (setting_ptr, "ip") ||			// also finds 'server ip'
+		strstr (setting_ptr, "mask") ||
+		strstr (setting_ptr, "name") ||
+		strstr (setting_ptr, "rights"))
+			limit = 16;							// for these keys, value length limit is 16 characters
+	
+	padding_ptr = value_ptr + value_len;		// point to the line terminator (not the null byte)
+	for (uint8_t i=value_len; i<limit; i++)
+		{
+		*padding_ptr++ = '\0';					// write a fill byte and bump the pointer
+		setting_len++;							// keep track of the setting's length
+		}
+
+	*padding_ptr++ = '\n';						// write the line terminator
+	setting_len++;								// bump the length
+	
+	return setting_len;
+	}
+
+
+//---------------------------< L I N E _ L E N >--------------------------------------------------------------
+//
+// like strlen() except that it is looking for '\n' or '\r' instead of '\0'.
+//
+
+size_t line_len (char* line_ptr)
+	{
+	size_t length = 0;
+	
+	while (('\n' != *line_ptr) && ('\r' != *line_ptr) && (EOF_MARKER != *line_ptr))	// not carriage return or line feed or EOF marker
+		{
+		length ++;			// bump the length
+		line_ptr ++;		// bump the pointer
+		}
+	length ++;				// include end-of-line marker in the length
+	return length;			// return the length
 	}
 
 
@@ -815,7 +896,166 @@ boolean get_user_yes_no (char* query, boolean yesno)
 		}
 	}
 
+
+//---------------------------< F R A M _ G E T _ N _ B Y T E S >----------------------------------------------
+//
+// call this after setting the appropriate values in the fram control struct.  This function reads n number
+// of characters into a buffer.
+//
+
+void fram_get_n_bytes (uint8_t* buf_ptr, uint8_t n)
+	{
+	uint8_t i;
 	
+	fram.byte_read ();						// get the first byte
+	*buf_ptr++ = fram.control.rd_byte;		// save the byte we read
+	for (i=0; i<(n-1); i++)					// loop getting the rest of the bytes
+		{
+		fram.current_address_read ();		// get next byte
+		*buf_ptr++ = fram.control.rd_byte;	// save the byte we read
+		};
+	}
+
+
+//---------------------------< F R A M _ F I L L >------------------------------------------------------------
+//
+// fill fram with n copies of 'c' beginning at address and continuing for n number of bytes.
+// writes in groups of 256.  For n not an evenly divisible by 256, this code will stop short.
+//
+
+void fram_fill (uint8_t c, uint16_t address, size_t n)
+	{
+	uint8_t	buf[256];							// max length natively supported by the i2c_t3 library
+	size_t	i;									// the iterator
+
+	memset (buf, c, 256);						// fill buffer with characters write to fram
+
+	for (i=0; i<n; i+=256)						// page_write() max length is 256 bytes (i2c_t3 limit) so iterate
+		{
+		fram.set_addr16 (address + i);			// set the address
+		fram.control.wr_buf_ptr = buf;			// point to ln_buf
+		fram.control.rd_wr_len = 256;			// number of bytes to write
+		fram.page_write();						// do it
+		}
+	}
+
+//---------------------------< H E X _ D U M P _ S E T T I N G S >--------------------------------------------
+//
+// TODO: make a generic version of this
+//
+
+void hex_dump_settings (uint16_t start_address)
+	{
+	uint8_t 	c;											// any 8-bit element
+	uint8_t		buf [16];
+	uint8_t*	buf_ptr;
+	
+	fram.set_addr16 (start_address);						// first address to dump
+	while (1)
+		{
+		for (uint8_t i=0; i<16; i++)						// dump 'pages' that are 16 lines of 16 bytes
+			{
+			Serial.print ("\r\n\r\n");						// open some space
+			c = fram.control.addr.as_struct.high;			// get address high byte
+			if (0x10 > c)									// arduino doesn't support leading zeros so 
+				Serial.print ("0");							// add a leading zero
+			Serial.print (c, HEX);
+			c = fram.control.addr.as_struct.low;			// get the low byte
+			if (0x10 > c)
+				Serial.print ("0");							// add leading zero if necessary
+			Serial.print (c, HEX);
+			Serial.print ("    ");							// space between address and data
+
+			fram_get_n_bytes ((uint8_t*)buf, 16);			// get 16 bytes from fram
+			buf_ptr = buf;									// reset the pointer
+
+			for (uint8_t j=0; j<8; j++)						// first half
+				{
+				if (0x10 > *buf_ptr)
+					Serial.print ("0");						// add leading zero
+				Serial.print (*buf_ptr++, HEX);				// bump the pointer
+				Serial.print (" ");							// space between bytes
+				}
+			Serial.print (" -  ");							// mid array separator
+
+			for (uint8_t j=0; j<8; j++)						// second half
+				{
+				if (0x10 > *buf_ptr)
+					Serial.print ("0");						// add leading zero
+				Serial.print (*buf_ptr++, HEX);				// bump the pointer
+				Serial.print (" ");							// space between bytes
+				}
+			Serial.print ("   ");							// space between hex and character data
+
+			buf_ptr = buf;									// reset the pointer
+			for (uint8_t j=0; j<16; j++)
+				{
+				if (' ' > *buf_ptr)							// if a control character (0x00-0x1F)
+					buf[j] = '.';							// print a dot
+				Serial.print ((char)*buf_ptr++);			// bump the pointer
+				}
+			}
+		Serial.println ("");								// insert a blank line
+		if (!get_user_yes_no ((char*)"another page?", true))	// default answer yes
+			break;
+		}
+	}
+
+
+//---------------------------< H E X _ D U M P _ A R R A Y >--------------------------------------------------
+//
+// TODO: make a generic version of this
+//
+
+void hex_dump_array (uint8_t* array_ptr)
+	{
+	uint8_t 	c;											// any 8-bit element
+	uint8_t*	text_ptr;
+	
+	uint16_t	index = 0;									// array index
+	
+	while (1)
+		{
+		for (uint8_t i=0; i<16; i++)						// dump 'pages' that are 16 lines of 16 bytes
+			{
+			text_ptr = array_ptr;							// copy of array pointer used to print text version
+			Serial.print ("\r\n\r\n");						// open some space
+			c = (uint8_t)(index>>8);						// get index high byte
+			if (0x10 > c)									// arduino doesn't support leading zeros so 
+				Serial.print ("0");							// add a leading zero
+			Serial.print (c, HEX);
+			c = (uint8_t)(index);							// get index low byte
+			if (0x10 > c)
+				Serial.print ("0");							// add leading zero if necessary
+			Serial.print (c, HEX);
+			Serial.print ("    ");							// space between address and data
+
+			for (uint8_t j=0; j<16; j++)
+				{
+				if (0x10 > *array_ptr)
+					Serial.print ("0");						// add leading zero
+				Serial.print (*array_ptr++, HEX);			// bump the pointer
+				Serial.print (" ");							// space between bytes
+				}
+			Serial.print ("   ");							// space between hex and character data
+
+			for (uint8_t j=0; j<16; j++)
+				{
+				if (' ' > *text_ptr)						// if a control character (0x00-0x1F)
+					Serial.print ('.');						// print a dot; bump the pointer
+				else
+					Serial.print ((char)*text_ptr);
+				text_ptr++;									// bump the pointer
+				}
+			index += 16;									// advance the array index
+			}
+		Serial.println ("");								// insert a blank line
+		if (!get_user_yes_no ((char*)"another page?", true))	// default answer yes
+			break;
+		}
+	}
+
+
 //---------------------------< S E T U P >--------------------------------------------------------------------
 
 void setup()
@@ -830,16 +1070,16 @@ void setup()
 	Serial.begin(115200);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 
-#ifdef		BY_LINE
-#ifdef		HOMEBREW	
-	Serial.print ("8k (fetch by line - HB): initialization file loader: ");
-#else
-	Serial.print ("8k (fetch by line): initialization file loader: ");
-#endif
-#endif
-#ifdef		BY_CHAR
-	Serial.print ("8k (fetch by character): initialization file loader: ");
-#endif
+//#ifdef		BY_LINE
+//#ifdef		HOMEBREW	
+//	Serial.print ("8k (fetch by line - HB): initialization file loader: ");
+//#else
+//	Serial.print ("8k (fetch by line): initialization file loader: ");
+//#endif
+//#endif
+//#ifdef		BY_CHAR
+	Serial.print ("NAP ini loader: ");
+//#endif
 	Serial.print ("build time: ");				// assemble
 	Serial.print (__TIME__);					// the
 	Serial.print (" ");							// startup
@@ -857,15 +1097,17 @@ void setup()
 
 void loop()
 	{
+	uint16_t	crc;
 	uint16_t	rcvd_count;
-	uint16_t	crc = 0xFFFF;
 	uint32_t	millis_prev, millis_now;
 	uint8_t		waiting_counter = 0;
 	uint8_t		ret_val;
 	uint8_t		heading = 0;
-	char* rx_ptr = rx_buf;						// point to start of rx_buf
-	char* out_ptr = out_buf;					// point to start of out_buf
+	char*		rx_ptr = rx_buf;				// point to start of rx_buf
+	char*		out_ptr = out_buf;				// point to start of out_buf
+	char*		ln_ptr;							// pointer to ln_buf
 
+	memset (out_buf, EOF_MARKER, 8192);			// fill out_buf with end-of-file markers
 
 	millis_prev = millis();						// init
 	Serial.print ("\r\n\r\nloader> waiting for file ...");
@@ -881,39 +1123,12 @@ void loop()
 		}
 	Serial.println ("\r\nreceiving");
 	millis_prev = millis();
-#ifdef		BY_CHAR
 	rcvd_count = serial_get_chars (rx_buf);
-#endif
-
-#ifdef		BY_LINE
-	while (1)
-		{
-#ifdef		HOMEBREW
-		rcvd_count = serial_get_line (ln_buf);
-#else
-		rcvd_count = Serial.readBytesUntil ('\n', ln_buf, 256);		// 1 second timeout
-#endif
-		if (0 == rcvd_count)
-			break;									// timed out
-
-		settings.line_num++;						// if here we got a line
-
-		strcpy (rx_ptr, ln_buf);
-		rx_ptr += strlen (ln_buf);					// advance the rx_ptr
-		Serial.print (".");
-		}
-#endif
 
 	millis_now = millis();							// capture the time
 	Serial.print ("\r\nrecieved ");
-#ifdef		BY_CHAR
 	Serial.print (rcvd_count);						// number of characters received
 	Serial.print (" characters in ");
-#endif
-#ifdef		BY_LINE
-	Serial.print (line_cnt);						// number of lines received
-	Serial.print (" lines in ");
-#endif
 	Serial.print (millis_now-millis_prev);			// elapsed time
 	Serial.println ("ms");
 
@@ -925,6 +1140,15 @@ void loop()
 	while (rx_ptr)
 		{
 		rx_ptr = array_get_line (ln_buf, rx_ptr);	// returns null pointer when no more characters in buffer
+		if (!rx_ptr)
+			break;
+	
+		if (EOF_MARKER == *ln_buf)						// when we find the end-of-file-marker
+			{
+			*out_ptr = *ln_buf;						// add it to out_buf
+			break;									// done reading rx_buf
+			}
+
 		settings.line_num ++;						// tally
 
 		if (('\r' == *ln_buf) || ('\n' == *ln_buf))	// do these here so we have source line numbers for error messages
@@ -932,19 +1156,16 @@ void loop()
 		if (strstr (ln_buf, "#"))
 			continue;								// comment; we don't save comments in fram
 
-		ret_val = normalize_kv_pair (ln_buf);		// trim, spaces to underscores
+		ret_val = normalize_kv_pair (ln_buf);		// trim, spaces to underscores; returns ptr to mull terminated string
 
 		if (ret_val)								// if an error or a heading (otherwise returns SUCCESS)
 			{
 			if (INI_ERROR == ret_val)				// not a heading, missing assignment operator
-				settings.err_msg ((char *)"not key/value pair");
+				settings.err_msg ((char *)"+not key/value pair");
 			else									// found a new heading
 				{
 				heading = ret_val;					// so remember which heading we found
-				strcpy (out_ptr, ln_buf);			// save it in the output buffer
-				out_ptr += strlen (ln_buf);			// advance the pointer
-				*out_ptr++ = '\n';					// add the end-of-line marker
-				*out_ptr = '\0';					// and null terminate
+				out_ptr = array_add_line (out_ptr, ln_buf);		// copy to out_buf; reset pointer to eof marker
 				}
 			continue;								// get the next line
 			}
@@ -960,10 +1181,14 @@ void loop()
 		else if (USERS == heading)
 			check_ini_users (ln_buf);
 		
-		strcpy (out_ptr, ln_buf);					// write the setting to the output buffer
-		out_ptr += strlen(ln_buf);					// advance the pointer
-		*out_ptr++ = '\n';							// add the end-of-line marker
-		*out_ptr = '\0';							// and null terminate
+		ret_val = zero_pad_setting (ln_buf);		// do the zero padding; returned string is not and cannot be null terminated
+
+		ln_ptr = ln_buf;							// reset the pointer
+		for (uint8_t i=0; i<ret_val; i++)
+			{
+			*out_ptr++ = *ln_ptr++;					// copy the setting to out_buf
+			}
+		*out_ptr = EOF_MARKER;							// add the end-of-file marker
 		}
 
 	millis_now = millis();							// capture the time
@@ -995,54 +1220,49 @@ void loop()
 
 	if (!total_errs)								// if there have been errors, no writing fram
 		{
+		Serial.println ("\r\nerasing fram settings");
+		millis_prev = millis();						// reset
+		fram_fill (EOF_MARKER, FRAM_SETTINGS_START, 8192);
+		millis_now = millis();						// capture the time
+
+		Serial.print ("\r\nerased ");
+		Serial.print (8192);						// number of bytes
+		Serial.print (" fram bytes in ");
+		Serial.print (millis_now-millis_prev);		// elapsed time
+		Serial.println ("ms");
+
 		settings.line_num = 0;						// reset
 		Serial.println ("\r\nwriting");
 		millis_prev = millis();						// reset
 
-	/*-----------------------------
-		// calculate the crc across the entire buffer
-		rx_ptr = rx_buf;							// reset the pointer
-		while (*rx_ptr)								// while not null
-			{
-			crc = crc16_update (crc, *rx_ptr);		// calc crc for this byte
-			rx_ptr++;								// bump the pointer
-			}
-			
-		Serial.print ("\ncrc: ");					// should be the crc value
-		Serial.println (crc, HEX);					
-		// check the crc
-		rx_ptr = rx_buf;							// reset the pointer
-		uint8_t crc_h = (uint8_t)(crc>>8);			// the previously calculated crc split into bytes
-		uint8_t crc_l = (uint8_t)crc;
-		crc = 0xFFFF;								// reset the seed value
-		while (*rx_ptr)
-			{
-			crc = crc16_update (crc, *rx_ptr);
-			rx_ptr++;
-			}
-		
-		crc = crc16_update (crc, crc_l);
-		crc = crc16_update (crc, crc_h);
-
-		Serial.print ("crc: ");						// should be 0
-		Serial.println (crc, HEX);					
-	----------------------------*/
-	
 		fram.set_addr16 (FRAM_SETTINGS_START);		// set starting address where we will begin writing
 		
 		out_ptr = out_buf;							// point to the buffer
 		while (out_ptr)
 			{
 			out_ptr = array_get_line (ln_buf, out_ptr);		// returns null pointer when no more characters in buffer
+			if (!out_ptr)
+				break;
 			settings.line_num ++;							// tally
 			fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
-			fram.control.rd_wr_len = strlen ((char*)ln_buf);
+			fram.control.rd_wr_len = line_len ((char*)ln_buf);
 			fram.page_write();								// write it
 			Serial.print (".");
 			}
 		
-		fram.control.wr_byte = '\x04';				// write the EOF marker
+		fram.control.wr_byte = EOF_MARKER;			// write the EOF marker
 		fram.byte_write();
+
+		fram.set_addr16 (0);						// set fram control block starting address
+		fram.byte_read();
+		if (0x00 != fram.control.rd_byte)			// if address zero not blank, erase the control block
+			{
+			memset (ln_buf, '\0', 16);
+			fram.set_addr16 (0);					// set fram control block starting address
+			fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
+			fram.control.rd_wr_len = 16;
+			fram.page_write();						// erase the control block
+			}
 
 		millis_now = millis();						// capture the time
 
@@ -1052,16 +1272,47 @@ void loop()
 		Serial.print (millis_now-millis_prev);		// elapsed time
 		Serial.println ("ms");
 
+		millis_prev = millis();						// reset
+		crc = get_crc_array ((uint8_t*)out_buf);	// calculate the crc across the entire buffer
+
+		if (settings.get_crc_fram (FRAM_SETTINGS_START) == crc)	// calculate the crc across the settings in fram
+			{
+			fram.set_addr16 (FRAM_CRC_LO);				// set address for low byte of crc
+			fram.control.wr_byte = (uint8_t)crc;		// write the low byte
+			fram.byte_write();
+			fram.set_addr16 (FRAM_CRC_HI);				// set address for high byte of crc
+			fram.control.wr_byte = (uint8_t)(crc>>8);	// write the high byte
+			fram.byte_write();
+			}
+		else
+			{
+			Serial.println("\r\ncrc match failure. loader stopped; reset to restart");	// give up and enter and endless
+			while(1);									// loop
+			}
+	
+		millis_now = millis();						// capture the time
+		Serial.print ("\r\ncrc value (");
+		if (0x1000 > crc)
+			Serial.print ('0');						// leading zero
+		Serial.print (crc, HEX);
+		Serial.print (") written to fram in ");
+		Serial.print (millis_now-millis_prev);		// elapsed time
+		Serial.println ("ms");
+			
 		Serial.print("\r\n\r\nfram write complete\r\n\r\n");
 
 		if (get_user_yes_no ((char*)"dump settings from fram?", true))	// default answer yes
-			settings.dump_settings ();				// dump the settings to the monitor
+			{
+//			settings.dump_settings ();				// dump the settings to the monitor
+			hex_dump_settings (0);
+			}
 		}
 	Serial.println("\n\ndone");
 	
 	if (!get_user_yes_no ((char*)"load another file", false))	// default answer no
 		{
-		Serial.println("\r\nquitting");				// give up and enter and endless
+		Serial.println("\r\nloader stopped; reset to restart");				// give up and enter and endless
 		while(1);									// loop
 		}
+	memset (rx_buf, '\0', 8192);					// clear rx_buf to zeros
 	}
