@@ -34,6 +34,9 @@ SALT_settings settings;
 #define		SYSTEM	0xDF
 #define		USERS	0xEF
 
+#define		STOP	0
+#define		START	1
+#define		TIMING	0xFFFFFFFF
 
 //---------------------------< P A G E   S C O P E   V A R I A B L E S >--------------------------------------
 
@@ -43,6 +46,104 @@ char		ln_buf [256];
 uint16_t	err_cnt = 0;
 uint16_t	total_errs = 0;
 uint16_t	warn_cnt = 0;
+
+
+//---------------------------< S T O P W A T C H >------------------------------------------------------------
+//
+// Start and stop an elapsed timer.
+//
+// returns start_time (current millis() value) in response to START;
+// return elapsed_time in response to STOP
+//
+
+time_t stopwatch (boolean start_stop)
+	{
+	static uint32_t		state = STOP;
+	static time_t		start_time = 0;
+	static time_t		end_time = 0;
+	static time_t		elapsed_time = TIMING;		// invalidate until started and stopped
+	
+	switch (state)
+		{
+		case STOP:
+			if (start_stop)							// start command
+				{
+				start_time = millis();				// set start time
+				elapsed_time = TIMING;				// invalidate until stopped
+				state = TIMING;						// bump the state
+				break;								// done
+				}
+			return TIMING;							// command to stop while stopped
+		
+		case TIMING:
+			if (!start_stop)						// stop command
+				{
+				end_time = millis();				// set the end time
+				elapsed_time = end_time - start_time;	// calculate
+				state = STOP;						// bump the state
+				return elapsed_time;				// done
+				}
+			start_time = millis();					// start command while timing is a restart
+		}
+	return start_time;						// return new start time
+	}
+
+
+//---------------------------< H E X _ P R I N T _ C O R E >--------------------------------------------------
+//
+//
+//
+
+void hex_print_core (uint32_t val_32, uint8_t len)
+	{
+	switch (len)
+		{
+		case 4:								// uint32_t
+			for (uint32_t i=0x10000000; i>0x1000; i>>=4)		// add leading zeros as necessary
+				{
+				if (i > val_32)
+					Serial.print ("0");							// then fall into uint16_t
+				}
+		case 2:								// uint16_t
+			for (uint32_t i=0x1000; i>0x10; i>>=4)
+				{
+				if (i > val_32)
+					Serial.print ("0");							// and so downwards
+				}
+		case 1:								// uint8_t
+			if (0x10 > val_32)
+				Serial.print ("0");
+			break;
+		default:
+			Serial.print ("hex_print_core() unknown len");
+			return;
+		}
+	Serial.print (val_32, HEX);
+	}
+
+
+//---------------------------< H E X _ P R I N T   ( 1   B Y T E ) >------------------------------------------
+
+void hex_print (uint8_t val)
+	{
+	hex_print_core ((uint32_t)val, 1);
+	}
+
+
+//---------------------------< H E X _ P R I N T   ( 2   B Y T E ) >------------------------------------------
+
+void hex_print (uint16_t val)
+	{
+	hex_print_core ((uint32_t)val, 2);
+	}
+
+
+//---------------------------< H E X _ P R I N T   ( 4   B Y T E ) >------------------------------------------
+
+void hex_print (uint32_t val)
+	{
+	hex_print_core (val, 4);
+	}
 
 
 //---------------------------< G E T _ C R C _ A R R A Y >----------------------------------------------------
@@ -903,7 +1004,7 @@ boolean get_user_yes_no (char* query, boolean yesno)
 // of characters into a buffer.
 //
 
-void fram_get_n_bytes (uint8_t* buf_ptr, uint8_t n)
+void fram_get_n_bytes (uint8_t* buf_ptr, size_t n)
 	{
 	uint8_t i;
 	
@@ -939,6 +1040,52 @@ void fram_fill (uint8_t c, uint16_t address, size_t n)
 		}
 	}
 
+
+//---------------------------< H E X _ D U M P _ C O R E >----------------------------------------------------
+//
+// Render a 'page' (16 rows of 16 columns) of hex data and its character equivalent.  data_ptr MUST point to
+// a buffer of at least 256 bytes.  This function always renders 256 items regardless of the size of the buffer.
+//
+
+void hex_dump_core (uint16_t address, uint8_t* data_ptr)
+	{
+	uint8_t*	text_ptr = data_ptr;					// walks in tandem with data_ptr; prints the text
+	
+	for (uint8_t i=0; i<16; i++)						// dump 'pages' that are 16 lines of 16 bytes
+		{
+		Serial.print ("\r\n\r\n");						// open some space
+		hex_print (address);
+		Serial.print ("    ");							// space between address and data
+
+		
+		for (uint8_t j=0; j<8; j++)						// first half
+			{
+			hex_print (*data_ptr++);
+			Serial.print (" ");							// space between bytes
+			}
+		Serial.print (" -  ");							// mid array separator
+
+		for (uint8_t j=0; j<8; j++)						// second half
+			{
+			hex_print (*data_ptr++);
+			Serial.print (" ");							// space between bytes
+			}
+		Serial.print ("   ");							// space between hex and character data
+
+		for (uint8_t j=0; j<16; j++)
+			{
+			if (' ' > *text_ptr)						// if a control character (0x00-0x1F)
+				Serial.print ('.');						// print a dot
+			else
+				Serial.print ((char)*text_ptr);
+			text_ptr++;									// bump the pointer
+			}
+
+		address+=16;
+		}
+	}
+
+
 //---------------------------< H E X _ D U M P _ S E T T I N G S >--------------------------------------------
 //
 // TODO: make a generic version of this
@@ -946,112 +1093,57 @@ void fram_fill (uint8_t c, uint16_t address, size_t n)
 
 void hex_dump_settings (uint16_t start_address)
 	{
-	uint8_t 	c;											// any 8-bit element
-	uint8_t		buf [16];
-	uint8_t*	buf_ptr;
+	uint8_t		buf [256];
 	
-	fram.set_addr16 (start_address);						// first address to dump
 	while (1)
 		{
-		for (uint8_t i=0; i<16; i++)						// dump 'pages' that are 16 lines of 16 bytes
-			{
-			Serial.print ("\r\n\r\n");						// open some space
-			c = fram.control.addr.as_struct.high;			// get address high byte
-			if (0x10 > c)									// arduino doesn't support leading zeros so 
-				Serial.print ("0");							// add a leading zero
-			Serial.print (c, HEX);
-			c = fram.control.addr.as_struct.low;			// get the low byte
-			if (0x10 > c)
-				Serial.print ("0");							// add leading zero if necessary
-			Serial.print (c, HEX);
-			Serial.print ("    ");							// space between address and data
+		fram.set_addr16 (start_address);						// first address to dump
+		fram_get_n_bytes ((uint8_t*)buf, 256);					// get 256 bytes from fram
+		hex_dump_core (start_address, buf);
 
-			fram_get_n_bytes ((uint8_t*)buf, 16);			// get 16 bytes from fram
-			buf_ptr = buf;									// reset the pointer
-
-			for (uint8_t j=0; j<8; j++)						// first half
-				{
-				if (0x10 > *buf_ptr)
-					Serial.print ("0");						// add leading zero
-				Serial.print (*buf_ptr++, HEX);				// bump the pointer
-				Serial.print (" ");							// space between bytes
-				}
-			Serial.print (" -  ");							// mid array separator
-
-			for (uint8_t j=0; j<8; j++)						// second half
-				{
-				if (0x10 > *buf_ptr)
-					Serial.print ("0");						// add leading zero
-				Serial.print (*buf_ptr++, HEX);				// bump the pointer
-				Serial.print (" ");							// space between bytes
-				}
-			Serial.print ("   ");							// space between hex and character data
-
-			buf_ptr = buf;									// reset the pointer
-			for (uint8_t j=0; j<16; j++)
-				{
-				if (' ' > *buf_ptr)							// if a control character (0x00-0x1F)
-					buf[j] = '.';							// print a dot
-				Serial.print ((char)*buf_ptr++);			// bump the pointer
-				}
-			}
-		Serial.println ("");								// insert a blank line
+		Serial.println ("");									// insert a blank line
 		if (!get_user_yes_no ((char*)"another page?", true))	// default answer yes
-			break;
+			return;
+		start_address += 256;									// next 'page' starting address
 		}
 	}
 
 
 //---------------------------< H E X _ D U M P _ A R R A Y >--------------------------------------------------
 //
-// TODO: make a generic version of this
+// print a hex dump of an internal array in 256 byte chunks.  If the array is smaller than 256 byte, this
+// function will print whatever is in memory beyond the last element of the array.
+//
+// TODO: add an array length argument so that the function will only print pages that cover the array.
 //
 
-void hex_dump_array (uint8_t* array_ptr)
+void hex_dump_array (uint8_t* array_ptr, size_t len)
 	{
-	uint8_t 	c;											// any 8-bit element
-	uint8_t*	text_ptr;
-	
 	uint16_t	index = 0;									// array index
 	
 	while (1)
 		{
-		for (uint8_t i=0; i<16; i++)						// dump 'pages' that are 16 lines of 16 bytes
+		Serial.print ("@ ");
+		Serial.print ((uint32_t)array_ptr);
+		Serial.print (" (0x");
+		Serial.print ((uint32_t)array_ptr, HEX);
+		Serial.print (")");
+		hex_dump_core (index, array_ptr);
+
+		Serial.println ("");									// insert a blank line
+		array_ptr += 256;										// next 'page' starting address
+		index += 256;											// and index
+
+		if (len > index)
 			{
-			text_ptr = array_ptr;							// copy of array pointer used to print text version
-			Serial.print ("\r\n\r\n");						// open some space
-			c = (uint8_t)(index>>8);						// get index high byte
-			if (0x10 > c)									// arduino doesn't support leading zeros so 
-				Serial.print ("0");							// add a leading zero
-			Serial.print (c, HEX);
-			c = (uint8_t)(index);							// get index low byte
-			if (0x10 > c)
-				Serial.print ("0");							// add leading zero if necessary
-			Serial.print (c, HEX);
-			Serial.print ("    ");							// space between address and data
-
-			for (uint8_t j=0; j<16; j++)
-				{
-				if (0x10 > *array_ptr)
-					Serial.print ("0");						// add leading zero
-				Serial.print (*array_ptr++, HEX);			// bump the pointer
-				Serial.print (" ");							// space between bytes
-				}
-			Serial.print ("   ");							// space between hex and character data
-
-			for (uint8_t j=0; j<16; j++)
-				{
-				if (' ' > *text_ptr)						// if a control character (0x00-0x1F)
-					Serial.print ('.');						// print a dot; bump the pointer
-				else
-					Serial.print ((char)*text_ptr);
-				text_ptr++;									// bump the pointer
-				}
-			index += 16;									// advance the array index
+			if (!get_user_yes_no ((char*)"another page?", true))	// default answer yes
+				return;
 			}
-		Serial.println ("");								// insert a blank line
-		if (!get_user_yes_no ((char*)"another page?", true))	// default answer yes
-			break;
+		else
+			{
+			if (!get_user_yes_no ((char*)"end of array; more?", false))	// default answer no
+				return;
+			}
 		}
 	}
 
@@ -1070,16 +1162,7 @@ void setup()
 	Serial.begin(115200);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 
-//#ifdef		BY_LINE
-//#ifdef		HOMEBREW	
-//	Serial.print ("8k (fetch by line - HB): initialization file loader: ");
-//#else
-//	Serial.print ("8k (fetch by line): initialization file loader: ");
-//#endif
-//#endif
-//#ifdef		BY_CHAR
 	Serial.print ("NAP ini loader: ");
-//#endif
 	Serial.print ("build time: ");				// assemble
 	Serial.print (__TIME__);					// the
 	Serial.print (" ");							// startup
@@ -1099,7 +1182,8 @@ void loop()
 	{
 	uint16_t	crc;
 	uint16_t	rcvd_count;
-	uint32_t	millis_prev, millis_now;
+	uint32_t	millis_prev;
+	time_t		elapsed_time;
 	uint8_t		waiting_counter = 0;
 	uint8_t		ret_val;
 	uint8_t		heading = 0;
@@ -1122,19 +1206,19 @@ void loop()
 			}
 		}
 	Serial.println ("\r\nreceiving");
-	millis_prev = millis();
+	stopwatch (START);
 	rcvd_count = serial_get_chars (rx_buf);
 
-	millis_now = millis();							// capture the time
+	elapsed_time = stopwatch (STOP);				// capture the time
 	Serial.print ("\r\nrecieved ");
 	Serial.print (rcvd_count);						// number of characters received
 	Serial.print (" characters in ");
-	Serial.print (millis_now-millis_prev);			// elapsed time
+	Serial.print (elapsed_time);					// elapsed time
 	Serial.println ("ms");
 
 	settings.line_num = 0;							// reset to count lines taken from rx_buf
 	Serial.println ("\r\nchecking");
-	millis_prev = millis();							// reset
+	stopwatch (START);								// reset
 
 	rx_ptr = rx_buf;								// initialize
 	while (rx_ptr)
@@ -1191,11 +1275,11 @@ void loop()
 		*out_ptr = EOF_MARKER;							// add the end-of-file marker
 		}
 
-	millis_now = millis();							// capture the time
+	elapsed_time = stopwatch (STOP);				// capture the time
 	Serial.print ("\r\nchecked ");
 	Serial.print (settings.line_num);				// number of lines
 	Serial.print (" lines in ");
-	Serial.print (millis_now-millis_prev);			// elapsed time
+	Serial.print (elapsed_time);					// elapsed time
 	Serial.print ("ms; ");
 	if (total_errs)									// if there have been any errors
 		{
@@ -1215,25 +1299,29 @@ void loop()
 	if (warn_cnt && !total_errs)					// warnings but no errors
 		{
 		if (!get_user_yes_no ((char*)"ignore warnings and write settings to fram?", false))		// default answer no
+			{
 			total_errs = warn_cnt;					// spoof to prevent writing fram
+			Serial.println("\n\nabandoned");
+			}
 		}
 
 	if (!total_errs)								// if there have been errors, no writing fram
 		{
 		Serial.println ("\r\nerasing fram settings");
-		millis_prev = millis();						// reset
+		stopwatch (START);						// reset
 		fram_fill (EOF_MARKER, FRAM_SETTINGS_START, 8192);
-		millis_now = millis();						// capture the time
+		elapsed_time = stopwatch (STOP);			// capture the time
 
 		Serial.print ("\r\nerased ");
 		Serial.print (8192);						// number of bytes
 		Serial.print (" fram bytes in ");
-		Serial.print (millis_now-millis_prev);		// elapsed time
+		Serial.print (elapsed_time);		// elapsed time
 		Serial.println ("ms");
 
 		settings.line_num = 0;						// reset
 		Serial.println ("\r\nwriting");
-		millis_prev = millis();						// reset
+
+		stopwatch (START);
 
 		fram.set_addr16 (FRAM_SETTINGS_START);		// set starting address where we will begin writing
 		
@@ -1264,15 +1352,15 @@ void loop()
 			fram.page_write();						// erase the control block
 			}
 
-		millis_now = millis();						// capture the time
+		elapsed_time = stopwatch (STOP);			// capture the time
 
 		Serial.print ("\r\nwrote ");
 		Serial.print (settings.line_num);			// number of lines
 		Serial.print (" lines to fram in ");
-		Serial.print (millis_now-millis_prev);		// elapsed time
+		Serial.print (elapsed_time);				// elapsed time
 		Serial.println ("ms");
 
-		millis_prev = millis();						// reset
+		stopwatch (START);
 		crc = get_crc_array ((uint8_t*)out_buf);	// calculate the crc across the entire buffer
 
 		if (settings.get_crc_fram (FRAM_SETTINGS_START) == crc)	// calculate the crc across the settings in fram
@@ -1290,13 +1378,11 @@ void loop()
 			while(1);									// loop
 			}
 	
-		millis_now = millis();						// capture the time
+		elapsed_time = stopwatch (STOP);
 		Serial.print ("\r\ncrc value (");
-		if (0x1000 > crc)
-			Serial.print ('0');						// leading zero
-		Serial.print (crc, HEX);
-		Serial.print (") written to fram in ");
-		Serial.print (millis_now-millis_prev);		// elapsed time
+		hex_print (crc);
+		Serial.print (") calculated and written to fram in ");
+		Serial.print (elapsed_time);				// elapsed time
 		Serial.println ("ms");
 			
 		Serial.print("\r\n\r\nfram write complete\r\n\r\n");
@@ -1306,8 +1392,9 @@ void loop()
 //			settings.dump_settings ();				// dump the settings to the monitor
 			hex_dump_settings (0);
 			}
+		
+		Serial.println("\n\ndone");
 		}
-	Serial.println("\n\ndone");
 	
 	if (!get_user_yes_no ((char*)"load another file", false))	// default answer no
 		{
@@ -1315,4 +1402,6 @@ void loop()
 		while(1);									// loop
 		}
 	memset (rx_buf, '\0', 8192);					// clear rx_buf to zeros
+	total_errs = 0;									// reset these so they aren't misleading
+	warn_cnt = 0;
 	}
