@@ -31,9 +31,6 @@ void Systronix_MB85RC256V::init (void)
 // addresses.  The fram_addr union allows access to a single fram address as a struct of two bytes (high and
 // low), as an array of two bytes [0] and [1], or as a uint16_t.
 //
-// This function simplifies keeping track of the current fram address pointer when using default_read_byte()
-// which uses the fram's internal address pointer
-//
 
 uint8_t Systronix_MB85RC256V::set_addr16 (uint16_t addr)
 	{
@@ -64,7 +61,7 @@ void Systronix_MB85RC256V::inc_addr16 (void)
 
 //---------------------------< A D V _ A D D R 1 6 >----------------------------------------------------------
 //
-// This function advances the current fram address pointer by rd_wr_en when using page_read() or page_write()
+// This function advances the current fram address pointer by rd_wr_len when using page_read() or page_write()
 // to track the fram's internal address pointer.
 //
 
@@ -77,25 +74,34 @@ void Systronix_MB85RC256V::adv_addr16 (void)
 
 //---------------------------< B Y T E _ W R I T E >----------------------------------------------------------
 
-void Systronix_MB85RC256V::byte_write (void)
+uint8_t Systronix_MB85RC256V::byte_write (void)
 	{
-	Wire.beginTransmission(_base);			// init tx buff for xmit to slave at _base address
-	Wire.write (control.addr.as_array, 2);		// put the memory address in the tx buffer
-	Wire.write (control.wr_byte);
-	Wire.endTransmission();					// xmit memory address
+	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	Wire.write (control.addr.as_array, 2);					// put the memory address in the tx buffer
+	control.bytes_written = Wire.write (control.wr_byte);
+	control.et_ret_val = Wire.endTransmission();			// xmit memory address
+
+	if (SUCCESS == control.et_ret_val)
+		return SUCCESS;
+	return FAIL;
 	}
 
 
 //---------------------------< P A G E _ W R I T E >----------------------------------------------------------
 
-void Systronix_MB85RC256V::page_write (void)
+uint8_t Systronix_MB85RC256V::page_write (void)
 	{
-	Wire.beginTransmission(_base);			// init tx buff for xmit to slave at _base address
-	Wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
-	Wire.write (control.wr_buf_ptr, control.rd_wr_len);		// copy source to wire tx buffer data
-	Wire.endTransmission();					// xmit address followed by data
+	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	Wire.write (control.addr.as_array, 2);					// put the memory address in the tx buffer
+	control.bytes_written = Wire.write (control.wr_buf_ptr, control.rd_wr_len);	// copy source to wire tx buffer data
+	control.et_ret_val = Wire.endTransmission();			// xmit address followed by data
 	
-	adv_addr16 ();							// advance our copy of the address
+	if (SUCCESS == control.et_ret_val)
+		{
+		adv_addr16 ();										// advance our copy of the address
+		return SUCCESS;
+		}
+	return FAIL;
 	}
 
 
@@ -106,65 +112,87 @@ void Systronix_MB85RC256V::page_write (void)
 // track the fram's internal pointer by incrementing control.addr.as_u16.
 //
 
-void Systronix_MB85RC256V::current_address_read (void)
+uint8_t Systronix_MB85RC256V::current_address_read (void)
 	{
-	Wire.requestFrom(_base, 1, I2C_STOP);
-	control.rd_byte = Wire.readByte();
-	inc_addr16 ();					// bump our copy of the address to perhaps keep track of where the fran's pointer is
+	control.bytes_received = Wire.requestFrom(_base, 1, I2C_STOP);
+	if (control.bytes_received)								// if a byte was received
+		{
+		control.rd_byte = Wire.readByte();					// get the byte
+		inc_addr16 ();										// bump our copy of the address
+		return SUCCESS;
+		}
+	return FAIL;
 	}
 
 
 //---------------------------< B Y T E _ R E A D >------------------------------------------------------------
 
-void Systronix_MB85RC256V::byte_read (void)
+uint8_t Systronix_MB85RC256V::byte_read (void)
 	{
-	Wire.beginTransmission(_base);			// init tx buff for xmit to slave at _base address
-	Wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
-	Wire.endTransmission();					// xmit memory address
+	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	Wire.write (control.addr.as_array, 2);					// put the memory address in the tx buffer
+	control.et_ret_val = Wire.endTransmission();			// xmit memory address
 	
-	current_address_read ();
+	return current_address_read ();							// use current_address_read() to fetch the byte
 	}
 
 
 //---------------------------< P A G E _ R E A D >------------------------------------------------------------
 
-void Systronix_MB85RC256V::page_read (void)
+uint8_t Systronix_MB85RC256V::page_read (void)
 	{
 	uint8_t i;
 	
-	Wire.beginTransmission(_base);			// init tx buff for xmit to slave at _base address
-	Wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
-	Wire.endTransmission();					// xmit memory address
+	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	Wire.write (control.addr.as_array, 2);					// put the memory address in the tx buffer
+	control.et_ret_val = Wire.endTransmission();			// xmit memory address
 
-	Wire.requestFrom(_base, control.rd_wr_len, I2C_STOP);	// read the bytes
+	if (SUCCESS == control.et_ret_val)
+		{
+		control.bytes_received = Wire.requestFrom(_base, control.rd_wr_len, I2C_STOP);	// read the bytes
+		if (control.bytes_received == control.rd_wr_len)
+			{
+			adv_addr16 ();									// advance our copy of the address
 	
-	adv_addr16 ();							// advance our copy of the address
-	
-	for (i=0;i<control.rd_wr_len; i++)		// copy wire rx buffer data to destination
-		*control.rd_buf_ptr++ = Wire.readByte();
+			for (i=0;i<control.rd_wr_len; i++)				// copy wire rx buffer data to destination
+				*control.rd_buf_ptr++ = Wire.readByte();
+			return SUCCESS;
+			}
+		}
+	return FAIL;
 	}
 
 
-//---------------------------< D E V I C E _ I D >------------------------------------------------------------
-
-void Systronix_MB85RC256V::device_id (uint16_t *manuf_id_ptr, uint16_t *prod_id_ptr)
+//---------------------------< G E T _ D E V I C E _ I D >----------------------------------------------------
+//
+// Original code stolen from Adafruit.  Modified to use this library's control struct so that in the event of
+// a failure, diagnostic information is available to external functions.  
+//
+	
+uint8_t Systronix_MB85RC256V::get_device_id (void)
 	{
-	uint8_t a[3];
+	uint8_t a[3] = { 0, 0, 0 };
 
-	Wire.beginTransmission (RSVD_SLAVE_ID >> 1);
-	Wire.write (_base << 1);
-	Wire.endTransmission (false);
-
-	Wire.requestFrom (RSVD_SLAVE_ID >> 1, 3);
+	Wire.beginTransmission(RSVD_SLAVE_ID >> 1);				// (0xF8>>1)=0xFC; Wire shifts left to 0xF8
+	Wire.write(_base << 1);
+	control.et_ret_val = Wire.endTransmission(false);
 	
-	a[0] = Wire.read();
-	a[1] = Wire.read();
-	a[2] = Wire.read();
-
-	/* Shift values to separate manuf and prod IDs */
-	/* See p.10 of http://www.fujitsu.com/downloads/MICRO/fsa/pdf/products/memory/fram/MB85RC256V-DS501-00017-3v0-E.pdf */
-	*manuf_id_ptr = (a[0] << 4) + (a[1]  >> 4);
-	*prod_id_ptr = ((a[1] & 0x0F) << 8) + a[2];
+	if (SUCCESS == control.et_ret_val)
+		{
+		control.rd_wr_len = 3;								// set the number of bytes to read
+		control.bytes_received = Wire.requestFrom(RSVD_SLAVE_ID >> 1, (int)control.rd_wr_len);	// r/w bit for read makes 0xF9
+		if (control.rd_wr_len == control.bytes_received)
+			{
+			a[0] = Wire.read();
+			a[1] = Wire.read();
+			a[2] = Wire.read();
+			
+			// Shift values to separate manuf and prod IDs; see p.10 of
+			// http://www.fujitsu.com/downloads/MICRO/fsa/pdf/products/memory/fram/MB85RC256V-DS501-00017-3v0-E.pdf
+			manufID = (a[0] << 4) + (a[1]  >> 4);			// for MB85RC256V: 0x000A = fujitsu
+			prodID = ((a[1] & 0x0F) << 8) + a[2];			// 0x0510 (5 is the density; 10 is proprietary
+			return SUCCESS;
+			}
+		}
+	return FAIL;
 	}
-
-
