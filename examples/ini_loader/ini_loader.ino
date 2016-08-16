@@ -21,10 +21,14 @@
 #include <SALT_settings.h>
 #include <SALT_FETs.h>
 #include <SALT.h>
+#include <SALT_utilities.h>
+
+#include "ini_loader.h"
 
 SALT_FETs FETs;
 Systronix_MB85RC256V fram;
 SALT_settings settings;
+SALT_utilities utils;
 
 
 //---------------------------< D E F I N E S >----------------------------------------------------------------
@@ -86,63 +90,6 @@ time_t stopwatch (boolean start_stop)
 			start_time = millis();					// start command while timing is a restart
 		}
 	return start_time;						// return new start time
-	}
-
-
-//---------------------------< H E X _ P R I N T _ C O R E >--------------------------------------------------
-//
-//
-//
-
-void hex_print_core (uint32_t val_32, uint8_t len)
-	{
-	switch (len)
-		{
-		case 4:								// uint32_t
-			for (uint32_t i=0x10000000; i>0x1000; i>>=4)		// add leading zeros as necessary
-				{
-				if (i > val_32)
-					Serial.print ("0");							// then fall into uint16_t
-				}
-		case 2:								// uint16_t
-			for (uint32_t i=0x1000; i>0x10; i>>=4)
-				{
-				if (i > val_32)
-					Serial.print ("0");							// and so downwards
-				}
-		case 1:								// uint8_t
-			if (0x10 > val_32)
-				Serial.print ("0");
-			break;
-		default:
-			Serial.print ("hex_print_core() unknown len");
-			return;
-		}
-	Serial.print (val_32, HEX);
-	}
-
-
-//---------------------------< H E X _ P R I N T   ( 1   B Y T E ) >------------------------------------------
-
-void hex_print (uint8_t val)
-	{
-	hex_print_core ((uint32_t)val, 1);
-	}
-
-
-//---------------------------< H E X _ P R I N T   ( 2   B Y T E ) >------------------------------------------
-
-void hex_print (uint16_t val)
-	{
-	hex_print_core ((uint32_t)val, 2);
-	}
-
-
-//---------------------------< H E X _ P R I N T   ( 4   B Y T E ) >------------------------------------------
-
-void hex_print (uint32_t val)
-	{
-	hex_print_core (val, 4);
 	}
 
 
@@ -288,7 +235,7 @@ void check_ini_system (char* key_ptr)
 	value_ptr = strchr (key_ptr, '=');		// find the assignment operator; assign its address to value_ptr
 	if (NULL == value_ptr)
 		{
-		settings.err_msg ((char *)"(char *)not key/value pair");		// should never get here
+		settings.err_msg ((char *)"not key/value pair");		// should never get here
 		total_errs++;						// make sure that we don't write to fram
 		return;
 		}
@@ -311,6 +258,8 @@ void check_ini_system (char* key_ptr)
 			stricmp (value_ptr, "B2BWEC") && stricmp (value_ptr, "B2B") &&
 			stricmp (value_ptr, "SBS"))
 				settings.err_msg ((char *)"unknown config");
+		else
+			strcpy (system_config, value_ptr);
 		}
 	else if (!strcmp (key_ptr, "lights_on"))
 		{
@@ -320,64 +269,129 @@ void check_ini_system (char* key_ptr)
 			
 			if (TIME_ERROR == temp32)						// if can't be converted
 				settings.err_msg ((char *)"invalid time");
+			else
+				strcpy (system_lights_on, value_ptr);
 			}
 		else
 			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "lights_off"))
 		{
-		temp32 = settings.string_to_time_stamp (temp_array);		// convert hh:mm to seconds
-		
-		if (TIME_ERROR == temp32)						// if can't be converted
-			settings.err_msg ((char *)"invalid time");
+		if (*value_ptr)
+			{
+			temp32 = settings.string_to_time_stamp (temp_array);		// convert hh:mm to seconds
+			
+			if (TIME_ERROR == temp32)						// if can't be converted
+				settings.err_msg ((char *)"invalid time");
+			else
+				strcpy (system_lights_off, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "fan_temp_1"))
 		{
-		temp16 = settings.fahrenheit_string_to_raw13 (temp_array);	// convert to binary raw13 format
+		if (*value_ptr)
+			{
+			temp16 = settings.fahrenheit_string_to_raw13 (temp_array);	// convert to binary raw13 format
 
-		if (TEMP_ERROR == temp16)							// if can't be converted
-			settings.err_msg ((char *)"invalid temperature");
+			if (TEMP_ERROR == temp16)							// if can't be converted
+				settings.err_msg ((char *)"invalid temperature");
+			else
+				strcpy (system_auto_fan_1, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "fan_temp_2"))
 		{
-		temp16 = settings.fahrenheit_string_to_raw13 (temp_array);	// convert to binary raw13 format
-		
-		if (TEMP_ERROR == temp16)							// if can't be converted
-			settings.err_msg ((char *)"invalid temperature");
+		if (*value_ptr)
+			{
+			temp16 = settings.fahrenheit_string_to_raw13 (temp_array);	// convert to binary raw13 format
+			
+			if (TEMP_ERROR == temp16)							// if can't be converted
+				settings.err_msg ((char *)"invalid temperature");
+			else
+				strcpy (system_auto_fan_2, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "fan_temp_3"))
 		{
-		temp16 = settings.fahrenheit_string_to_raw13 (temp_array);	// convert to binary raw13 format
-		
-		if (TEMP_ERROR == temp16)							// if can't be converted
-			settings.err_msg ((char *)"invalid temperature");
+		if (*value_ptr)
+			{
+			temp16 = settings.fahrenheit_string_to_raw13 (temp_array);	// convert to binary raw13 format
+			
+			if (TEMP_ERROR == temp16)							// if can't be converted
+				settings.err_msg ((char *)"invalid temperature");
+			else
+				strcpy (system_auto_fan_3, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "ip"))
 		{
-		if (!settings.is_dot_decimal (temp_array))
-			settings.err_msg ((char *)"invalid ip");
+		if (*value_ptr)
+			{
+			if (!settings.is_dot_decimal (temp_array))
+				settings.err_msg ((char *)"invalid ip");
+			else
+				strcpy (system_ip, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "mask"))
 		{
-		if (!settings.is_dot_decimal (temp_array))
-			settings.err_msg ((char *)"invalid mask");
+		if (*value_ptr)
+			{
+			if (!settings.is_dot_decimal (temp_array))
+				settings.err_msg ((char *)"invalid mask");
+			else
+				strcpy (system_mask, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "server_ip"))
 		{
-		if (!settings.is_dot_decimal (temp_array))
-			settings.err_msg ((char *)"invalid server ip");
+		if (*value_ptr)
+			{
+			if (!settings.is_dot_decimal (temp_array))
+				settings.err_msg ((char *)"invalid server ip");
+			else
+				strcpy (system_server_ip, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "tz"))
 		{
-		if (stricmp (value_ptr, "pst") && stricmp (value_ptr, "mst") &&
-			stricmp (value_ptr, "cst") && stricmp (value_ptr, "est") &&
-			stricmp (value_ptr, "akst") && stricmp (value_ptr, "hast"))
-				settings.err_msg ((char *)"unsupported time zone");
+		if (*value_ptr)
+			{
+			if (stricmp (value_ptr, "pst") && stricmp (value_ptr, "mst") &&
+				stricmp (value_ptr, "cst") && stricmp (value_ptr, "est") &&
+				stricmp (value_ptr, "akst") && stricmp (value_ptr, "hast"))
+					settings.err_msg ((char *)"unsupported time zone");
+			else
+				strcpy (system_tz, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "dst"))
 		{
-		if (stricmp (value_ptr, "no") && stricmp (value_ptr, "yes"))				// default value
-			settings.err_msg ((char *)"invalid dst setting");
+		if (*value_ptr)
+			{
+			if (stricmp (value_ptr, "no") && stricmp (value_ptr, "yes"))				// default value
+				settings.err_msg ((char *)"invalid dst setting");
+			else
+				strcpy (system_dst, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else
 		settings.err_msg ((char *)"unrecognized setting");
@@ -433,6 +447,8 @@ void check_ini_habitat_A (char* key_ptr)
 
 				if (TEMP_ERROR == temp16)							// if can't be converted
 					settings.err_msg ((char *)"invalid temperature");
+				else
+					strcpy (habitat_A_heat_settings [index].day_temp, value_ptr);
 				}
 			}
 		else
@@ -451,6 +467,8 @@ void check_ini_habitat_A (char* key_ptr)
 
 				if (TEMP_ERROR == temp16)							// if can't be converted
 					settings.err_msg ((char *)"invalid temperature");
+				else
+					strcpy (habitat_A_heat_settings [index].night_temp, value_ptr);
 				}
 			}
 		else
@@ -468,6 +486,8 @@ void check_ini_habitat_A (char* key_ptr)
 				temp8 = (uint8_t)settings.str_to_int (value_ptr);
 				if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
 					settings.err_msg ((char *)"invalid wattage");
+				else
+					strcpy (habitat_A_heat_settings [index].watts, value_ptr);
 				}
 			}
 		else
@@ -484,6 +504,8 @@ void check_ini_habitat_A (char* key_ptr)
 				{
 				if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
 					settings.err_msg ((char *)"invalid over-temp ignore setting");
+				else
+					strcpy (overtemp_ignore_A [index], value_ptr);
 				}
 			}
 		else
@@ -543,6 +565,8 @@ void check_ini_habitat_B (char* key_ptr)
 
 				if (TEMP_ERROR == temp16)							// if can't be converted
 					settings.err_msg ((char *)"invalid temperature");
+				else
+					strcpy (habitat_B_heat_settings [index].day_temp, value_ptr);
 				}
 			}
 		else
@@ -561,6 +585,8 @@ void check_ini_habitat_B (char* key_ptr)
 
 				if (TEMP_ERROR == temp16)							// if can't be converted
 					settings.err_msg ((char *)"invalid temperature");
+				else
+					strcpy (habitat_B_heat_settings [index].night_temp, value_ptr);
 				}
 			}
 		else
@@ -578,6 +604,8 @@ void check_ini_habitat_B (char* key_ptr)
 				temp8 = (uint8_t)settings.str_to_int (value_ptr);
 				if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
 					settings.err_msg ((char *)"invalid wattage");
+				else
+					strcpy (habitat_B_heat_settings [index].watts, value_ptr);
 				}
 			}
 		else
@@ -594,6 +622,8 @@ void check_ini_habitat_B (char* key_ptr)
 				{
 				if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
 					settings.err_msg ((char *)"invalid over-temp ignore setting");
+				else
+					strcpy (overtemp_ignore_B [index], value_ptr);
 				}
 			}
 		else
@@ -647,6 +677,8 @@ void check_ini_habitat_EC (char* key_ptr)
 			
 			if (TEMP_ERROR == temp16)
 				settings.err_msg ((char *)"invalid temperature");
+			else
+				strcpy (habitat_EC_heat_settings [1].day_temp, value_ptr);
 			}
 		else
 			warn_msg();
@@ -659,6 +691,8 @@ void check_ini_habitat_EC (char* key_ptr)
 			
 			if (TEMP_ERROR == temp16)
 				settings.err_msg ((char *)"invalid temperature");
+			else
+				strcpy (habitat_EC_heat_settings [1].night_temp, value_ptr);
 			}
 		else
 			warn_msg();
@@ -670,6 +704,8 @@ void check_ini_habitat_EC (char* key_ptr)
 			temp8 = (uint8_t)settings.str_to_int (value_ptr);
 			if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
 				settings.err_msg ((char *)"invalid wattage");
+			else
+				strcpy (habitat_EC_heat_settings [1].watts, value_ptr);
 			}
 		else
 			warn_msg();
@@ -680,6 +716,8 @@ void check_ini_habitat_EC (char* key_ptr)
 			{
 			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
 				settings.err_msg ((char *)"invalid over-temp ignore setting");
+			else
+				strcpy (overtemp_ignore_EC [1], value_ptr);
 			}
 		else
 			warn_msg();
@@ -692,6 +730,8 @@ void check_ini_habitat_EC (char* key_ptr)
 			
 			if (TEMP_ERROR == temp16)
 				settings.err_msg ((char *)"invalid temperature");
+			else
+				strcpy (habitat_EC_heat_settings [2].day_temp, value_ptr);
 			}
 		else
 			warn_msg();
@@ -704,6 +744,8 @@ void check_ini_habitat_EC (char* key_ptr)
 			
 			if (TEMP_ERROR == temp16)
 				settings.err_msg ((char *)"invalid temperature");
+			else
+				strcpy (habitat_EC_heat_settings [2].night_temp, value_ptr);
 			}
 		else
 			warn_msg();
@@ -715,6 +757,8 @@ void check_ini_habitat_EC (char* key_ptr)
 			temp8 = (uint8_t)settings.str_to_int (value_ptr);
 			if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
 				settings.err_msg ((char *)"invalid wattage");
+			else
+				strcpy (habitat_EC_heat_settings [2].watts, value_ptr);
 			}
 		else
 			warn_msg();
@@ -725,6 +769,8 @@ void check_ini_habitat_EC (char* key_ptr)
 			{
 			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
 				settings.err_msg ((char *)"invalid over-temp ignore setting");
+			else
+				strcpy (overtemp_ignore_EC [2], value_ptr);
 			}
 		else
 			warn_msg();
@@ -764,49 +810,55 @@ void check_ini_users (char*	key_ptr)
 	err_cnt = 0;							// reset the counter
 	
 	if (16 < strlen (value_ptr))
-		{
 		settings.err_msg ((char *)"value string too long");
-		return;
-		}
 	
-	if (strstr (key_ptr, "name_"))
+	else if (strstr (key_ptr, "name_"))
 		{
-		index = (uint8_t)settings.str_to_int (&key_ptr[5]);
-		if ((INVALID_NUM == index) || (10 < index))
-			settings.err_msg ((char *)"invalid name index");
-		else if (!*value_ptr)
-			warn_msg ();
+		if (*value_ptr)
+			{
+			index = (uint8_t)settings.str_to_int (&key_ptr[5]);
+			if ((INVALID_NUM == index) || (10 < index))
+				settings.err_msg ((char *)"invalid name index");
+			else
+				strcpy (user [index].name, value_ptr);
+			}
 		}
 	else if (strstr (key_ptr, "pin_"))
 		{
-		index = (uint8_t)settings.str_to_int (&key_ptr[4]);
-		if ((INVALID_NUM == index) || (10 < index))
-			settings.err_msg ((char *)"invalid pin index");
-		else if (*value_ptr)
+		if (*value_ptr)
 			{
-			pin = settings.str_to_int (value_ptr);	// convert to a number to see if string is all digits
-			if ((INVALID_NUM == pin) || (5 != strlen (value_ptr)))
-				settings.err_msg ((char *)"invalid pin value");
+			index = (uint8_t)settings.str_to_int (&key_ptr[4]);
+			if ((INVALID_NUM == index) || (10 < index))
+				settings.err_msg ((char *)"invalid pin index");
+			else
+				{
+				pin = settings.str_to_int (value_ptr);	// convert to a number to see if string is all digits
+				if ((INVALID_NUM == pin) || (5 != strlen (value_ptr)))
+					settings.err_msg ((char *)"invalid pin value");
+				else
+					strcpy (user [index].pin, value_ptr);
+				}
 			}
-		else
-			warn_msg ();
 		}
 	else if (strcmp (key_ptr, "rights_"))
 		{
-		index = (uint8_t)settings.str_to_int (&key_ptr[7]);
-		if ((INVALID_NUM == index) || (10 < index))
-			settings.err_msg ((char *)"invalid rights index");
-		else if (*value_ptr)
-			{	// TODO: should manuf, dev, and service rights be part of the ini?
-			if (stricmp(value_ptr, "manufacturer") &&
-				stricmp(value_ptr, "developer") &&
-				stricmp(value_ptr, "service") &&
-				stricmp(value_ptr, "manager") &&
-				stricmp(value_ptr, "employee"))
-					settings.err_msg ((char *)"invalid rights value");
+		if (*value_ptr)
+			{
+			index = (uint8_t)settings.str_to_int (&key_ptr[7]);
+			if ((INVALID_NUM == index) || (10 < index))
+				settings.err_msg ((char *)"invalid rights index");
+			else if (*value_ptr)
+				{	// TODO: should manuf, dev, and service rights be part of the ini?
+				if (stricmp(value_ptr, "manufacturer") &&
+					stricmp(value_ptr, "developer") &&
+					stricmp(value_ptr, "service") &&
+					stricmp(value_ptr, "manager") &&
+					stricmp(value_ptr, "employee"))
+						settings.err_msg ((char *)"invalid rights value");
+				else
+					strcpy (user [index].rights, value_ptr);
+				}
 			}
-		else
-			warn_msg ();
 		}
 	else
 		settings.err_msg ((char *)"unrecognized setting");
@@ -963,152 +1015,6 @@ size_t line_len (char* line_ptr)
 	}
 
 
-//---------------------------< G E T _ U S E R _ Y E S _ N O >------------------------------------------------
-//
-//
-//
-
-boolean get_user_yes_no (char* query, boolean yesno)
-	{
-	char c;
-	Serial.print ("\r\nloader> ");
-	Serial.print (query);
-	if (yesno)
-		Serial.print (" ([y]/n) ");
-	else
-		Serial.print (" (y/[n]) ");
-	
-	while (1)
-		{
-		if (Serial.available())
-			{
-			c = Serial.read();
-			if ((('\x0d' == c) && !yesno) || ('n' == c) || ('N' == c))
-				{
-				Serial.println ("no");
-				return false;
-				}
-			else if ((('\x0d' == c) && yesno) || ('y' == c) || ('Y' == c))
-				{
-				Serial.println ("yes");
-				return true;
-				}
-			}
-		}
-	}
-
-
-//---------------------------< F R A M _ G E T _ N _ B Y T E S >----------------------------------------------
-//
-// call this after setting the appropriate values in the fram control struct.  This function reads n number
-// of characters into a buffer.
-//
-
-void fram_get_n_bytes (uint8_t* buf_ptr, size_t n)
-	{
-	uint8_t i;
-	
-	fram.byte_read ();						// get the first byte
-	*buf_ptr++ = fram.control.rd_byte;		// save the byte we read
-	for (i=0; i<(n-1); i++)					// loop getting the rest of the bytes
-		{
-		fram.current_address_read ();		// get next byte
-		*buf_ptr++ = fram.control.rd_byte;	// save the byte we read
-		};
-	}
-
-
-//---------------------------< F R A M _ F I L L >------------------------------------------------------------
-//
-// fill fram with n copies of 'c' beginning at address and continuing for n number of bytes.
-// writes in groups of 256.  For n not an evenly divisible by 256, this code will stop short.
-//
-
-void fram_fill (uint8_t c, uint16_t address, size_t n)
-	{
-	uint8_t	buf[256];							// max length natively supported by the i2c_t3 library
-	size_t	i;									// the iterator
-
-	memset (buf, c, 256);						// fill buffer with characters write to fram
-
-	for (i=0; i<n; i+=256)						// page_write() max length is 256 bytes (i2c_t3 limit) so iterate
-		{
-		fram.set_addr16 (address + i);			// set the address
-		fram.control.wr_buf_ptr = buf;			// point to ln_buf
-		fram.control.rd_wr_len = 256;			// number of bytes to write
-		fram.page_write();						// do it
-		}
-	}
-
-
-//---------------------------< H E X _ D U M P _ C O R E >----------------------------------------------------
-//
-// Render a 'page' (16 rows of 16 columns) of hex data and its character equivalent.  data_ptr MUST point to
-// a buffer of at least 256 bytes.  This function always renders 256 items regardless of the size of the buffer.
-//
-
-void hex_dump_core (uint16_t address, uint8_t* data_ptr)
-	{
-	uint8_t*	text_ptr = data_ptr;					// walks in tandem with data_ptr; prints the text
-	
-	for (uint8_t i=0; i<16; i++)						// dump 'pages' that are 16 lines of 16 bytes
-		{
-		Serial.print ("\r\n\r\n");						// open some space
-		hex_print (address);
-		Serial.print ("    ");							// space between address and data
-
-		
-		for (uint8_t j=0; j<8; j++)						// first half
-			{
-			hex_print (*data_ptr++);
-			Serial.print (" ");							// space between bytes
-			}
-		Serial.print (" -  ");							// mid array separator
-
-		for (uint8_t j=0; j<8; j++)						// second half
-			{
-			hex_print (*data_ptr++);
-			Serial.print (" ");							// space between bytes
-			}
-		Serial.print ("   ");							// space between hex and character data
-
-		for (uint8_t j=0; j<16; j++)
-			{
-			if (' ' > *text_ptr)						// if a control character (0x00-0x1F)
-				Serial.print ('.');						// print a dot
-			else
-				Serial.print ((char)*text_ptr);
-			text_ptr++;									// bump the pointer
-			}
-
-		address+=16;
-		}
-	}
-
-
-//---------------------------< H E X _ D U M P _ S E T T I N G S >--------------------------------------------
-//
-// TODO: make a generic version of this
-//
-
-void hex_dump_settings (uint16_t start_address)
-	{
-	uint8_t		buf [256];
-	
-	while (1)
-		{
-		fram.set_addr16 (start_address);						// first address to dump
-		fram_get_n_bytes ((uint8_t*)buf, 256);					// get 256 bytes from fram
-		hex_dump_core (start_address, buf);
-
-		Serial.println ("");									// insert a blank line
-		if (!get_user_yes_no ((char*)"another page?", true))	// default answer yes
-			return;
-		start_address += 256;									// next 'page' starting address
-		}
-	}
-
-
 //---------------------------< H E X _ D U M P _ A R R A Y >--------------------------------------------------
 //
 // print a hex dump of an internal array in 256 byte chunks.  If the array is smaller than 256 byte, this
@@ -1117,34 +1023,124 @@ void hex_dump_settings (uint16_t start_address)
 // TODO: add an array length argument so that the function will only print pages that cover the array.
 //
 
-void hex_dump_array (uint8_t* array_ptr, size_t len)
-	{
-	uint16_t	index = 0;									// array index
+//void hex_dump_array (uint8_t* array_ptr, size_t len)
+//	{
+//	uint16_t	index = 0;									// array index
 	
-	while (1)
-		{
-		Serial.print ("@ ");
-		Serial.print ((uint32_t)array_ptr);
-		Serial.print (" (0x");
-		Serial.print ((uint32_t)array_ptr, HEX);
-		Serial.print (")");
-		hex_dump_core (index, array_ptr);
+//	while (1)
+//		{
+//		Serial.print ("@ ");
+//		Serial.print ((uint32_t)array_ptr);
+//		Serial.print (" (0x");
+//		Serial.print ((uint32_t)array_ptr, HEX);
+//		Serial.print (")");
+//		hex_dump_core (index, array_ptr);
 
-		Serial.println ("");									// insert a blank line
-		array_ptr += 256;										// next 'page' starting address
-		index += 256;											// and index
+//		Serial.println ("");									// insert a blank line
+//		array_ptr += 256;										// next 'page' starting address
+//		index += 256;											// and index
 
-		if (len > index)
-			{
-			if (!get_user_yes_no ((char*)"another page?", true))	// default answer yes
-				return;
-			}
-		else
-			{
-			if (!get_user_yes_no ((char*)"end of array; more?", false))	// default answer no
-				return;
-			}
-		}
+//		if (len > index)
+//			{
+//			if (!utils.get_user_yes_no ((char*)"loader", (char*)"another page?", true))	// default answer yes
+//				return;
+//			}
+//		else
+//			{
+//			if (!utils.get_user_yes_no ((char*)"loader", (char*)"end of array; more?", false))	// default answer no
+//				return;
+//			}
+//		}
+//	}
+
+
+//---------------------------< M A K E _ L I N E >------------------------------------------------------------
+//
+//
+//
+
+char* add_line (kv_pair pair, char* array_ptr)
+	{
+	uint8_t i;
+	uint8_t	ret_val;
+	char*	ln_ptr;
+	char*	key_ptr = (char*)pair.key;
+	char*	val_ptr = pair.value;
+	
+	memset (ln_buf, '\0', 128);
+
+	ln_ptr = ln_buf;						// point to the line buffer
+	while (*key_ptr)						// copy the key into the line buffer
+		*ln_ptr++ = *key_ptr++;
+	*ln_ptr++ = '=';						// add the assignment operator
+	while (*val_ptr)						// copy the value (if there is one) into the line buffer
+		*ln_ptr++ = *val_ptr++;
+	*ln_ptr = '\0';							// null terminate
+
+	ret_val = zero_pad_setting (ln_buf);	// zero pad; ln_buf is no longer null terminated
+	
+	ln_ptr = ln_buf;						// reset the pointer
+	for (i=0; i<ret_val; i++)
+		*array_ptr++ = *ln_ptr++;			// copy the setting to out_buf
+	return array_ptr;						// return a pointer to next available space in out_buf
+	}
+
+
+//---------------------------< W R I T E _ S E T T I N G S _ T O _ O U T _ B U F >----------------------------
+//
+// writes a complete settings file using defaults where explicit values are not provided in the .ini file.
+// This allows the .ini file to be 'incomplete' (not recommended)
+//
+
+void write_settings_to_out_buf (char* out_buf_ptr)
+	{
+	uint8_t i;
+	char* ln_ptr;
+	
+//---------- [system]
+	strcpy (ln_buf, (char *)"[system]\n");
+	ln_ptr = ln_buf;							// reset the pointer
+	while (*ln_ptr)
+		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
+	
+	for (i=1; i<=11; i++)
+		out_buf_ptr = add_line (kv_system [i], out_buf_ptr);
+
+//---------- [habitat A]
+	strcpy (ln_buf, (char *)"[habitat A]\n");
+	ln_ptr = ln_buf;							// reset the pointer
+	while (*ln_ptr)
+		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
+	
+	for (i=1; i<=48; i++)
+		out_buf_ptr = add_line (kv_habitat_A [i], out_buf_ptr);
+
+//---------- [habitat B]
+	strcpy (ln_buf, (char *)"[habitat B]\n");
+	ln_ptr = ln_buf;							// reset the pointer
+	while (*ln_ptr)
+		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
+	
+	for (i=1; i<=48; i++)
+		out_buf_ptr = add_line (kv_habitat_B [i], out_buf_ptr);
+
+//---------- [habitat EC]
+	strcpy (ln_buf, (char *)"[habitat EC]\n");
+	ln_ptr = ln_buf;							// reset the pointer
+	while (*ln_ptr)
+		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
+	
+	for (i=1; i<=8; i++)
+		out_buf_ptr = add_line (kv_habitat_EC [i], out_buf_ptr);
+
+//---------- [users]
+	strcpy (ln_buf, (char *)"[users]\n");
+	ln_ptr = ln_buf;							// reset the pointer
+	while (*ln_ptr)
+		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
+	
+	for (i=1; i<=30; i++)
+		out_buf_ptr = add_line (kv_users [i], out_buf_ptr);
 	}
 
 
@@ -1189,7 +1185,7 @@ void loop()
 	uint8_t		heading = 0;
 	char*		rx_ptr = rx_buf;				// point to start of rx_buf
 	char*		out_ptr = out_buf;				// point to start of out_buf
-	char*		ln_ptr;							// pointer to ln_buf
+//	char*		ln_ptr;							// pointer to ln_buf
 
 	memset (out_buf, EOF_MARKER, 8192);			// fill out_buf with end-of-file markers
 
@@ -1265,14 +1261,14 @@ void loop()
 		else if (USERS == heading)
 			check_ini_users (ln_buf);
 		
-		ret_val = zero_pad_setting (ln_buf);		// do the zero padding; returned string is not and cannot be null terminated
-
-		ln_ptr = ln_buf;							// reset the pointer
-		for (uint8_t i=0; i<ret_val; i++)
-			{
-			*out_ptr++ = *ln_ptr++;					// copy the setting to out_buf
-			}
-		*out_ptr = EOF_MARKER;							// add the end-of-file marker
+//		ret_val = zero_pad_setting (ln_buf);		// do the zero padding; returned string is not and cannot be null terminated
+//
+//		ln_ptr = ln_buf;							// reset the pointer
+//		for (uint8_t i=0; i<ret_val; i++)
+//			{
+//			*out_ptr++ = *ln_ptr++;					// copy the setting to out_buf
+//			}
+//		*out_ptr = EOF_MARKER;							// add the end-of-file marker
 		}
 
 	elapsed_time = stopwatch (STOP);				// capture the time
@@ -1298,7 +1294,7 @@ void loop()
 
 	if (warn_cnt && !total_errs)					// warnings but no errors
 		{
-		if (!get_user_yes_no ((char*)"ignore warnings and write settings to fram?", false))		// default answer no
+		if (!utils.get_user_yes_no ((char*)"loader", (char*)"ignore warnings and write settings to fram?", false))		// default answer no
 			{
 			total_errs = warn_cnt;					// spoof to prevent writing fram
 			Serial.println("\n\nabandoned");
@@ -1307,9 +1303,11 @@ void loop()
 
 	if (!total_errs)								// if there have been errors, no writing fram
 		{
+		write_settings_to_out_buf (out_buf);		// write settings to the output buffer
+
 		Serial.println ("\r\nerasing fram settings");
 		stopwatch (START);						// reset
-		fram_fill (EOF_MARKER, FRAM_SETTINGS_START, 8192);
+		utils.fram_fill (EOF_MARKER, FRAM_SETTINGS_START, 8192);
 		elapsed_time = stopwatch (STOP);			// capture the time
 
 		Serial.print ("\r\nerased ");
@@ -1380,23 +1378,23 @@ void loop()
 	
 		elapsed_time = stopwatch (STOP);
 		Serial.print ("\r\ncrc value (");
-		hex_print (crc);
+		utils.hex_print (crc);
 		Serial.print (") calculated and written to fram in ");
 		Serial.print (elapsed_time);				// elapsed time
 		Serial.println ("ms");
 			
 		Serial.print("\r\n\r\nfram write complete\r\n\r\n");
 
-		if (get_user_yes_no ((char*)"dump settings from fram?", true))	// default answer yes
+		if (utils.get_user_yes_no ((char*)"loader", (char*)"dump settings from fram?", true))	// default answer yes
 			{
 //			settings.dump_settings ();				// dump the settings to the monitor
-			hex_dump_settings (0);
+			utils.fram_hex_dump (0);
 			}
 		
 		Serial.println("\n\ndone");
 		}
 	
-	if (!get_user_yes_no ((char*)"load another file", false))	// default answer no
+	if (!utils.get_user_yes_no ((char*)"loader", (char*)"load another file", false))	// default answer no
 		{
 		Serial.println("\r\nloader stopped; reset to restart");				// give up and enter and endless
 		while(1);									// loop
