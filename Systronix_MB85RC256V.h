@@ -19,6 +19,9 @@
 #define	SUCCESS	0
 #define	FAIL	0xFF
 #define	DENIED	0xFE
+#define	ABSENT	0xFD
+
+#define	I2C_BUF_OVF	8		// mimic the same-named i2c_t3 i2c_status enum
 
 
 
@@ -30,11 +33,19 @@
 class Systronix_MB85RC256V
 	{
 	protected:
-		uint8_t _base;								// base address, eight possible values
-		void adv_addr16 (void);						// advance control.addr.u16 by control.rd_wr_len
-		void inc_addr16 (void);						// increment control.addr.u16 by 1
+		uint8_t		_base;							// base address, eight possible values
+		
+		void		adv_addr16 (void);				// advance control.addr.u16 by control.rd_wr_len
+		void		inc_addr16 (void);				// increment control.addr.u16 by 1
+		void		tally_errors (uint8_t);			// maintains the i2c_t3 error counters
 
 	public:
+													// i2c_t3 error counters
+		uint32_t	data_len_error_count;			// data too long
+		uint32_t	rcv_addr_nack_count;			// slave did not ack address
+		uint32_t	rcv_data_nack_count;			// slave did not ack data
+		uint32_t	other_error_count;				// arbitration lost or timeout
+	
 		union fram_addr
 			{
 			struct
@@ -48,6 +59,7 @@ class Systronix_MB85RC256V
 			
 		struct
 			{
+			boolean				exists;				// set false after an unsuccessful i2c transaction
 			union fram_addr		addr;
 			uint8_t				wr_byte;			// a place to put single read and write bytes
 			uint8_t				rd_byte;
@@ -56,7 +68,7 @@ class Systronix_MB85RC256V
 			size_t				rd_wr_len;			// number of bytes to read/write with page_read()/page_write()
 			size_t				bytes_written;		// number bytes written by Wire.write(); 0 = fail
 			size_t				bytes_received;		// number of bytes read by Wire.requestFrom()
-			uint8_t				et_ret_val;			// return value of the last Wire.endTransmission()
+			uint8_t				ret_val;			// SUCCESS or error return value of the last transaction
 			} control;
 
 		uint16_t	prodID;
@@ -64,7 +76,7 @@ class Systronix_MB85RC256V
 
 		void setup (uint8_t base);					// constructor
 		void begin (void);							// joins I2C as master
-		void init (void);							// does nothing
+		uint8_t init (void);						// determines if the device at _base is correct and communicating
 
 		uint8_t set_addr16 (uint16_t);
 		
