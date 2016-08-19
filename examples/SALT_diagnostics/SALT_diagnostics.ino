@@ -1,10 +1,12 @@
 #include <Systronix_MB85RC256V.h>
 //#include <SALT_settings.h>
 #include <SALT_FETs.h>
+#include <SALT_utilities.h>
 #include <SALT.h>
 
 SALT_FETs FETs;
 Systronix_MB85RC256V fram;
+SALT_utilities utils;
 //SALT_settings settings;
 
 
@@ -156,6 +158,7 @@ void fram_get_n_bytes (uint8_t* buf_ptr, size_t n)
 void fram_fill (uint8_t c, uint16_t address, size_t n)
 	{
 	uint8_t	buf[256];							// max length natively supported by the i2c_t3 library
+	uint8_t ret_val;
 	size_t	i;									// the iterator
 
 	memset (buf, c, 256);						// fill buffer with characters write to fram
@@ -165,7 +168,12 @@ void fram_fill (uint8_t c, uint16_t address, size_t n)
 		fram.set_addr16 (address + i);			// set the address
 		fram.control.wr_buf_ptr = buf;			// point to ln_buf
 		fram.control.rd_wr_len = 256;			// number of bytes to write
-		fram.page_write();						// do it
+		ret_val = fram.page_write();						// do it
+		if (ret_val)
+			{
+			Serial.print ("page write fail: ");
+			Serial.println (ret_val);
+			}
 		if (0x100 == (i & 0x100))
 			Serial.print (".");				// every 4th read
 		}
@@ -321,6 +329,8 @@ void stopwatch (boolean start_stop)
 
 uint8_t fram_fill_test (uint8_t fill_val)
 	{
+	size_t char_count = 0;
+	
 	Serial.print ("\r\nfilling fram with 0x");
 	if (0x10 > fill_val)
 		Serial.print ("0");
@@ -329,7 +339,9 @@ uint8_t fram_fill_test (uint8_t fill_val)
 	stopwatch (START);						// start a timer
 	fram_fill (fill_val, 0, FRAM_SIZE);
 	stopwatch (STOP);						// stop the timer
-
+	
+//	utils.fram_hex_dump (0x7F00);
+	
 	Serial.print ("\r\nwrote ");
 	Serial.print (FRAM_SIZE);					// number of bytes
 	Serial.print (" bytes in ");
@@ -340,44 +352,43 @@ uint8_t fram_fill_test (uint8_t fill_val)
 	Serial.print ("\r\nchecking fram fill    ");
 	stopwatch (START);						// start a timer
 
-												// page_read() max length is 256 bytes (i2c_t3 limit) but, that
-	for (uint16_t i=0; i<FRAM_SIZE; i+=128)		// doesn't seem to work (never returns) work so read in chunks of 128
+	for (uint16_t i=0; i<FRAM_SIZE; i+=256)		// page_read() max length is 256 bytes (i2c_t3 rx_buffer limit)
 		{
 		memset (test_buf, ~fill_val, 512);		// preset the test buffer to something other than the test value
 		
 		fram.set_addr16 (i);					// set the address
 		fram.control.rd_buf_ptr = test_buf;		// point to test_buf
-		fram.control.rd_wr_len = 128;			// number of bytes to read
+		fram.control.rd_wr_len = 256;			// number of bytes to read
 		if (SUCCESS != fram.page_read())		// do it
 			{
-			Serial.print ("page read fail");
-			Serial.print (i);
+			Serial.print ("page read fail; received ");
+			Serial.print (fram.control.bytes_received);
+			Serial.print (" bytes");
 			return FAIL;
 			}
 		else									// successful read
 			{
-			if (0x180 == (i & 0x180))
-				Serial.print (".");				// every 4th read
+			char_count += fram.control.bytes_received;
+			if (0x100 == (i & 0x100))
+				Serial.print (".");				// every 2nd read
 			}
 
 		test_ptr = test_buf;					// point to start of buffer
-		for (uint16_t j=0; j<130; j++)			// compare bytes in buffer against test value
+		for (uint16_t j=0; j<257; j++)			// compare bytes in buffer against test value
 			{
-			if (fill_val == *test_ptr)			// should be 0
+			if (fill_val == *test_ptr)			// should be the same
 				{
 				test_ptr ++;					// bump the pointer
 				continue;						// do it again
 				}
-			if (128 == j)						// the 129th byte in the buffer should not be 0
+			if (256 == j)						// the 257th byte in the buffer should not be 0
 				break;
-			else								// one of 0-127 was not zero
+			else								// one of 0-255 was not correct
 				{
 				stopwatch (STOP);			// stop the timer
 				Serial.print ("\r\nFAILED: expected: ");
-//				hex_print_1_byte (fill_val);
 				hex_print (fill_val);
 				Serial.print (", got: 0x");
-//				hex_print_1_byte (*test_ptr);
 				hex_print (*test_ptr);
 				Serial.print ("; i: ");
 				Serial.print (i);
@@ -391,7 +402,8 @@ uint8_t fram_fill_test (uint8_t fill_val)
 	stopwatch (STOP);						// stop the timer
 
 	Serial.print ("\r\nchecked ");
-	Serial.print (FRAM_SIZE);					// number of bytes
+//	Serial.print (FRAM_SIZE);					// number of bytes
+	Serial.print (char_count);					// number of bytes
 	Serial.print (" bytes in ");
 	Serial.print (elapsed_time);				// elapsed time
 	Serial.println ("ms");
@@ -545,6 +557,43 @@ uint8_t check_counting_pattern (uint8_t seed)
 	}
 
 
+//---------------------------< P R I N T _ I 2 C _ E R R O R _ C O U N T S >----------------------------------
+//
+//
+//
+
+uint8_t print_i2c_error_counts (void)
+	{
+	uint8_t ret_val = SUCCESS;
+	
+	if (fram.data_len_error_count)
+		{
+		Serial.print ("data length errors: ");
+		Serial.println (fram.data_len_error_count);
+		ret_val = FAIL;
+		}
+	if (fram.rcv_addr_nack_count)
+		{
+		Serial.print ("address NAK errors: ");
+		Serial.println (fram.rcv_addr_nack_count);
+		ret_val = FAIL;
+		}
+	if (fram.rcv_data_nack_count)
+		{
+		Serial.print ("data NAK errors: ");
+		Serial.println (fram.rcv_data_nack_count);
+		ret_val = FAIL;
+		}
+	if (fram.other_error_count)
+		{
+		Serial.print ("other errors: ");
+		Serial.println (fram.other_error_count);
+		ret_val = FAIL;
+		}
+	return ret_val;
+	}
+
+
 //---------------------------< S E T U P >--------------------------------------------------------------------
 
 void setup()
@@ -567,6 +616,7 @@ void setup()
 	
 	fram.setup (0x50);
 	fram.begin ();								// join i2c as master
+	fram.init();
 	
 	delay (2000);
 	}
@@ -587,10 +637,8 @@ void loop()
 	fram.prodID = 0;
 	fram.get_device_id ();
 	Serial.print ("\r\ndevice id: manufacturer ID: 0x");
-//	hex_print_2_byte (fram.manufID);
 	hex_print (fram.manufID);
 	Serial.print ("; product ID: 0x");
-//	hex_print_2_byte (fram.prodID);
 	hex_print (fram.prodID);
 	Serial.print ("\r\n");
 
@@ -600,6 +648,8 @@ void loop()
 	fram_fill_test (0xAA);
 	fram_fill_test (0x55);
 	fram_fill_test (0xFF);
+
+	print_i2c_error_counts();
 	
 	if (!state)
 		answer = get_user_yes_no ((char*)"do counting pattern test? (takes about 26 minutes)", true);	// 100kHz default answer yes
@@ -611,11 +661,12 @@ void loop()
 		for (uint16_t i=0; i<256; i++)
 			{
 			Serial.print ("counting pattern; seed = 0x");
-//			hex_print_1_byte (i);
-			hex_print (i);
+			hex_print ((uint8_t)i);
 
 			write_counting_pattern ((uint8_t)i);
 			check_counting_pattern ((uint8_t)i);
+			if (print_i2c_error_counts())
+				while (1);			// lock up
 			Serial.print ("\r\n");
 			}
 		}
