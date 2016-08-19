@@ -51,7 +51,7 @@ SALT_JX coreJ4;
 char		rx_buf [8192];
 char		out_buf [8192];
 char		ln_buf [256];
-uint16_t	err_cnt = 0;
+//uint16_t	err_cnt = 0;
 uint16_t	total_errs = 0;
 uint16_t	warn_cnt = 0;
 
@@ -246,7 +246,7 @@ void check_ini_system (char* key_ptr)
 	
 	*value_ptr++ = '\0';					// null terminate the key and bump the pointer to point at the value
 	
-	err_cnt = 0;							// reset the counter
+	settings.err_cnt = 0;							// reset the counter
 	
 	if (16 < strlen (value_ptr))
 		{
@@ -401,7 +401,7 @@ void check_ini_system (char* key_ptr)
 		settings.err_msg ((char *)"unrecognized setting");
 
 	*(value_ptr-1) = '=';					// restore the '='
-	total_errs += err_cnt;					// accumulate for reporting later
+	total_errs += settings.err_cnt;					// accumulate for reporting later
 	}
 
 
@@ -430,7 +430,7 @@ void check_ini_habitat_A (char* key_ptr)
 	
 	*value_ptr++ = '\0';					// null terminate the key and bump the pointer to point at the value
 
-	err_cnt = 0;							// reset the counter
+	settings.err_cnt = 0;							// reset the counter
 
 	if (8 < strlen (value_ptr))
 		{
@@ -519,7 +519,7 @@ void check_ini_habitat_A (char* key_ptr)
 		settings.err_msg ((char *)"unrecognized setting");
 
 	*(value_ptr-1) = '=';					// restore the '='
-	total_errs += err_cnt;					// accumulate for reporting later
+	total_errs += settings.err_cnt;					// accumulate for reporting later
 	}
 
 
@@ -548,7 +548,7 @@ void check_ini_habitat_B (char* key_ptr)
 	
 	*value_ptr++ = '\0';					// null terminate the key and bump the pointer to point at the value
 
-	err_cnt = 0;							// reset the counter
+	settings.err_cnt = 0;							// reset the counter
 
 	if (8 < strlen (value_ptr))
 		{
@@ -637,7 +637,7 @@ void check_ini_habitat_B (char* key_ptr)
 		settings.err_msg ((char *)"unrecognized setting");
 
 	*(value_ptr-1) = '=';					// restore the '='
-	total_errs += err_cnt;					// accumulate for reporting later
+	total_errs += settings.err_cnt;					// accumulate for reporting later
 	}
 
 
@@ -665,7 +665,7 @@ void check_ini_habitat_EC (char* key_ptr)
 	
 	*value_ptr++ = '\0';					// null terminate the key and bump the pointer to point at the value
 
-	err_cnt = 0;							// reset the counter
+	settings.err_cnt = 0;							// reset the counter
 
 	if (8 < strlen (value_ptr))
 		{
@@ -783,7 +783,7 @@ void check_ini_habitat_EC (char* key_ptr)
 		settings.err_msg ((char *)"unrecognized setting");
 
 	*(value_ptr-1) = '=';					// restore the '='
-	total_errs += err_cnt;					// accumulate for reporting later
+	total_errs += settings.err_cnt;					// accumulate for reporting later
 	}
 
 
@@ -811,7 +811,7 @@ void check_ini_users (char*	key_ptr)
 	
 	*value_ptr++ = '\0';					// null terminate the key and bump the pointer to point at the value
 	
-	err_cnt = 0;							// reset the counter
+	settings.err_cnt = 0;							// reset the counter
 	
 	if (16 < strlen (value_ptr))
 		settings.err_msg ((char *)"value string too long");
@@ -868,7 +868,7 @@ void check_ini_users (char*	key_ptr)
 		settings.err_msg ((char *)"unrecognized setting");
 
 	*(value_ptr-1) = '=';					// restore the '='
-	total_errs += err_cnt;					// accumulate for reporting later
+	total_errs += settings.err_cnt;					// accumulate for reporting later
 	}
 
 
@@ -1152,6 +1152,9 @@ void setup()
 	coreJ4.JX_data.outdata.as_u32_word = 0;		// heatlamps and heat pads off
 	coreJ4.update();
 	
+	fram.setup (0x50);
+	fram.begin ();								// join i2c as master
+	fram.init();
 
 	Serial.begin(115200);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
@@ -1161,9 +1164,13 @@ void setup()
 	Serial.print (__TIME__);					// the
 	Serial.print (" ");							// startup
 	Serial.print (__DATE__);					// message
-	
-	fram.setup (0x50);
-	fram.begin ();								// join i2c as master
+
+	if (!fram.control.exists)
+		{
+		Serial.println ("fatal error: cannot communicate with fram");
+		Serial.println("loader stopped; reset to restart");		// give up and enter an endless
+		while(1);								// loop
+		}
 	}
 
 
@@ -1234,12 +1241,12 @@ void loop()
 		if (strstr (ln_buf, "#"))
 			continue;								// comment; we don't save comments in fram
 
-		ret_val = normalize_kv_pair (ln_buf);		// trim, spaces to underscores; returns ptr to mull terminated string
+		ret_val = normalize_kv_pair (ln_buf);		// trim, spaces to underscores; returns ptr to null terminated string
 
 		if (ret_val)								// if an error or a heading (otherwise returns SUCCESS)
 			{
 			if (INI_ERROR == ret_val)				// not a heading, missing assignment operator
-				settings.err_msg ((char *)"+not key/value pair");
+				settings.err_msg ((char *)"not key/value pair");
 			else									// found a new heading
 				{
 				heading = ret_val;					// so remember which heading we found
@@ -1362,7 +1369,9 @@ void loop()
 			}
 		else
 			{
-			Serial.println("\r\ncrc match failure. loader stopped; reset to restart");	// give up and enter and endless
+			if (utils.get_user_yes_no ((char*)"loader", (char*)"crc match failure.  dump settings from fram?", true))	// default answer yes
+				utils.fram_hex_dump (0);
+			Serial.println("\r\ncrc match failure. loader stopped; reset to restart");	// give up an enter and endless
 			while(1);									// loop
 			}
 	
@@ -1370,14 +1379,14 @@ void loop()
 		Serial.print ("\r\ncrc value (");
 		utils.hex_print (crc);
 		Serial.print (") calculated and written to fram in ");
-		Serial.print (elapsed_time);				// elapsed time
+		Serial.print (elapsed_time);					// elapsed time
 		Serial.println ("ms");
 			
 		Serial.print("\r\n\r\nfram settings write complete\r\n\r\n");
 
 		if (utils.get_user_yes_no ((char*)"loader", (char*)"dump settings from fram?", true))	// default answer yes
 			{
-//			settings.dump_settings ();				// dump the settings to the monitor
+//			settings.dump_settings ();					// dump the settings to the monitor
 			utils.fram_hex_dump (0);
 			}
 		
@@ -1390,23 +1399,23 @@ void loop()
 	if (utils.get_user_yes_no ((char*)"loader", (char*)"initialize fram log memory?", false))		// default answer no
 		{
 		Serial.println ("\r\ninitializing fram log memory");
-		stopwatch (START);						// reset
+		stopwatch (START);								// reset
 		utils.fram_fill (EOF_MARKER, FRAM_LOG_START, (FRAM_LOG_END - FRAM_LOG_START + 1));
-		elapsed_time = stopwatch (STOP);			// capture the time
+		elapsed_time = stopwatch (STOP);				// capture the time
 
 		Serial.print ("\r\nerased ");
 		Serial.print (FRAM_LOG_END - FRAM_LOG_START + 1);		// number of bytes
 		Serial.print (" fram bytes in ");
-		Serial.print (elapsed_time);		// elapsed time
+		Serial.print (elapsed_time);					// elapsed time
 		Serial.println ("ms");
 		}
 
 	if (!utils.get_user_yes_no ((char*)"loader", (char*)"load another file", false))	// default answer no
 		{
-		Serial.println("\r\nloader stopped; reset to restart");				// give up and enter and endless
-		while(1);									// loop
+		Serial.println("\r\nloader stopped; reset to restart");				// give up and enter an endless
+		while(1);										// loop
 		}
-	memset (rx_buf, '\0', 8192);					// clear rx_buf to zeros
-	total_errs = 0;									// reset these so they aren't misleading
+	memset (rx_buf, '\0', 8192);						// clear rx_buf to zeros
+	total_errs = 0;										// reset these so they aren't misleading
 	warn_cnt = 0;
 	}
