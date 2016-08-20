@@ -221,6 +221,65 @@ void warn_msg (void)
 	}
 
 
+//---------------------------< I S _ G O O D _ P I N >--------------------------------------------------------
+//
+//
+//
+
+boolean is_good_pin (const char* pin_ptr)
+	{
+	uint8_t i;
+	char*	test_ptr;
+	char	c;
+	
+	test_ptr = (char*)pin_ptr;
+	if (5 != strlen (test_ptr))				// must have proper length
+		return false;
+	
+	test_ptr = (char*)pin_ptr;
+	for (i=0; i<5; i++)
+		if (!isdigit (*test_ptr++))			// must be digits only
+			return false;
+	
+	test_ptr = (char*)pin_ptr+1;
+	for (i=0; i<4; i++)						// must not be a string of all same digits
+		{
+		if (*pin_ptr != *test_ptr)
+			break;
+		}
+	if (4 == i)
+		return false;
+	
+	test_ptr = (char*)pin_ptr;
+	c = *test_ptr++;						// c gets first digit; bump pointer to second digit
+	for (i=0; i<4; i++)
+		{
+		if ('9' == c)
+			c = '0';
+		else
+			c++;
+		if (c != *test_ptr++)				// is content of pointer one more than previous digit?
+			break;
+		}
+	if (4 == i)
+		return false;
+		
+	test_ptr = (char*)pin_ptr;
+	c = *test_ptr++;						// c gets first digit; bump pointer to second digit
+	for (i=0; i<4; i++)
+		{
+		if ('0' == c)
+			c = '9';
+		else
+			c--;
+		if (c != *test_ptr++)				// is content of pointer one less than previous digit?
+			break;
+		}
+	if (4 == i)
+		return false;
+	return true;
+	}
+
 //---------------------------< C H E C K _ I N I _ S Y S T E M >----------------------------------------------
 //
 // reads the ini file from fram line-at-a-time looking for the [system] section header.  Once found, continues
@@ -797,9 +856,7 @@ void check_ini_habitat_EC (char* key_ptr)
 void check_ini_users (char*	key_ptr)
 	{
 	uint8_t		index;						// index into user array
-	int32_t		pin;						// pin converted from text
-
-	char*	value_ptr;						// pointers to the key and value items
+	char*		value_ptr;					// pointer to the value items
 
 	value_ptr = strchr (key_ptr, '=');		// find the assignment operator; assign its address to value_ptr
 	if (NULL == value_ptr)
@@ -836,11 +893,10 @@ void check_ini_users (char*	key_ptr)
 				settings.err_msg ((char *)"invalid pin index");
 			else
 				{
-				pin = settings.str_to_int (value_ptr);	// convert to a number to see if string is all digits
-				if ((INVALID_NUM == pin) || (5 != strlen (value_ptr)))
-					settings.err_msg ((char *)"invalid pin value");
-				else
+				if (is_good_pin (value_ptr))
 					strcpy (user [index].pin, value_ptr);
+				else
+					settings.err_msg ((char *)"invalid pin value");
 				}
 			}
 		}
