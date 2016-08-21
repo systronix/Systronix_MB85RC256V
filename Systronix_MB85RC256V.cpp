@@ -42,7 +42,10 @@ uint8_t Systronix_MB85RC256V::init (void)
 //---------------------------< T A L L Y _ E R R O R S >------------------------------------------------------
 //
 // Here we tally errors.  This does not answer the 'what to do in the event of these errors' question; it just
-// counts them.  For those errors that are i2c bus related, sets exists to false.  This takes
+// counts them.  If the device does not ack the address portion of a transaction or if we get a timeout error,
+// exists is set to false.  We assume here that the timeout error is really an indication that the automatic
+// reset feature of the i2c_t3 library failed to reset the device in which case, the device no longer 'exists'
+// for whatever reason.
 //
 
 void Systronix_MB85RC256V::tally_errors (uint8_t error)
@@ -61,7 +64,6 @@ void Systronix_MB85RC256V::tally_errors (uint8_t error)
 		case 3:					// slave did not ack data (write)
 		case 6:					// from call to status() (read)
 			rcv_data_nack_count ++;
-			control.exists=false;
 			break;
 		case 4:					// arbitration lost (write) or timeout (read/write)
 		case 7:					// arbitration lost from call to status() (read)
@@ -233,7 +235,8 @@ uint8_t Systronix_MB85RC256V::byte_read (void)
 
 uint8_t Systronix_MB85RC256V::page_read (void)
 	{
-	size_t i;
+	size_t 		i;
+	uint8_t*	ptr = control.rd_buf_ptr;					// a copy so we don't disturb the original
 	
 	if (!control.exists)									// exit immediately if device does not exist
 		return ABSENT;
@@ -254,7 +257,7 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 		adv_addr16 ();										// advance our copy of the address
 
 		for (i=0;i<control.rd_wr_len; i++)					// copy wire rx buffer data to destination
-			*control.rd_buf_ptr++ = Wire.readByte();
+			*ptr++ = Wire.readByte();
 		return SUCCESS;
 		}
 
