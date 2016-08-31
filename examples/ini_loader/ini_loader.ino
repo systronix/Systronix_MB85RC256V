@@ -1417,11 +1417,8 @@ void loop()
 		if (settings.get_crc_fram (FRAM_SETTINGS_START) == crc)	// calculate the crc across the settings in fram
 			{
 			fram.set_addr16 (FRAM_CRC_LO);				// set address for low byte of crc
-			fram.control.wr_byte = (uint8_t)crc;		// write the low byte
-			fram.byte_write();
-			fram.set_addr16 (FRAM_CRC_HI);				// set address for high byte of crc
-			fram.control.wr_byte = (uint8_t)(crc>>8);	// write the high byte
-			fram.byte_write();
+			fram.control.wr_int16 = crc;
+			fram.int16_write();
 			}
 		else
 			{
