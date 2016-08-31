@@ -3,8 +3,14 @@
 #include <SALT_FETs.h>
 #include <SALT_utilities.h>
 #include <SALT.h>
+#include <SALT_JX.h>
+
 
 SALT_FETs FETs;
+SALT_JX coreJ2;
+SALT_JX coreJ3;
+SALT_JX coreJ4;
+
 Systronix_MB85RC256V fram;
 SALT_utilities utils;
 //SALT_settings settings;
@@ -605,6 +611,21 @@ void setup()
 	FETs.begin ();
 	FETs.init ();								// lights, fans, and alarms all off
 
+	fram.setup (I2C_EEP);
+	fram.begin ();							// join i2c as master
+	if (fram.init())						// determine if the device exists and is communicating
+		Serial.println ("\r\nfram not communicating");	// just a place holder  TODO: do something with this knowledge
+		
+	coreJ2.setup (I2C_J2);
+	coreJ2.begin();
+	coreJ2.init();
+	coreJ3.setup (I2C_J3);
+	coreJ3.begin();
+	coreJ3.init();
+	coreJ4.setup (I2C_J4);
+	coreJ4.begin();
+	coreJ4.init();
+
 	Serial.begin(115200);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 
@@ -613,10 +634,6 @@ void setup()
 	Serial.print (__TIME__);					// the
 	Serial.print (" ");							// startup
 	Serial.print (__DATE__);					// message
-	
-	fram.setup (0x50);
-	fram.begin ();								// join i2c as master
-	fram.init();
 	
 	delay (2000);
 	}
@@ -630,6 +647,44 @@ void setup()
 void loop()
 	{
 	boolean	answer = false;
+
+	if (coreJ2.read())
+		Serial.println ("J2 read operation failed");
+	
+	if (JX_NO_CONNECT == coreJ2.JX_data.u32_DC_data_in)
+		Serial.println ("J2 not connected");
+	else if (0x000F000F & coreJ2.JX_data.u32_DC_data_in)
+		{
+		Serial.print ("J2 unexpected value: 0x");
+		hex_print (coreJ2.JX_data.u32_DC_data_in);
+		Serial.println ("");
+		}
+		
+	if (coreJ3.read())
+		Serial.println ("J3 read operation failed");
+	
+	if (JX_NO_CONNECT == coreJ3.JX_data.u32_DC_data_in)
+		Serial.println ("J3 not connected");
+	else if (0x000F000F & coreJ3.JX_data.u32_DC_data_in)
+		{
+		Serial.print ("J3 unexpected value: 0x");
+		hex_print (coreJ3.JX_data.u32_DC_data_in);
+		Serial.println ("");
+		}
+
+	if (coreJ4.read())
+		Serial.println ("J4 read operation failed");
+	
+	if (JX_NO_CONNECT == coreJ4.JX_data.u32_DC_data_in)
+		Serial.println ("J4 not connected");
+	else if (0x000F000F & coreJ4.JX_data.u32_DC_data_in)
+		{
+		Serial.print ("J4 unexpected value: 0x");
+		hex_print (coreJ4.JX_data.u32_DC_data_in);
+		Serial.println ("");
+		}
+
+	while(1);
 
 	//---------- < F R A M >----------
 	
