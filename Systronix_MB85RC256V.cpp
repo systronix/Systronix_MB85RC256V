@@ -151,6 +151,38 @@ uint8_t Systronix_MB85RC256V::byte_write (void)
 	}
 
 
+//---------------------------< I N T 1 6 _ W R I T E >--------------------------------------------------------
+//
+// writes the two bytes of an int16_t or uint16_t to fram beginning at address in control.addr ls byte first.
+//
+
+uint8_t Systronix_MB85RC256V::int16_write (void)
+	{
+	if (!control.exists)									// exit immediately if device does not exist
+		return ABSENT;
+	
+	control.wr_buf_ptr = (uint8_t*)(&control.wr_int16);		// point to the int16 member of the control struct
+	control.rd_wr_len = sizeof(uint16_t);					// set the write length
+	return page_write ();									// do the write and done
+	}
+
+
+//---------------------------< I N T 3 2 _ W R I T E >--------------------------------------------------------
+//
+// writes the two bytes of an int32_t or uint32_t to fram beginning at address in control.addr ls byte first.
+//
+
+uint8_t Systronix_MB85RC256V::int32_write (void)
+	{
+	if (!control.exists)									// exit immediately if device does not exist
+		return ABSENT;
+	
+	control.wr_buf_ptr = (uint8_t*)(&control.wr_int32);		// point to the int32 member of the control struct
+	control.rd_wr_len = sizeof(uint32_t);					// set the write length
+	return page_write ();									// do the write and done
+	}
+
+
 //---------------------------< P A G E _ W R I T E >----------------------------------------------------------
 
 uint8_t Systronix_MB85RC256V::page_write (void)
@@ -223,6 +255,32 @@ uint8_t Systronix_MB85RC256V::byte_read (void)
 		}
 	
 	return current_address_read ();							// use current_address_read() to fetch the byte
+	}
+
+
+//---------------------------< I N T 1 6 _ R E A D >----------------------------------------------------------
+
+uint8_t Systronix_MB85RC256V::int16_read (void)
+	{
+	if (!control.exists)									// exit immediately if device does not exist
+		return ABSENT;
+	
+	control.rd_buf_ptr = (uint8_t*)(&control.rd_int16);
+	control.rd_wr_len = sizeof(uint16_t);					// set the read length
+	return page_read ();									// do the read and done
+	}
+
+
+//---------------------------< I N T 3 2 _ R E A D >----------------------------------------------------------
+
+uint8_t Systronix_MB85RC256V::int32_read (void)
+	{
+	if (!control.exists)									// exit immediately if device does not exist
+		return ABSENT;
+	
+	control.rd_buf_ptr = (uint8_t*)(&control.rd_int32);
+	control.rd_wr_len = sizeof(uint32_t);					// set the read length
+	return page_read ();									// do the read and done
 	}
 
 

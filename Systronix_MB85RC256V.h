@@ -62,7 +62,11 @@ class Systronix_MB85RC256V
 			boolean				exists;				// set false after an unsuccessful i2c transaction
 			union fram_addr		addr;
 			uint8_t				wr_byte;			// a place to put single read and write bytes
+			uint16_t			wr_int16;
+			uint32_t			wr_int32;
 			uint8_t				rd_byte;
+			uint16_t			rd_int16;
+			uint32_t			rd_int32;
 			uint8_t*			wr_buf_ptr;			// pointers to read / write buffers; buffers must be appropriately sized
 			uint8_t*			rd_buf_ptr;
 			size_t				rd_wr_len;			// number of bytes to read/write with page_read()/page_write()
@@ -81,9 +85,13 @@ class Systronix_MB85RC256V
 		uint8_t set_addr16 (uint16_t);
 		
 		uint8_t byte_write (void);						// write 1 byte to address
+		uint8_t int16_write (void);						// write 2-byte int16 to address
+		uint8_t int32_write (void);						// write 4-byte int32 to address
 		uint8_t page_write (void);						// write n number of bytes beginning at address
 		uint8_t current_address_read (void);			// get the byte at the current position of the device's address pointer
 		uint8_t byte_read (void);						// read 1 byte from address
+		uint8_t int16_read (void);						// read 2-byte int16 from address
+		uint8_t int32_read (void);						// read 4-byte int32 from address
 		uint8_t default_byte_read (void);				// read 1 byte from fram's current address pointer
 		uint8_t page_read (void);						// read n number of bytes beginning at address
 		uint8_t get_device_id (void);					// get the device id
