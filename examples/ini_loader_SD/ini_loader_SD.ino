@@ -915,8 +915,7 @@ void check_ini_users (char*	key_ptr)
 				settings.err_msg ((char *)"invalid rights index");
 			else if (*value_ptr)
 				{	// TODO: should manuf, dev, and service rights be part of the ini?
-				if (stricmp(value_ptr, "manufacturer") &&
-					stricmp(value_ptr, "developer") &&
+				if (stricmp(value_ptr, "factory") &&
 					stricmp(value_ptr, "service") &&
 					stricmp(value_ptr, "manager") &&
 					stricmp(value_ptr, "employee"))
@@ -1526,8 +1525,8 @@ void loop()
 
 		if (utils.get_user_yes_no ((char*)"loader", (char*)"dump settings from fram?", true))	// default answer yes
 			{
-//			settings.dump_settings ();					// dump the settings to the monitor
-			utils.fram_hex_dump (0);
+			settings.dump_settings ();					// dump the settings to the monitor
+//			utils.fram_hex_dump (0);
 			}
 		
 		Serial.println("\n\ndone");

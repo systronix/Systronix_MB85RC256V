@@ -909,8 +909,7 @@ void check_ini_users (char*	key_ptr)
 				settings.err_msg ((char *)"invalid rights index");
 			else if (*value_ptr)
 				{	// TODO: should manuf, dev, and service rights be part of the ini?
-				if (stricmp(value_ptr, "manufacturer") &&
-					stricmp(value_ptr, "developer") &&
+				if (stricmp(value_ptr, "factory") &&
 					stricmp(value_ptr, "service") &&
 					stricmp(value_ptr, "manager") &&
 					stricmp(value_ptr, "employee"))
