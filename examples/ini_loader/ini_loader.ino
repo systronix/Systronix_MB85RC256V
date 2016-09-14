@@ -324,7 +324,7 @@ void check_ini_system (char* key_ptr)
 		else
 			strcpy (system_config, value_ptr);
 		}
-	else if (!strcmp (key_ptr, "lights_on"))
+	else if (!strcmp (key_ptr, "dawn"))
 		{
 		if (*value_ptr)
 			{
@@ -338,7 +338,7 @@ void check_ini_system (char* key_ptr)
 		else
 			warn_msg ();
 		}
-	else if (!strcmp (key_ptr, "lights_off"))
+	else if (!strcmp (key_ptr, "dusk"))
 		{
 		if (*value_ptr)
 			{

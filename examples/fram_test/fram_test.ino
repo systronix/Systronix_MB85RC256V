@@ -141,15 +141,15 @@ void parse_ini (void)
 			Serial.print (line_num);
 			Serial.print (": ");
 			Serial.println ("lights off");
-			settings.sys_settings.time_lights_off = (time_t)atoi(value);
+			settings.sys_settings.time_dusk = (time_t)atoi(value);
 			
-			if (0 ==settings.sys_settings.time_lights_off)
+			if (0 ==settings.sys_settings.time_dusk)
 				{
 				Serial.print ("invalid time in line ");
 				Serial.println (line_num);
 				}
 			
-			Serial.println (settings.sys_settings.time_lights_off);
+			Serial.println (settings.sys_settings.time_dusk);
 			}
 		else if (!stricmp (key, "fan temp 1"))
 			{
