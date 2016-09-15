@@ -71,8 +71,8 @@ char overtemp_ignore_EC [3][8] = 	// compartment overtemp alarm ignored when cor
 	};
 
 char system_config [8] = {"SSWEC"};				// SS, SSWEC, B2B, B2BWEC, SBS
-char system_lights_on [8] = {"06:00"};			// minimal default: 06:00
-char system_lights_off [8] = {"18:00"};			// minimal default: 18:00
+char system_dawn [8] = {"06:00"};				// minimal default: 06:00
+char system_dusk [8] = {"18:00"};				// minimal default: 18:00
 char system_auto_fan_1 [8] = {"80"};			// threshold temperatures 
 char system_auto_fan_2 [8] = {"85"};
 char system_auto_fan_3 [8] = {"90"};
@@ -108,8 +108,8 @@ kv_pair	kv_system [12] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
 	{{CONFIG_KEY},				system_config},
-	{{LIGHTS_ON_KEY},			system_lights_on},
-	{{LIGHTS_OFF_KEY},			system_lights_off},
+	{{DAWN_KEY},				system_dawn},
+	{{DUSK_KEY},				system_dusk},
 	{{AUTO_FAN_1_KEY},			system_auto_fan_1},
 	{{AUTO_FAN_2_KEY},			system_auto_fan_2},
 	{{AUTO_FAN_3_KEY},			system_auto_fan_3},
