@@ -333,7 +333,7 @@ void check_ini_system (char* key_ptr)
 			if (TIME_ERROR == temp32)						// if can't be converted
 				settings.err_msg ((char *)"invalid time");
 			else
-				strcpy (system_lights_on, value_ptr);
+				strcpy (system_dawn, value_ptr);
 			}
 		else
 			warn_msg ();
@@ -347,7 +347,7 @@ void check_ini_system (char* key_ptr)
 			if (TIME_ERROR == temp32)						// if can't be converted
 				settings.err_msg ((char *)"invalid time");
 			else
-				strcpy (system_lights_off, value_ptr);
+				strcpy (system_dusk, value_ptr);
 			}
 		else
 			warn_msg ();
