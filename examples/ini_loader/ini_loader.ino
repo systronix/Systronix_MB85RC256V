@@ -912,7 +912,7 @@ void check_ini_users (char*	key_ptr)
 				if (stricmp(value_ptr, "factory") &&
 					stricmp(value_ptr, "service") &&
 					stricmp(value_ptr, "manager") &&
-					stricmp(value_ptr, "employee"))
+					stricmp(value_ptr, "associate"))
 						settings.err_msg ((char *)"invalid rights value");
 				else
 					strcpy (user [index].rights, value_ptr);

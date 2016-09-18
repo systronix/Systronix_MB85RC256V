@@ -87,7 +87,7 @@ struct user_settings							// these initialize to empty strings or 0; the minima
 	{
 	char		name [16];						// 15 character name + null terminator
 	char		pin [8];						// 5 digit number 00000-99999; TODO: 4 digits and a check digit? some values illegal?
-	char		rights [16];					// employee, manager, service, developer, manufacturer
+	char		rights [16];					// associate, manager, service, developer, manufacturer
 	};
 	
 user_settings user [11];						// '1' indexed; [0] not used
