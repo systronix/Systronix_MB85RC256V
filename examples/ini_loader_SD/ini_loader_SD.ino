@@ -1528,16 +1528,16 @@ void loop()
 		fram.control.wr_byte = EOF_MARKER;				// write the EOF marker
 		fram.byte_write();
 
-		fram.set_addr16 (0);							// set fram control block starting address
-		fram.byte_read();
+//		fram.set_addr16 (0);							// set fram control block starting address
+//		fram.byte_read();
 
 //-----
 // once stable, remove this bit of code
-		memset (ln_buf, '\0', 256);
-		fram.set_addr16 (0);							// set fram control block starting address
-		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
-		fram.control.rd_wr_len = 256;
-		fram.page_write();								// erase the control block
+//		memset (ln_buf, '\0', 256);
+//		fram.set_addr16 (0);							// set fram control block starting address
+//		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
+//		fram.control.rd_wr_len = 256;
+//		fram.page_write();								// erase the control block
 //-----
 		elapsed_time = stopwatch (STOP);				// capture the time
 
@@ -1579,8 +1579,8 @@ void loop()
 			ret_val = Serial.read();					// if anything in the Serial input, get rid of it
 		if (utils.get_user_yes_no ((char*)"loader", (char*)"dump settings from fram?", true))	// default answer yes
 			{
-			settings.dump_settings ();					// dump the settings to the monitor
-//			utils.fram_hex_dump (0);
+//			settings.dump_settings ();					// dump the settings to the monitor
+			utils.fram_hex_dump (0);
 			}
 		
 		Serial.println("\n\ndone");
