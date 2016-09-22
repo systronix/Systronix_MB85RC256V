@@ -1177,6 +1177,9 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 
 void setup()
 	{
+	Serial.begin(115200);						// usb; could be any value
+	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
+
 												// make sure all spi chip selects inactive
 	pinMode (FLASH_CS_PIN, INPUT_PULLUP);		// SALT FLASH_CS(L)
 	pinMode (T_CS_PIN, INPUT_PULLUP);			// SALT T_CS(L)
@@ -1215,8 +1218,8 @@ void setup()
 	fram.begin ();								// join i2c as master
 	fram.init();
 
-	Serial.begin(115200);						// usb; could be any value
-	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
+//	Serial.begin(115200);						// usb; could be any value
+//	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 
 	Serial.print ("NAP ini loader [SD]: ");
 	Serial.print ("build time: ");				// assemble
@@ -1238,52 +1241,91 @@ void setup()
 //
 //
 
+char file_list [11][64];							// a 1 indexed array of file names; file_list[0] not used
+
+
 void loop()
 	{
 	uint16_t	crc;
 	uint16_t	rcvd_count;
-//	uint32_t	millis_prev;
 	time_t		elapsed_time;
-//	uint8_t		waiting_counter = 0;
 	uint8_t		ret_val;
 	uint8_t		heading = 0;
-	char*		rx_ptr = rx_buf;				// point to start of rx_buf
-	char*		out_ptr = out_buf;				// point to start of out_buf
-//	char*		ln_ptr;							// pointer to ln_buf
-
-	memset (out_buf, EOF_MARKER, 8192);			// fill out_buf with end-of-file markers
-
+	char*		rx_ptr = rx_buf;					// point to start of rx_buf
+	char*		out_ptr = out_buf;					// point to start of out_buf
+	uint8_t		file_count;							// indexer into file_list; a 1-indexed array; file_list[0] not used
+	
+	memset (out_buf, EOF_MARKER, 8192);				// fill out_buf with end-of-file markers
 
 	if (digitalRead (uSD_DETECT))
 		{
 		Serial.println ("insert uSD");
 		while (digitalRead (uSD_DETECT));
+		delay (50);									// installed, now wait a bit for things to settle
 		}
 	
-	Serial.println ("uSD detected");
-	
-	delay (5);
+	Serial.println ("uSD installed");
 	
 	if (!SD.begin(uSD_CS_PIN, SPI_HALF_SPEED))
 		{
-		Serial.println ("error initializing uSD");
+		Serial.printf ("\r\nerror initializing uSD; cs: %d; half-speed mode\r\n", uSD_CS_PIN);
+		SD.initErrorHalt("loader stopped; reset to restart\r\n");
 		while (1);
 		}
 
-	while (1)
+	Serial.println ("choose ini file to load:");
+
+	file_count = 0;	
+	SD.vwd()->rewind();									// rewind to start of virtual working idrectory
+	while (file.openNext(SD.vwd(), O_READ))				// open next file for reading
 		{
-		Serial.println ("choose ini file to load:");
-		Serial.println (" [1] b2b.ini");
-		Serial.println (" [2] b2bwec.ini");
-		Serial.println (" [3] sbs.ini");
-		Serial.println (" [4] ss.ini");
-		Serial.println (" [5] sswec.ini");
-		Serial.print ("SALT/loader> ");
-		while (!Serial.available());
-		ret_val = Serial.read();
-		Serial.write (ret_val);
-		Serial.println ("");
-		switch (ret_val)
+		if (!file.isFile())								// files only
+			{
+			file.close ();								// close this directory
+			continue;									// from the top
+			}
+			
+		file_count++;									// bump to next file list location
+		file.getName (file_list[file_count], 32);		// get and save the file name
+		ret_val = strlen (file_list[file_count]) - 4;			// make an index to the last four characters of the file name
+		if (stricmp(&file_list[file_count][ret_val], ".ini"))	// if last four characters are not ".ini"
+			{
+			file_count--;								// not a .ini file so recover this spot in the list
+			file.close();								// close the file
+			continue;									// from the top
+			}
+		
+//		Serial.printf ("\n%d ", file.fileSize());		// is this of any value?  Get it but don't list a file with length 0?
+		Serial.printf (" [%2d] %-32s ", file_count, file_list[file_count]);		// print menu item, file name, file date
+		file.printModifyDateTime(&Serial);				// and time/date  TODO: must we use this?  is there no better way to getfile  date and time?
+		Serial.println ("");							// terminate the menu
+		file.close();									// 
+
+		if (10 <= file_count)							// only list 10 files
+			break;
+		}
+
+	if (0 == file_count)
+		{
+		Serial.printf ("\r\nno .ini files found on uSD card.\r\nloader stopped; reset to restart");
+		while (1);										// hang it up
+		}
+		
+		
+/*		while (1)
+			{
+			Serial.println ("choose ini file to load:");
+			Serial.println (" [1] b2b.ini");
+			Serial.println (" [2] b2bwec.ini");
+			Serial.println (" [3] sbs.ini");
+			Serial.println (" [4] ss.ini");
+			Serial.println (" [5] sswec.ini");
+			Serial.print ("SALT/loader> ");
+			while (!Serial.available());
+			ret_val = Serial.read();
+			Serial.write (ret_val);
+			Serial.println ("");
+			switch (ret_val)
 			{
 			case '1':
 				if (file.open ("b2b.ini"))
@@ -1324,80 +1366,86 @@ void loop()
 		if (0xFF == ret_val)
 			break;
 		}
-	
-//	Serial.println ("ls");		// don't know how to use this
-//	file.ls(LS_DATE|LS_SIZE);
-	
-//	if (!file.open ("b2bwec.ini"))
-//		Serial.println ("error opening file");
-	
-//	while (file.available())
-//		Serial.write(file.read());
-//	while(1);
-	
-//	millis_prev = millis();						// init
-//	Serial.print ("\r\n\r\nloader> waiting for file ...");
-//	while (!Serial.available())
-//		{
-//		if (10000 < (millis() - millis_prev))
-//			{
-//			millis_prev = millis();				// reset
-//			Serial.print ("\r\nloader> waiting for file (");
-//			Serial.print (waiting_counter++);
-//			Serial.print (") ...");
-//			}
-//		}
+*/
+		
+	while (1)
+		{
+		while (Serial.available())
+			ret_val = Serial.read();					// if anything in the Serial input, get rid of it
+
+		Serial.printf ("SALT/loader> ");				// print the SALT prompt and accept serial input
+
+		while (!Serial.available());
+		ret_val = Serial.read();
+		Serial.write (ret_val);
+		Serial.println ("");
+		ret_val -= '0';									// convert text to number
+		if ((0 < ret_val) && (ret_val <= file_count))
+			{
+			if (file.open (file_list[ret_val]))
+				{
+				Serial.printf ("\r\nreading %s\r\n", file_list[ret_val]);
+				ret_val = 0xFF;
+				}
+			else
+				Serial.printf ("\r\nfile %s did not open\r\n", file_list[ret_val]);
+			break;
+			}
+		else
+			Serial.printf ("\r\nselection must be between 1 and %d\r\n", file_count);
+		}
+		
 	Serial.println ("\r\nreading");
 	stopwatch (START);
 	rcvd_count = file_get_chars (rx_buf);
 	file.close();
 
-	elapsed_time = stopwatch (STOP);				// capture the time
+	elapsed_time = stopwatch (STOP);					// capture the time
 	Serial.print ("\r\nread ");
-	Serial.print (rcvd_count);						// number of characters received
+	Serial.print (rcvd_count);							// number of characters received
 	Serial.print (" characters in ");
-	Serial.print (elapsed_time);					// elapsed time
+	Serial.print (elapsed_time);						// elapsed time
 	Serial.println ("ms");
 
-	settings.line_num = 0;							// reset to count lines taken from rx_buf
+	settings.line_num = 0;								// reset to count lines taken from rx_buf
 	Serial.println ("\r\nchecking");
-	stopwatch (START);								// reset
+	stopwatch (START);									// reset
 
-	rx_ptr = rx_buf;								// initialize
+	rx_ptr = rx_buf;									// initialize
 	while (rx_ptr)
 		{
-		rx_ptr = array_get_line (ln_buf, rx_ptr);	// returns null pointer when no more characters in buffer
+		rx_ptr = array_get_line (ln_buf, rx_ptr);		// returns null pointer when no more characters in buffer
 		if (!rx_ptr)
 			break;
 	
 		if (EOF_MARKER == *ln_buf)						// when we find the end-of-file-marker
 			{
-			*out_ptr = *ln_buf;						// add it to out_buf
-			break;									// done reading rx_buf
+			*out_ptr = *ln_buf;							// add it to out_buf
+			break;										// done reading rx_buf
 			}
 
-		settings.line_num ++;						// tally
+		settings.line_num ++;							// tally
 
 		if (('\r' == *ln_buf) || (EOL_MARKER == *ln_buf))	// do these here so we have source line numbers for error messages
-			continue;								// cr or lf; we don't save newlines in fram
+			continue;									// cr or lf; we don't save newlines in fram
 		if (strstr (ln_buf, "#"))
-			continue;								// comment; we don't save comments in fram
+			continue;									// comment; we don't save comments in fram
 
-		ret_val = normalize_kv_pair (ln_buf);		// trim, spaces to underscores; returns ptr to null terminated string
+		ret_val = normalize_kv_pair (ln_buf);			// trim, spaces to underscores; returns ptr to null terminated string
 
-		if (ret_val)								// if an error or a heading (otherwise returns SUCCESS)
+		if (ret_val)									// if an error or a heading (otherwise returns SUCCESS)
 			{
-			if (INI_ERROR == ret_val)				// not a heading, missing assignment operator
+			if (INI_ERROR == ret_val)					// not a heading, missing assignment operator
 				settings.err_msg ((char *)"not key/value pair");
-			else									// found a new heading
+			else										// found a new heading
 				{
-				heading = ret_val;					// so remember which heading we found
+				heading = ret_val;						// so remember which heading we found
 				out_ptr = array_add_line (out_ptr, ln_buf);		// copy to out_buf; reset pointer to eof marker
 				}
-			continue;								// get the next line
+			continue;									// get the next line
 			}
 
-		if (SYSTEM == heading)						// validate the various settings according to their headings
+		if (SYSTEM == heading)							// validate the various settings according to their headings
 			check_ini_system (ln_buf);
 		else if (HABITAT_A == heading)
 			check_ini_habitat_A (ln_buf);
@@ -1409,60 +1457,62 @@ void loop()
 			check_ini_users (ln_buf);
 		}
 
-	elapsed_time = stopwatch (STOP);				// capture the time
+	elapsed_time = stopwatch (STOP);					// capture the time
 	Serial.print ("\r\nchecked ");
-	Serial.print (settings.line_num);				// number of lines
+	Serial.print (settings.line_num);					// number of lines
 	Serial.print (" lines in ");
-	Serial.print (elapsed_time);					// elapsed time
+	Serial.print (elapsed_time);						// elapsed time
 	Serial.print ("ms; ");
-	if (total_errs)									// if there have been any errors
+	if (total_errs)										// if there have been any errors
 		{
 		Serial.print (total_errs);
 		Serial.print (" error(s); ");
-		Serial.print (warn_cnt);					// number of warnings
+		Serial.print (warn_cnt);						// number of warnings
 		Serial.println (" warning(s); ");
 		Serial.println ("configuration not written.");
 		}
 	else
 		{
-		Serial.print ("0 error(s); ");				// no errors
-		Serial.print (warn_cnt);					// number of warnings
+		Serial.print ("0 error(s); ");					// no errors
+		Serial.print (warn_cnt);						// number of warnings
 		Serial.println (" warning(s).");
 		}
 
-	if (warn_cnt && !total_errs)					// warnings but no errors
+	if (warn_cnt && !total_errs)						// warnings but no errors
 		{
+		while (Serial.available())
+			ret_val = Serial.read();					// if anything in the Serial input, get rid of it
 		if (!utils.get_user_yes_no ((char*)"loader", (char*)"ignore warnings and write settings to fram?", false))		// default answer no
 			{
-			total_errs = warn_cnt;					// spoof to prevent writing fram
+			total_errs = warn_cnt;						// spoof to prevent writing fram
 			Serial.println("\n\nabandoned");
 			}
 		}
 
-	if (!total_errs)								// if there have been errors, no writing fram
+	if (!total_errs)									// if there have been errors, no writing fram
 		{
-		write_settings_to_out_buf (out_buf);		// write settings to the output buffer
+		write_settings_to_out_buf (out_buf);			// write settings to the output buffer
 
 		Serial.println ("\r\nerasing fram settings");
-		stopwatch (START);						// reset
+		stopwatch (START);								// reset
 		utils.fram_fill (EOF_MARKER, FRAM_SETTINGS_START, (FRAM_SETTINGS_END - FRAM_SETTINGS_START + 1));
-		elapsed_time = stopwatch (STOP);			// capture the time
+		elapsed_time = stopwatch (STOP);				// capture the time
 
 		Serial.print ("\r\nerased ");
 		Serial.print (FRAM_SETTINGS_END - FRAM_SETTINGS_START + 1);		// number of bytes
 		Serial.print (" fram bytes in ");
-		Serial.print (elapsed_time);		// elapsed time
+		Serial.print (elapsed_time);					// elapsed time
 		Serial.println ("ms");
 
 
-		settings.line_num = 0;						// reset
+		settings.line_num = 0;							// reset
 		Serial.println ("\r\nwriting");
 
 		stopwatch (START);
 
-		fram.set_addr16 (FRAM_SETTINGS_START);		// set starting address where we will begin writing
+		fram.set_addr16 (FRAM_SETTINGS_START);			// set starting address where we will begin writing
 		
-		out_ptr = out_buf;							// point to the buffer
+		out_ptr = out_buf;								// point to the buffer
 		while (out_ptr)
 			{
 			out_ptr = array_get_line (ln_buf, out_ptr);		// returns null pointer when no more characters in buffer
@@ -1471,34 +1521,34 @@ void loop()
 			settings.line_num ++;							// tally
 			fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
 			fram.control.rd_wr_len = line_len ((char*)ln_buf);
-			fram.page_write();								// write it
+			fram.page_write();							// write it
 			Serial.print (".");
 			}
 		
-		fram.control.wr_byte = EOF_MARKER;			// write the EOF marker
+		fram.control.wr_byte = EOF_MARKER;				// write the EOF marker
 		fram.byte_write();
 
-		fram.set_addr16 (0);						// set fram control block starting address
+		fram.set_addr16 (0);							// set fram control block starting address
 		fram.byte_read();
 
 //-----
 // once stable, remove this bit of code
 		memset (ln_buf, '\0', 256);
-		fram.set_addr16 (0);					// set fram control block starting address
+		fram.set_addr16 (0);							// set fram control block starting address
 		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
 		fram.control.rd_wr_len = 256;
-		fram.page_write();						// erase the control block
+		fram.page_write();								// erase the control block
 //-----
-		elapsed_time = stopwatch (STOP);			// capture the time
+		elapsed_time = stopwatch (STOP);				// capture the time
 
 		Serial.print ("\r\nwrote ");
-		Serial.print (settings.line_num);			// number of lines
+		Serial.print (settings.line_num);				// number of lines
 		Serial.print (" lines to fram in ");
-		Serial.print (elapsed_time);				// elapsed time
+		Serial.print (elapsed_time);					// elapsed time
 		Serial.println ("ms");
 
 		stopwatch (START);
-		crc = get_crc_array ((uint8_t*)out_buf);	// calculate the crc across the entire buffer
+		crc = get_crc_array ((uint8_t*)out_buf);		// calculate the crc across the entire buffer
 
 		if (settings.get_crc_fram (FRAM_SETTINGS_START) == crc)	// calculate the crc across the settings in fram
 			{
@@ -1508,6 +1558,8 @@ void loop()
 			}
 		else
 			{
+			while (Serial.available())
+				ret_val = Serial.read();				// if anything in the Serial input, get rid of it
 			if (utils.get_user_yes_no ((char*)"loader", (char*)"crc match failure.  dump settings from fram?", true))	// default answer yes
 				utils.fram_hex_dump (0);
 			Serial.println("\r\ncrc match failure. loader stopped; reset to restart");	// give up an enter and endless
@@ -1523,6 +1575,8 @@ void loop()
 			
 		Serial.print("\r\n\r\nfram settings write complete\r\n\r\n");
 
+		while (Serial.available())
+			ret_val = Serial.read();					// if anything in the Serial input, get rid of it
 		if (utils.get_user_yes_no ((char*)"loader", (char*)"dump settings from fram?", true))	// default answer yes
 			{
 			settings.dump_settings ();					// dump the settings to the monitor
@@ -1532,9 +1586,13 @@ void loop()
 		Serial.println("\n\ndone");
 		}
 
+		while (Serial.available())
+			ret_val = Serial.read();					// if anything in the Serial input, get rid of it
 	if (utils.get_user_yes_no ((char*)"loader", (char*)"dump fram log memory?", true))	// default answer yes
 		utils.fram_hex_dump (FRAM_LOG_START);
 		
+		while (Serial.available())
+			ret_val = Serial.read();					// if anything in the Serial input, get rid of it
 	if (utils.get_user_yes_no ((char*)"loader", (char*)"initialize fram log memory?", false))		// default answer no
 		{
 		Serial.println ("\r\ninitializing fram log memory");
@@ -1543,15 +1601,17 @@ void loop()
 		elapsed_time = stopwatch (STOP);				// capture the time
 
 		Serial.print ("\r\nerased ");
-		Serial.print (FRAM_LOG_END - FRAM_LOG_START + 1);		// number of bytes
+		Serial.print (FRAM_LOG_END - FRAM_LOG_START + 1);	// number of bytes
 		Serial.print (" fram bytes in ");
 		Serial.print (elapsed_time);					// elapsed time
 		Serial.println ("ms");
 		}
 
+		while (Serial.available())
+			ret_val = Serial.read();					// if anything in the Serial input, get rid of it
 	if (!utils.get_user_yes_no ((char*)"loader", (char*)"load another file", false))	// default answer no
 		{
-		Serial.println("\r\nloader stopped; reset to restart");				// give up and enter an endless
+		Serial.println("\r\nloader stopped; reset to restart");		// give up and enter an endless
 		while(1);										// loop
 		}
 	memset (rx_buf, '\0', 8192);						// clear rx_buf to zeros
