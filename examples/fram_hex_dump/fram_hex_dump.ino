@@ -1,5 +1,6 @@
 //
-// this code dumps 256 byte pages from fram beginning at address 0.  TODOprompt for a starting address
+// this code dumps 256 byte pages from fram beginning at address provided by user.  addresses must be in the
+// range 0x0000-0x7FFF.  The low byte address is set to 0x00 because pages are dumped in 256-byte chunks.
 //
 
 //
@@ -69,7 +70,7 @@ void setup()
 //	Serial.begin(115200);						// usb; could be any value
 //	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 
-	Serial.print ("NAP ini loader [SD]: ");
+	Serial.print ("NAP fram hex dump utility: ");
 	Serial.print ("build time: ");				// assemble
 	Serial.print (__TIME__);					// the
 	Serial.print (" ");							// startup
@@ -81,9 +82,6 @@ void setup()
 		Serial.println("loader stopped; reset to restart");		// give up and enter an endless
 		while(1);								// loop
 		}
-	utils.fram_hex_dump (0);
-	Serial.println("hex dump stopped; reset to restart");		// give up and enter an endless
-	while(1);								// loop
 	}
 
 
@@ -92,6 +90,47 @@ void setup()
 //
 //
 
+uint8_t		c;
+uint16_t	address = 0;
+uint8_t		character_counter = 0;
+
 void loop()
 	{
+	Serial.println ("\n********** DO NOT SEND LINE ENDINGS**********");
+
+	Serial.println ("enter 4-digit starting address in HEX format (00xx-7Fxx)");
+	Serial.print ("SALT/fram hex dump> ");
+	
+	while (1)
+		{
+		if (Serial.available())
+			{
+			c = Serial.read();
+			if (isxdigit(c))
+				{
+				if (('0' <= c) && ('9' >= c))
+					c -= '0';					// convert to binary
+				else if (('a' <= c) && ('f' >= c))
+					c = (c - 'a') + 10;
+				else
+					c = (c - 'A') + 10;
+				Serial.printf ("%x", c);
+				
+				address <<= 4;					// make room for new digit
+				address |= c;					// tack on the new digit
+				character_counter++;
+				if (4 <= character_counter)
+					{
+					while (Serial.available())
+						Serial.read();			// swallow extra characters
+					break;						// got 4 digits go dump
+					}
+				}
+			}
+		}
+
+	address >>= 8;								// set low 8 bits to zero because pages are displayed in groups of 256 bytes
+	address <<= 8;
+
+	utils.fram_hex_dump (address);
 	}

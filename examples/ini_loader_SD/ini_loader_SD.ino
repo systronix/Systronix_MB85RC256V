@@ -400,6 +400,18 @@ void check_ini_system (char* key_ptr)
 		else
 			warn_msg ();
 		}
+	else if (!strcmp (key_ptr, "dhcp"))
+		{
+		if (*value_ptr)
+			{
+			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+				settings.err_msg ((char *)"invalid dhcp setting");
+			else
+				strcpy (system_dhcp, value_ptr);
+			}
+		else
+			warn_msg ();
+		}
 	else if (!strcmp (key_ptr, "ip"))
 		{
 		if (*value_ptr)

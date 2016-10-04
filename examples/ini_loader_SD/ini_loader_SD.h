@@ -76,6 +76,7 @@ char system_dusk [8] = {"18:00"};				// minimal default: 18:00
 char system_auto_fan_1 [8] = {"80"};			// threshold temperatures 
 char system_auto_fan_2 [8] = {"85"};
 char system_auto_fan_3 [8] = {"90"};
+char system_dhcp [8] = {"no"};					// does habitat use DHCP?
 char system_ip [16];							// habitat's ip address
 char system_mask [16];							// habitat's subnet mask
 char system_server_ip [16];						// server's ip address
@@ -104,7 +105,7 @@ struct kv_pair
 	char* value;
 	};
 
-kv_pair	kv_system [12] =
+kv_pair	kv_system [13] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
 	{{CONFIG_KEY},				system_config},
@@ -113,6 +114,7 @@ kv_pair	kv_system [12] =
 	{{AUTO_FAN_1_KEY},			system_auto_fan_1},
 	{{AUTO_FAN_2_KEY},			system_auto_fan_2},
 	{{AUTO_FAN_3_KEY},			system_auto_fan_3},
+	{{DHCP_KEY},				system_dhcp},
 	{{IP_KEY},					system_ip},
 	{{MASK_KEY},				system_mask},
 	{{SERVER_IP_KEY},			system_server_ip},
