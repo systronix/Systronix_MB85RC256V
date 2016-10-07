@@ -54,6 +54,7 @@ char		ln_buf [256];
 //uint16_t	err_cnt = 0;
 uint16_t	total_errs = 0;
 uint16_t	warn_cnt = 0;
+char		pins[11][6] = {"", "", "", "", "", "", "", "", "", "", ""};
 
 
 //---------------------------< S T O P W A T C H >------------------------------------------------------------
@@ -218,6 +219,31 @@ void warn_msg (void)
 	Serial.print (settings.line_num);
 	Serial.println ("; system will use default value");
 	warn_cnt++;								// tally number of warnings
+	}
+
+
+//---------------------------< I S _ U N I Q U E _ P I N >----------------------------------------------------
+//
+//
+//
+
+boolean is_unique_pin (uint8_t index, char* value_ptr)
+	{
+	uint8_t i;
+	
+	if ('\0' != pins[index][0])							// if we have already used this index, something wrong
+		return false;
+	strcpy (pins[index], value_ptr);					// copy the pin into the pins array
+	
+	for (i=1; i<=10; i++)								// loop through all comparing new pin to old pins
+		{
+		if (i == index)									// if index is same as loop counter; 
+			continue;									// don't compare against self
+			
+		if (!strcmp (value_ptr, pins[i]))				// if same then new pin is not unique
+			return false;
+		}
+	return true;										// so far, pin is unique
 	}
 
 
@@ -906,7 +932,12 @@ void check_ini_users (char*	key_ptr)
 			else
 				{
 				if (is_good_pin (value_ptr))
-					strcpy (user [index].pin, value_ptr);
+					{
+					if (!is_unique_pin (index, value_ptr))
+						settings.err_msg ((char *)"pin value not unique");
+					else
+						strcpy (user [index].pin, value_ptr);	// is valid and unique
+					}
 				else
 					settings.err_msg ((char *)"invalid pin value");
 				}
@@ -1260,6 +1291,9 @@ void loop()
 //	char*		ln_ptr;							// pointer to ln_buf
 
 	memset (out_buf, EOF_MARKER, 8192);			// fill out_buf with end-of-file markers
+
+	for (uint8_t i=1; i<=10; i++)							// loop through pins array and reset them to zero length
+		pins[i][0] = '\0';
 
 	millis_prev = millis();						// init
 	Serial.print ("\r\n\r\nloader> waiting for file ...");
