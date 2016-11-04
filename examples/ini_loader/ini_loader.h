@@ -53,22 +53,22 @@ heat_settings habitat_EC_heat_settings [3] =	// '1' indexed; [0] not used
 	{{"85"}, {"80"}, {"25"}}	// 2
 	};
 
-char overtemp_ignore_A [13][8] = 	// compartment overtemp alarm ignored when corresponding bit set here
-	{
-	{""}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"},
-	{"no"}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"}
-	};
+//char overtemp_ignore_A [13][8] = 	// compartment overtemp alarm ignored when corresponding bit set here
+//	{
+//	{""}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"},
+//	{"no"}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"}
+//	};
 	
-char overtemp_ignore_B [13][8] = 	// compartment overtemp alarm ignored when corresponding bit set here
-	{
-	{""}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"},
-	{"no"}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"}
-	};
+//char overtemp_ignore_B [13][8] = 	// compartment overtemp alarm ignored when corresponding bit set here
+//	{
+//	{""}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"},
+//	{"no"}, {"no"}, {"no"}, {"no"}, {"no"}, {"no"}
+//	};
 
-char overtemp_ignore_EC [3][8] = 	// compartment overtemp alarm ignored when corresponding bit set here
-	{
-	{""}, {"no"}, {"no"}
-	};
+//char overtemp_ignore_EC [3][8] = 	// compartment overtemp alarm ignored when corresponding bit set here
+//	{
+//	{""}, {"no"}, {"no"}
+//	};
 
 char system_config [8] = {"SSWEC"};				// SS, SSWEC, B2B, B2BWEC, SBS
 char system_dawn [8] = {"06:00"};			// minimal default: 06:00
@@ -88,10 +88,10 @@ struct user_settings							// these initialize to empty strings or 0; the minima
 	{
 	char		name [16];						// 15 character name + null terminator
 	char		pin [8];						// 5 digit number 00000-99999; TODO: 4 digits and a check digit? some values illegal?
-	char		rights [16];					// associate, manager, service, developer, manufacturer
+	char		rights [16];					// associate, leader, service, factory
 	};
 	
-user_settings user [11];						// '1' indexed; [0] not used
+user_settings user [21];						// '1' indexed; [0] not used
 
 
 //---------------------------< K E Y / V A L U E   P A I R S >------------------------------------------------
@@ -122,7 +122,7 @@ kv_pair	kv_system [13] =
 	{{DST_KEY},					system_dst}
 	};
  
-kv_pair	kv_habitat_A [49] =
+kv_pair	kv_habitat_A [37] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
 	{{DAY_A_D1C1_KEY},	 		habitat_A_heat_settings [1].day_temp},
@@ -131,28 +131,24 @@ kv_pair	kv_habitat_A [49] =
 	{{NIGHT_A_D1C2_KEY},		habitat_A_heat_settings [2].night_temp},
 	{{DAY_A_D1C3_KEY},			habitat_A_heat_settings [3].day_temp},
 	{{NIGHT_A_D1C3_KEY},		habitat_A_heat_settings [3].night_temp},
-
 	{{DAY_A_D2C1_KEY},			habitat_A_heat_settings [4].day_temp},
 	{{NIGHT_A_D2C1_KEY},		habitat_A_heat_settings [4].night_temp},
 	{{DAY_A_D2C2_KEY},			habitat_A_heat_settings [5].day_temp},
 	{{NIGHT_A_D2C2_KEY},		habitat_A_heat_settings [5].night_temp},
 	{{DAY_A_D2C3_KEY},			habitat_A_heat_settings [6].day_temp},
 	{{NIGHT_A_D2C3_KEY},		habitat_A_heat_settings [6].night_temp},
-
 	{{DAY_A_D3C1_KEY},			habitat_A_heat_settings [7].day_temp},
 	{{NIGHT_A_D3C1_KEY},		habitat_A_heat_settings [7].night_temp},
 	{{DAY_A_D3C2_KEY},			habitat_A_heat_settings [8].day_temp},
 	{{NIGHT_A_D3C2_KEY},		habitat_A_heat_settings [8].night_temp},
 	{{DAY_A_D3C3_KEY},			habitat_A_heat_settings [9].day_temp},
 	{{NIGHT_A_D3C3_KEY},		habitat_A_heat_settings [9].night_temp},
-	
 	{{DAY_A_D4C1_KEY},			habitat_A_heat_settings [10].day_temp},
 	{{NIGHT_A_D4C1_KEY},		habitat_A_heat_settings [10].night_temp},
 	{{DAY_A_D4C2_KEY},			habitat_A_heat_settings [11].day_temp},
 	{{NIGHT_A_D4C2_KEY},		habitat_A_heat_settings [11].night_temp},
 	{{DAY_A_D4C3_KEY},			habitat_A_heat_settings [12].day_temp},
 	{{NIGHT_A_D4C3_KEY},		habitat_A_heat_settings [12].night_temp},
-
 	{{HLAMP_A_D1C1_KEY},		habitat_A_heat_settings [1].watts},
 	{{HLAMP_A_D1C2_KEY},		habitat_A_heat_settings [2].watts},
 	{{HLAMP_A_D1C3_KEY},		habitat_A_heat_settings [3].watts},
@@ -165,21 +161,21 @@ kv_pair	kv_habitat_A [49] =
 	{{HLAMP_A_D4C1_KEY},		habitat_A_heat_settings [10].watts},
 	{{HLAMP_A_D4C2_KEY},		habitat_A_heat_settings [11].watts},
 	{{HLAMP_A_D4C3_KEY},		habitat_A_heat_settings [12].watts},
-	{{OT_IGNORE_A_D1C1_KEY},	overtemp_ignore_A [1]},
-	{{OT_IGNORE_A_D1C2_KEY},	overtemp_ignore_A [2]},
-	{{OT_IGNORE_A_D1C3_KEY},	overtemp_ignore_A [3]},
-	{{OT_IGNORE_A_D2C1_KEY},	overtemp_ignore_A [4]},
-	{{OT_IGNORE_A_D2C2_KEY},	overtemp_ignore_A [5]},
-	{{OT_IGNORE_A_D2C3_KEY},	overtemp_ignore_A [6]},
-	{{OT_IGNORE_A_D3C1_KEY},	overtemp_ignore_A [7]},
-	{{OT_IGNORE_A_D3C2_KEY},	overtemp_ignore_A [8]},
-	{{OT_IGNORE_A_D3C3_KEY},	overtemp_ignore_A [9]},
-	{{OT_IGNORE_A_D4C1_KEY},	overtemp_ignore_A [10]},
-	{{OT_IGNORE_A_D4C2_KEY},	overtemp_ignore_A [11]},
-	{{OT_IGNORE_A_D4C3_KEY},	overtemp_ignore_A [12]}
+//	{{OT_IGNORE_A_D1C1_KEY},	overtemp_ignore_A [1]},
+//	{{OT_IGNORE_A_D1C2_KEY},	overtemp_ignore_A [2]},
+//	{{OT_IGNORE_A_D1C3_KEY},	overtemp_ignore_A [3]},
+//	{{OT_IGNORE_A_D2C1_KEY},	overtemp_ignore_A [4]},
+//	{{OT_IGNORE_A_D2C2_KEY},	overtemp_ignore_A [5]},
+//	{{OT_IGNORE_A_D2C3_KEY},	overtemp_ignore_A [6]},
+//	{{OT_IGNORE_A_D3C1_KEY},	overtemp_ignore_A [7]},
+//	{{OT_IGNORE_A_D3C2_KEY},	overtemp_ignore_A [8]},
+//	{{OT_IGNORE_A_D3C3_KEY},	overtemp_ignore_A [9]},
+//	{{OT_IGNORE_A_D4C1_KEY},	overtemp_ignore_A [10]},
+//	{{OT_IGNORE_A_D4C2_KEY},	overtemp_ignore_A [11]},
+//	{{OT_IGNORE_A_D4C3_KEY},	overtemp_ignore_A [12]}
 	};
 	
-kv_pair	kv_habitat_B [49] =
+kv_pair	kv_habitat_B [37] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
 	{{DAY_B_D1C1_KEY},			habitat_B_heat_settings [1].day_temp},
@@ -218,22 +214,22 @@ kv_pair	kv_habitat_B [49] =
 	{{HLAMP_B_D4C1_KEY},		habitat_B_heat_settings [10].watts},
 	{{HLAMP_B_D4C2_KEY},		habitat_B_heat_settings [11].watts},
 	{{HLAMP_B_D4C3_KEY},		habitat_B_heat_settings [12].watts},
-	{{OT_IGNORE_B_D1C1_KEY},	overtemp_ignore_B [1]},
-	{{OT_IGNORE_B_D1C2_KEY},	overtemp_ignore_B [2]},
-	{{OT_IGNORE_B_D1C3_KEY},	overtemp_ignore_B [3]},
-	{{OT_IGNORE_B_D2C1_KEY},	overtemp_ignore_B [4]},
-	{{OT_IGNORE_B_D2C2_KEY},	overtemp_ignore_B [5]},
-	{{OT_IGNORE_B_D2C3_KEY},	overtemp_ignore_B [6]},
-	{{OT_IGNORE_B_D3C1_KEY},	overtemp_ignore_B [7]},
-	{{OT_IGNORE_B_D3C2_KEY},	overtemp_ignore_B [8]},
-	{{OT_IGNORE_B_D3C3_KEY},	overtemp_ignore_B [9]},
-	{{OT_IGNORE_B_D4C1_KEY},	overtemp_ignore_B [10]},
-	{{OT_IGNORE_B_D4C2_KEY},	overtemp_ignore_B [11]},
-	{{OT_IGNORE_B_D4C3_KEY},	overtemp_ignore_B [12]}
+//	{{OT_IGNORE_B_D1C1_KEY},	overtemp_ignore_B [1]},
+//	{{OT_IGNORE_B_D1C2_KEY},	overtemp_ignore_B [2]},
+//	{{OT_IGNORE_B_D1C3_KEY},	overtemp_ignore_B [3]},
+//	{{OT_IGNORE_B_D2C1_KEY},	overtemp_ignore_B [4]},
+//	{{OT_IGNORE_B_D2C2_KEY},	overtemp_ignore_B [5]},
+//	{{OT_IGNORE_B_D2C3_KEY},	overtemp_ignore_B [6]},
+//	{{OT_IGNORE_B_D3C1_KEY},	overtemp_ignore_B [7]},
+//	{{OT_IGNORE_B_D3C2_KEY},	overtemp_ignore_B [8]},
+//	{{OT_IGNORE_B_D3C3_KEY},	overtemp_ignore_B [9]},
+//	{{OT_IGNORE_B_D4C1_KEY},	overtemp_ignore_B [10]},
+//	{{OT_IGNORE_B_D4C2_KEY},	overtemp_ignore_B [11]},
+//	{{OT_IGNORE_B_D4C3_KEY},	overtemp_ignore_B [12]}
 	};
 
 	
-kv_pair	kv_habitat_EC [9] =
+kv_pair	kv_habitat_EC [7] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
 	{{DAY_ECT_KEY},				habitat_EC_heat_settings [1].day_temp},
@@ -242,11 +238,11 @@ kv_pair	kv_habitat_EC [9] =
 	{{NIGHT_ECB_KEY},			habitat_EC_heat_settings [2].night_temp},
 	{{HLAMP_ECT_KEY},			habitat_EC_heat_settings [1].watts},
 	{{HLAMP_ECB_KEY},			habitat_EC_heat_settings [2].watts},
-	{{OT_IGNORE_ECT_KEY},		overtemp_ignore_EC [1]},
-	{{OT_IGNORE_ECB_KEY},		overtemp_ignore_EC [2]}
+//	{{OT_IGNORE_ECT_KEY},		overtemp_ignore_EC [1]},
+//	{{OT_IGNORE_ECB_KEY},		overtemp_ignore_EC [2]}
 	};
 
-kv_pair	kv_users [31] =
+kv_pair	kv_users [61] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
 	{{NAME_1_KEY},				user [1].name},
@@ -279,5 +275,35 @@ kv_pair	kv_users [31] =
 	{{NAME_10_KEY},				user [10].name},
 	{{PIN_10_KEY},				user [10].pin},
 	{{RIGHTS_10_KEY},			user [10].rights},
+	{{NAME_11_KEY},				user [11].name},
+	{{PIN_11_KEY},				user [11].pin},
+	{{RIGHTS_11_KEY},			user [11].rights},
+	{{NAME_12_KEY},				user [12].name},
+	{{PIN_12_KEY},				user [12].pin},
+	{{RIGHTS_12_KEY},			user [12].rights},
+	{{NAME_13_KEY},				user [13].name},
+	{{PIN_13_KEY},				user [13].pin},
+	{{RIGHTS_13_KEY},			user [13].rights},
+	{{NAME_14_KEY},				user [14].name},
+	{{PIN_14_KEY},				user [14].pin},
+	{{RIGHTS_14_KEY},			user [14].rights},
+	{{NAME_15_KEY},				user [15].name},
+	{{PIN_15_KEY},				user [15].pin},
+	{{RIGHTS_15_KEY},			user [15].rights},
+	{{NAME_16_KEY},				user [16].name},
+	{{PIN_16_KEY},				user [16].pin},
+	{{RIGHTS_16_KEY},			user [16].rights},
+	{{NAME_17_KEY},				user [17].name},
+	{{PIN_17_KEY},				user [17].pin},
+	{{RIGHTS_17_KEY},			user [17].rights},
+	{{NAME_18_KEY},				user [18].name},
+	{{PIN_18_KEY},				user [18].pin},
+	{{RIGHTS_18_KEY},			user [18].rights},
+	{{NAME_19_KEY},				user [19].name},
+	{{PIN_19_KEY},				user [19].pin},
+	{{RIGHTS_19_KEY},			user [19].rights},
+	{{NAME_20_KEY},				user [20].name},
+	{{PIN_20_KEY},				user [20].pin},
+	{{RIGHTS_20_KEY},			user [20].rights},
 	};
 #endif		// ini_loader_H_

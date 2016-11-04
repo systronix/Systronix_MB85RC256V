@@ -54,7 +54,7 @@ char		ln_buf [256];
 //uint16_t	err_cnt = 0;
 uint16_t	total_errs = 0;
 uint16_t	warn_cnt = 0;
-char		pins[11][6] = {"", "", "", "", "", "", "", "", "", "", ""};
+char		pins[21][6] = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
 
 
 //---------------------------< S T O P W A T C H >------------------------------------------------------------
@@ -232,16 +232,22 @@ boolean is_unique_pin (uint8_t index, char* value_ptr)
 	uint8_t i;
 	
 	if ('\0' != pins[index][0])							// if we have already used this index, something wrong
+		{
+		Serial.printf ("nul check: index: %d; i: %d\r\n", index, i);
 		return false;
+		}
 	strcpy (pins[index], value_ptr);					// copy the pin into the pins array
 	
-	for (i=1; i<=10; i++)								// loop through all comparing new pin to old pins
+	for (i=1; i<=20; i++)								// loop through all comparing new pin to old pins
 		{
 		if (i == index)									// if index is same as loop counter; 
 			continue;									// don't compare against self
 			
 		if (!strcmp (value_ptr, pins[i]))				// if same then new pin is not unique
+			{
+			Serial.printf ("index: %d; i: %d\r\n", index, i);
 			return false;
+			}
 		}
 	return true;										// so far, pin is unique
 	}
@@ -594,24 +600,24 @@ void check_ini_habitat_A (char* key_ptr)
 		else
 			warn_msg();
 		}
-	else if (strstr (key_ptr, "ot_ignore_a_"))						// over-temp ignore A ...
-		{
-		if (*value_ptr)
-			{
-			index = settings.key_decode (key_ptr + strlen ("ot_ignore_a_"));
-			if (0xFF == index)
-				settings.err_msg ((char *)"invalid drawer/compartment");
-			else
-				{
-				if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
-					settings.err_msg ((char *)"invalid over-temp ignore setting");
-				else
-					strcpy (overtemp_ignore_A [index], value_ptr);
-				}
-			}
-		else
-			warn_msg();
-		}
+//	else if (strstr (key_ptr, "ot_ignore_a_"))						// over-temp ignore A ...
+//		{
+//		if (*value_ptr)
+//			{
+//			index = settings.key_decode (key_ptr + strlen ("ot_ignore_a_"));
+//			if (0xFF == index)
+//				settings.err_msg ((char *)"invalid drawer/compartment");
+//			else
+//				{
+//				if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+//					settings.err_msg ((char *)"invalid over-temp ignore setting");
+//				else
+//					strcpy (overtemp_ignore_A [index], value_ptr);
+//				}
+//			}
+//		else
+//			warn_msg();
+//		}
 	else
 		settings.err_msg ((char *)"unrecognized setting");
 
@@ -712,24 +718,24 @@ void check_ini_habitat_B (char* key_ptr)
 		else
 			warn_msg();
 		}
-	else if (strstr (key_ptr, "ot_ignore_b_"))		// over temp ignore A ...
-		{
-		if (*value_ptr)
-			{
-			index = settings.key_decode (key_ptr + strlen ("ot_ignore_b_"));
-			if (0xFF == index)
-				settings.err_msg ((char *)"invalid drawer/compartment");
-			else
-				{
-				if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
-					settings.err_msg ((char *)"invalid over-temp ignore setting");
-				else
-					strcpy (overtemp_ignore_B [index], value_ptr);
-				}
-			}
-		else
-			warn_msg();
-		}
+//	else if (strstr (key_ptr, "ot_ignore_b_"))		// over temp ignore A ...
+//		{
+//		if (*value_ptr)
+//			{
+//			index = settings.key_decode (key_ptr + strlen ("ot_ignore_b_"));
+//			if (0xFF == index)
+//				settings.err_msg ((char *)"invalid drawer/compartment");
+//			else
+//				{
+//				if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+//					settings.err_msg ((char *)"invalid over-temp ignore setting");
+//				else
+//					strcpy (overtemp_ignore_B [index], value_ptr);
+//				}
+//			}
+//		else
+//			warn_msg();
+//		}
 	else
 		settings.err_msg ((char *)"unrecognized setting");
 
@@ -811,18 +817,18 @@ void check_ini_habitat_EC (char* key_ptr)
 		else
 			warn_msg();
 		}
-	else if (strstr (key_ptr, "ot_ignore_ec_top"))		// over temp ignore EC top ...
-		{
-		if (*value_ptr)
-			{
-			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
-				settings.err_msg ((char *)"invalid over-temp ignore setting");
-			else
-				strcpy (overtemp_ignore_EC [1], value_ptr);
-			}
-		else
-			warn_msg();
-		}
+//	else if (strstr (key_ptr, "ot_ignore_ec_top"))		// over temp ignore EC top ...
+//		{
+//		if (*value_ptr)
+//			{
+//			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+//				settings.err_msg ((char *)"invalid over-temp ignore setting");
+//			else
+//				strcpy (overtemp_ignore_EC [1], value_ptr);
+//			}
+//		else
+//			warn_msg();
+//		}
 	else if (!strcmp (key_ptr, "day_ec_bot"))	// daytime temperature target EC bottom ...
 		{
 		if (*value_ptr)
@@ -864,18 +870,18 @@ void check_ini_habitat_EC (char* key_ptr)
 		else
 			warn_msg();
 		}
-	else if (strstr (key_ptr, "ot_ignore_ec_bot"))		// over temp ignore EC bot ...
-		{
-		if (*value_ptr)
-			{
-			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
-				settings.err_msg ((char *)"invalid over-temp ignore setting");
-			else
-				strcpy (overtemp_ignore_EC [2], value_ptr);
-			}
-		else
-			warn_msg();
-		}
+//	else if (strstr (key_ptr, "ot_ignore_ec_bot"))		// over temp ignore EC bot ...
+//		{
+//		if (*value_ptr)
+//			{
+//			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+//				settings.err_msg ((char *)"invalid over-temp ignore setting");
+//			else
+//				strcpy (overtemp_ignore_EC [2], value_ptr);
+//			}
+//		else
+//			warn_msg();
+//		}
 	else
 		settings.err_msg ((char *)"unrecognized setting");
 
@@ -916,7 +922,7 @@ void check_ini_users (char*	key_ptr)
 		if (*value_ptr)
 			{
 			index = (uint8_t)settings.str_to_int (&key_ptr[5]);
-			if ((INVALID_NUM == index) || (10 < index))
+			if ((INVALID_NUM == index) || (20 < index))
 				settings.err_msg ((char *)"invalid name index");
 			else
 				strcpy (user [index].name, value_ptr);
@@ -927,7 +933,7 @@ void check_ini_users (char*	key_ptr)
 		if (*value_ptr)
 			{
 			index = (uint8_t)settings.str_to_int (&key_ptr[4]);
-			if ((INVALID_NUM == index) || (10 < index))
+			if ((INVALID_NUM == index) || (20 < index))
 				settings.err_msg ((char *)"invalid pin index");
 			else
 				{
@@ -948,13 +954,13 @@ void check_ini_users (char*	key_ptr)
 		if (*value_ptr)
 			{
 			index = (uint8_t)settings.str_to_int (&key_ptr[7]);
-			if ((INVALID_NUM == index) || (10 < index))
+			if ((INVALID_NUM == index) || (20 < index))
 				settings.err_msg ((char *)"invalid rights index");
 			else if (*value_ptr)
 				{	// TODO: should manuf, dev, and service rights be part of the ini?
 				if (stricmp(value_ptr, "factory") &&
 					stricmp(value_ptr, "service") &&
-					stricmp(value_ptr, "manager") &&
+					stricmp(value_ptr, "leader") &&
 					stricmp(value_ptr, "associate"))
 						settings.err_msg ((char *)"invalid rights value");
 				else
@@ -1188,7 +1194,7 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 	while (*ln_ptr)
 		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
 	
-	for (i=1; i<=48; i++)
+	for (i=1; i<=36; i++)
 		out_buf_ptr = add_line (kv_habitat_A [i], out_buf_ptr);
 
 //---------- [habitat B]
@@ -1197,7 +1203,7 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 	while (*ln_ptr)
 		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
 	
-	for (i=1; i<=48; i++)
+	for (i=1; i<=36; i++)
 		out_buf_ptr = add_line (kv_habitat_B [i], out_buf_ptr);
 
 //---------- [habitat EC]
@@ -1206,7 +1212,7 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 	while (*ln_ptr)
 		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
 	
-	for (i=1; i<=8; i++)
+	for (i=1; i<=6; i++)
 		out_buf_ptr = add_line (kv_habitat_EC [i], out_buf_ptr);
 
 //---------- [users]
@@ -1215,7 +1221,7 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 	while (*ln_ptr)
 		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
 	
-	for (i=1; i<=30; i++)
+	for (i=1; i<=60; i++)
 		out_buf_ptr = add_line (kv_users [i], out_buf_ptr);
 	}
 
@@ -1292,7 +1298,7 @@ void loop()
 
 	memset (out_buf, EOF_MARKER, 8192);			// fill out_buf with end-of-file markers
 
-	for (uint8_t i=1; i<=10; i++)							// loop through pins array and reset them to zero length
+	for (uint8_t i=1; i<=20; i++)							// loop through pins array and reset them to zero length
 		pins[i][0] = '\0';
 
 	millis_prev = millis();						// init
