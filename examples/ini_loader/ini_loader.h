@@ -71,8 +71,8 @@ heat_settings habitat_EC_heat_settings [3] =	// '1' indexed; [0] not used
 //	};
 
 char system_config [8] = {"SSWEC"};				// SS, SSWEC, B2B, B2BWEC, SBS
-char system_dawn [8] = {"06:00"};			// minimal default: 06:00
-char system_dusk [8] = {"18:00"};			// minimal default: 18:00
+char system_dawn [8] = {"06:00"};				// minimal default: 06:00
+char system_dusk [8] = {"18:00"};				// minimal default: 18:00
 char system_auto_fan_1 [8] = {"80"};			// threshold temperatures 
 char system_auto_fan_2 [8] = {"85"};
 char system_auto_fan_3 [8] = {"90"};
@@ -91,7 +91,7 @@ struct user_settings							// these initialize to empty strings or 0; the minima
 	char		rights [16];					// associate, leader, service, factory
 	};
 	
-user_settings user [21];						// '1' indexed; [0] not used
+user_settings user [USERS_MAX_NUM+1];			// '1' indexed; [0] not used
 
 
 //---------------------------< K E Y / V A L U E   P A I R S >------------------------------------------------
@@ -242,7 +242,7 @@ kv_pair	kv_habitat_EC [7] =
 //	{{OT_IGNORE_ECB_KEY},		overtemp_ignore_EC [2]}
 	};
 
-kv_pair	kv_users [61] =
+kv_pair	kv_users [(USERS_MAX_NUM*3)+1] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
 	{{NAME_1_KEY},				user [1].name},
