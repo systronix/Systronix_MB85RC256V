@@ -193,7 +193,7 @@ uint8_t Systronix_MB85RC256V::page_write (void)
 	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
 	Wire.write (control.addr.as_array, 2);					// put the memory address in the tx buffer
 	control.bytes_written = Wire.write (control.wr_buf_ptr, control.rd_wr_len);	// copy source to wire tx buffer data
-	if (I2C_BUF_OVF == Wire.status())						// did we try to write too many bytes to the i2c tx buf?
+	if (control.bytes_written != control.rd_wr_len)			// did we try to write too many bytes to the i2c tx buf?
 		{
 		tally_errors (I2C_BUF_OVF);							// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
@@ -337,7 +337,7 @@ uint8_t Systronix_MB85RC256V::get_device_id (void)
 
 	Wire.beginTransmission(RSVD_SLAVE_ID >> 1);				// (0xF8>>1)=0xFC; Wire shifts left to 0xF8
 	Wire.write(_base << 1);
-	control.ret_val = Wire.endTransmission(false);
+	control.ret_val = Wire.endTransmission(I2C_STOP);
 	
 	if (SUCCESS == control.ret_val)
 		{
@@ -356,6 +356,7 @@ uint8_t Systronix_MB85RC256V::get_device_id (void)
 			return SUCCESS;
 			}
 		}
+															// here if endTransmission() or requestFrom() failed
 	control.ret_val = Wire.status();						// to get error value
 	tally_errors (control.ret_val);							// increment the appropriate counter
 	return FAIL;
