@@ -536,11 +536,12 @@ void loop()
 			}
 	
 		elapsed_time = stopwatch (STOP);
-		Serial.print ("\r\ncrc value (");
-		utils.hex_print (crc);
-		Serial.print (") calculated and written to fram in ");
-		Serial.print (elapsed_time);					// elapsed time
-		Serial.println ("ms");
+		Serial.printf ("\r\ncrc value (0x%.4X) calculated and written to fram in %dms", crc, elapsed_time);
+//		Serial.print ("\r\ncrc value (");
+//		utils.hex_print (crc);
+//		Serial.print (") calculated and written to fram in ");
+//		Serial.print (elapsed_time);					// elapsed time
+//		Serial.println ("ms");
 			
 		Serial.print("\r\n\r\nfram settings write complete\r\n\r\n");
 
