@@ -337,7 +337,7 @@ uint8_t Systronix_MB85RC256V::get_device_id (void)
 
 	Wire.beginTransmission(RSVD_SLAVE_ID >> 1);				// (0xF8>>1)=0xFC; Wire shifts left to 0xF8
 	Wire.write(_base << 1);
-	control.ret_val = Wire.endTransmission(I2C_STOP);
+	control.ret_val = Wire.endTransmission(I2C_NOSTOP);
 	
 	if (SUCCESS == control.ret_val)
 		{
