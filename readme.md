@@ -1,5 +1,5 @@
 # Systronix_MB85RC256V
-Arduino library for FujitsuMB85RC256V 256 Kbit (32 KByte) I2C FRAM
+Arduino library for Fujitsu MB85RC256V 256 Kbit (32 KByte) I2C FRAM
 
 ## example files
 ### rcv_ini_file.ino
