@@ -1,5 +1,5 @@
 # Systronix_MB85RC256V
-Arduino library for FujitsuMB85RC256V 256 Kbit (32 KByte) I2C FRAM
+Arduino library for Fujitsu MB85RC256V 256 Kbit (32 KByte) I2C FRAM
 
 ## example files
 ### rcv_ini_file.ino
@@ -11,7 +11,7 @@ this code reads a habitat .ini file from the usb serial port, validates the file
 Additionally, this code allows inspection of the saved file and of the log portion of the fram.  It is also possible to initialize the log memory.
 
 ### SALT_diagnostics.ino
-initial hack at a diagnostic tool.  Currently this code just tests the fram.
+initial hack at a diagnostic tool.  Currently this code just tests the FRAM.
 
 ##control struct
 interface to and from the functions in this file are through a struct.  This allows the individual functions to return simple SUCCESS or FAIL status.
