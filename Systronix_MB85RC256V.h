@@ -17,7 +17,7 @@
 #define RSVD_SLAVE_ID	(0xF8)
 
 #define	SUCCESS	0
-#define	FAIL	0xFF
+#define	FAIL	!SUCCESS
 #define	DENIED	0xFE
 #define	ABSENT	0xFD
 
