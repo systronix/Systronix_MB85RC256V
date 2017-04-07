@@ -382,15 +382,15 @@ void loop()
 			}
 	
 		elapsed_time = stopwatch (STOP);
-<<<<<<< Updated upstream
+// <<<<<<< Updated upstream
 		Serial.printf ("\r\ncrc value (0x%.4X) calculated and written to fram in %dms", crc, elapsed_time);
-=======
-		Serial.print ("\r\ncrc value (");
-		Serial.printf ("0x%X", crc);
-		Serial.print (") calculated and written to fram in ");
-		Serial.print (elapsed_time);					// elapsed time
-		Serial.println ("ms");
->>>>>>> Stashed changes
+// =======
+// 		Serial.print ("\r\ncrc value (");
+// 		Serial.printf ("0x%X", crc);
+// 		Serial.print (") calculated and written to fram in ");
+// 		Serial.print (elapsed_time);					// elapsed time
+// 		Serial.println ("ms");
+// >>>>>>> Stashed changes
 			
 		Serial.print("\r\n\r\nfram settings write complete\r\n\r\n");
 
