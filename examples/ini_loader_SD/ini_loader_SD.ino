@@ -43,7 +43,7 @@ SdFile file;
 
 //---------------------------< D E F I N E S >----------------------------------------------------------------
 
-#define		END_OF_FILE		0xFFFF
+#define		END_OF_FILE		0xE0FF
 
 #define		SYSTEM	0xDF
 #define		USERS	0xEF
