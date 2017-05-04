@@ -187,6 +187,9 @@ uint8_t Systronix_MB85RC256V::int32_write (void)
 
 uint8_t Systronix_MB85RC256V::page_write (void)
 	{
+	uint32_t timer_start = 0;								// these are used to measure time required to
+	uint32_t timer_end = 0;									// write a page to frame
+	
 	if (!control.exists)									// exit immediately if device does not exist
 		return ABSENT;
 	
@@ -199,7 +202,11 @@ uint8_t Systronix_MB85RC256V::page_write (void)
 		return FAIL;										// calling function decides what to do with the error
 		}
 		
+	timer_start = micros();									// start the timer
 	control.ret_val = Wire.endTransmission();				// xmit address followed by data
+	timer_end = micros();									// end the timer
+
+	Serial. printf ("\tpage_write() time: %d uS\n", timer_end-timer_start);
 	
 	if (SUCCESS == control.ret_val)
 		{
