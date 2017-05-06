@@ -29,6 +29,25 @@ void setup()
 	Serial.begin(115200);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 
+	Serial1.begin(9600);								// UI habitat A LCD and keypad
+	while((!Serial1) && (millis()<10000));				// wait until serial port is open or timeout
+
+
+	Serial2.begin(9600);								// UI habitat B LCD and keypad
+	while((!Serial2) && (millis()<10000));				// wait until serial port is open or timeout
+
+	// These functions have a bug in TD 1.29 see forum post by KurtE...
+	// ...https://forum.pjrc.com/threads/32502-Serial2-Alternate-pins-26-and-31
+	Serial2.setRX (26);
+	Serial2.setTX (31);	
+
+	Serial1.println("r");								// 'r' initialize display so we can have a signon message
+	Serial2.println("r");
+	delay(50);
+
+	//                0123456789ABCDEF0123456789ABCDEF
+	Serial1.printf ("dNAP fram hex    dump utility    \r");
+	Serial2.printf ("dNAP fram hex    dump utility    \r");
 												// make sure all spi chip selects inactive
 	pinMode (FLASH_CS_PIN, INPUT_PULLUP);		// SALT FLASH_CS(L)
 	pinMode (T_CS_PIN, INPUT_PULLUP);			// SALT T_CS(L)
@@ -128,7 +147,7 @@ void loop()
 				}
 			}
 		}
-
+	character_counter = 0;						
 	address >>= 8;								// set low 8 bits to zero because pages are displayed in groups of 256 bytes
 	address <<= 8;
 
