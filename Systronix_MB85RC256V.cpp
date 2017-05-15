@@ -182,14 +182,13 @@ uint8_t Systronix_MB85RC256V::int32_write (void)
 	return page_write ();									// do the write and done
 	}
 
-
 //---------------------------< P A G E _ W R I T E >----------------------------------------------------------
 
 uint8_t Systronix_MB85RC256V::page_write (void)
 	{
 	uint32_t timer_start = 0;								// these are used to measure time required to
 	uint32_t timer_end = 0;									// write a page to frame
-
+	
 	if (!control.exists)									// exit immediately if device does not exist
 		return ABSENT;
 	
@@ -206,7 +205,9 @@ uint8_t Systronix_MB85RC256V::page_write (void)
 	control.ret_val = Wire.endTransmission();				// xmit address followed by data
 	timer_end = micros();									// end the timer
 
-	Serial.printf ("\tpage_write() time: %d uS\n", timer_end-timer_start);
+	min_page_write_time = min (timer_end-timer_start, min_page_write_time);
+	max_page_write_time = max (timer_end-timer_start, max_page_write_time);
+//	Serial.printf ("\tpage_write() time: %d uS (max %d uS; min %d uS)\n", timer_end-timer_start, max_page_write_time, min_page_write_time);
 	Serial.flush();
 	
 	if (SUCCESS == control.ret_val)
@@ -303,6 +304,8 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 	{
 	size_t 		i;
 	uint8_t*	ptr = control.rd_buf_ptr;					// a copy so we don't disturb the original
+//	uint32_t timer_start = 0;								// these are used to measure time required to
+//	uint32_t timer_end = 0;									// read a page from fram
 	
 	if (!control.exists)									// exit immediately if device does not exist
 		return ABSENT;
@@ -317,7 +320,15 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 		return FAIL;										// calling function decides what to do with the error
 		}
 
+//	timer_start = micros();									// start the timer
 	control.bytes_received = Wire.requestFrom(_base, control.rd_wr_len, I2C_STOP);	// read the bytes
+//	timer_end = micros();									// end the timer
+
+//	min_page_read_time = min (timer_end-timer_start, min_page_read_time);
+//	max_page_read_time = max (timer_end-timer_start, max_page_read_time);
+//	Serial.printf ("\tpage_read() time: %d uS (max %d uS; min %d uS)\n", timer_end-timer_start, max_page_read_time, min_page_read_time);
+//	Serial.flush();
+
 	if (control.bytes_received == control.rd_wr_len)
 		{
 		adv_addr16 ();										// advance our copy of the address

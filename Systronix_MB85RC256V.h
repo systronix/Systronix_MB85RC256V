@@ -17,7 +17,7 @@
 #define RSVD_SLAVE_ID	(0xF8)
 
 #define	SUCCESS	0
-#define	FAIL	(!SUCCESS)
+#define	FAIL	(~SUCCESS)
 #define	DENIED	0xFE
 #define	ABSENT	0xFD
 
@@ -45,7 +45,12 @@ class Systronix_MB85RC256V
 		uint32_t	rcv_addr_nack_count;			// slave did not ack address
 		uint32_t	rcv_data_nack_count;			// slave did not ack data
 		uint32_t	other_error_count;				// arbitration lost or timeout
-	
+		
+		uint32_t	max_page_write_time = 0;			// debug
+		uint32_t	min_page_write_time = 0xFFFFFFFF;	// debug
+//		uint32_t	max_page_read_time = 0;				// debug
+//		uint32_t	min_page_read_time = 0xFFFFFFFF;	// debug
+		
 		union fram_addr
 			{
 			struct
