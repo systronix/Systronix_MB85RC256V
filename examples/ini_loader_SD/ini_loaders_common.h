@@ -292,9 +292,9 @@ void check_ini_system (char* key_ptr)
 	
 	if (!strcmp (key_ptr, "config"))
 		{
-		if (stricmp (value_ptr, "SSWEC") && stricmp (value_ptr, "SS") &&
-			stricmp (value_ptr, "B2BWEC") && stricmp (value_ptr, "B2B") &&
-			stricmp (value_ptr, "SBS"))
+		if (strcasecmp (value_ptr, "SSWEC") && strcasecmp (value_ptr, "SS") &&
+			strcasecmp (value_ptr, "B2BWEC") && strcasecmp (value_ptr, "B2B") &&
+			strcasecmp (value_ptr, "SBS"))
 				settings.err_msg ((char *)"unknown config");
 		else
 			strcpy (system_config, value_ptr);
@@ -373,7 +373,7 @@ void check_ini_system (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+			if (strcasecmp (value_ptr, "yes") && strcasecmp (value_ptr, "no"))
 				settings.err_msg ((char *)"invalid dhcp setting");
 			else
 				strcpy (system_dhcp, value_ptr);
@@ -421,9 +421,9 @@ void check_ini_system (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			if (stricmp (value_ptr, "pst") && stricmp (value_ptr, "mst") &&
-				stricmp (value_ptr, "cst") && stricmp (value_ptr, "est") &&
-				stricmp (value_ptr, "akst") && stricmp (value_ptr, "hast"))
+			if (strcasecmp (value_ptr, "pst") && strcasecmp (value_ptr, "mst") &&
+				strcasecmp (value_ptr, "cst") && strcasecmp (value_ptr, "est") &&
+				strcasecmp (value_ptr, "akst") && strcasecmp (value_ptr, "hast"))
 					settings.err_msg ((char *)"unsupported time zone");
 			else
 				strcpy (system_tz, value_ptr);
@@ -435,7 +435,7 @@ void check_ini_system (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			if (stricmp (value_ptr, "no") && stricmp (value_ptr, "yes"))				// default value
+			if (strcasecmp (value_ptr, "no") && strcasecmp (value_ptr, "yes"))				// default value
 				settings.err_msg ((char *)"invalid dst setting");
 			else
 				strcpy (system_dst, value_ptr);
@@ -552,7 +552,7 @@ void check_ini_habitat_A (char* key_ptr)
 //				settings.err_msg ((char *)"invalid drawer/compartment");
 //			else
 //				{
-//				if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+//				if (strcasecmp (value_ptr, "yes") && strcasecmp (value_ptr, "no"))
 //					settings.err_msg ((char *)"invalid over-temp ignore setting");
 //				else
 //					strcpy (overtemp_ignore_A [index], value_ptr);
@@ -670,7 +670,7 @@ void check_ini_habitat_B (char* key_ptr)
 //				settings.err_msg ((char *)"invalid drawer/compartment");
 //			else
 //				{
-//				if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+//				if (strcasecmp (value_ptr, "yes") && strcasecmp (value_ptr, "no"))
 //					settings.err_msg ((char *)"invalid over-temp ignore setting");
 //				else
 //					strcpy (overtemp_ignore_B [index], value_ptr);
@@ -764,7 +764,7 @@ void check_ini_habitat_EC (char* key_ptr)
 //		{
 //		if (*value_ptr)
 //			{
-//			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+//			if (strcasecmp (value_ptr, "yes") && strcasecmp (value_ptr, "no"))
 //				settings.err_msg ((char *)"invalid over-temp ignore setting");
 //			else
 //				strcpy (overtemp_ignore_EC [1], value_ptr);
@@ -817,7 +817,7 @@ void check_ini_habitat_EC (char* key_ptr)
 //		{
 //		if (*value_ptr)
 //			{
-//			if (stricmp (value_ptr, "yes") && stricmp (value_ptr, "no"))
+//			if (strcasecmp (value_ptr, "yes") && strcasecmp (value_ptr, "no"))
 //				settings.err_msg ((char *)"invalid over-temp ignore setting");
 //			else
 //				strcpy (overtemp_ignore_EC [2], value_ptr);
@@ -901,11 +901,11 @@ void check_ini_users (char*	key_ptr)
 				settings.err_msg ((char *)"invalid rights index");
 			else if (*value_ptr)
 				{	// TODO: should factory rights be part of the ini?
-				if (stricmp(value_ptr, "factory") &&
-					stricmp(value_ptr, "it tech") &&
-					stricmp(value_ptr, "service") &&
-					stricmp(value_ptr, "leader") &&
-					stricmp(value_ptr, "associate"))
+				if (strcasecmp(value_ptr, "factory") &&
+					strcasecmp(value_ptr, "it tech") &&
+					strcasecmp(value_ptr, "service") &&
+					strcasecmp(value_ptr, "leader") &&
+					strcasecmp(value_ptr, "associate"))
 						settings.err_msg ((char *)"invalid rights value");
 				else
 					strcpy (user [index].rights, value_ptr);
@@ -1106,6 +1106,81 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 	
 	for (i=1; i<=(USERS_MAX_NUM*3); i++)
 		out_buf_ptr = add_line (kv_users [i], out_buf_ptr);
+	}
+
+
+//---------------------------< W R I T E _ S E T T I N G S >--------------------------------------------------
+//
+//
+//
+
+void write_settings (uint8_t settings_area, char* out_ptr)
+	{
+	uint16_t	start_addr = (PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START;
+	time_t		elapsed_time;
+
+	settings.line_num = 0;							// reset
+	Serial.printf ("\r\nwriting\r\n");
+
+	stopwatch (START);
+	fram.set_addr16 (start_addr);						// set starting address where we will begin writing
+	
+	while (out_ptr)
+		{
+		out_ptr = array_get_line (ln_buf, out_ptr);		// returns null pointer when no more characters in buffer
+		if (!out_ptr)
+			break;
+		settings.line_num ++;							// tally
+		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
+		fram.control.rd_wr_len = line_len ((char*)ln_buf);
+		fram.page_write();								// write it
+		Serial.printf (".");
+		}
+	fram.control.wr_byte = EOF_MARKER;					// write the EOF marker
+	fram.byte_write();
+
+	elapsed_time = stopwatch (STOP);				// capture the time
+	Serial.printf ("\r\nwrote %d lines to fram %sin %dms\r\n", settings.line_num, (PRIMARY == settings_area) ? (char*)"" : (char*)"backup ", elapsed_time);
+	}
+
+
+//---------------------------< E R A S E _ S E T T I N G S >--------------------------------------------------
+//
+//
+//
+
+void erase_settings (uint8_t settings_area)
+	{
+	time_t		elapsed_time = 0;
+	uint16_t	start_addr = (PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START;
+	uint16_t	end_addr = (PRIMARY == settings_area) ? FRAM_SETTINGS_END : FRAM_SETTINGS_2_END;
+	
+	Serial.printf ("\r\nerasing %sfram settings\r\n", (PRIMARY == settings_area) ? (char*)"" : (char*)"backup ");
+	stopwatch (START);								// reset
+	utils.fram_fill (EOF_MARKER, start_addr, (end_addr - start_addr + 1));
+	elapsed_time = stopwatch (STOP);				// capture the time
+
+	Serial.printf ("\terased %d %sfram bytes in %dms\r\n", end_addr - start_addr + 1, (PRIMARY == settings_area) ? (char*)"" : (char*)"backup ", elapsed_time);
+	}
+
+
+//---------------------------< S E T _ F R A M _ C R C >------------------------------------------------------
+//
+// calculates crc in specified fram settings area, compares it to locally calculated value.  If same writes new
+// crc to appropriate place in fram and returns SUCCESS; else returns FAIL.
+//
+
+uint8_t set_fram_crc (uint8_t settings_area, const uint16_t crc)
+	{
+	if (settings.get_crc_fram ((PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START,
+		(PRIMARY == settings_area) ? FRAM_SETTINGS_END : FRAM_SETTINGS_2_END) == crc)			// calculate the crc across the settings in fram
+		{
+		fram.set_addr16 ((PRIMARY == settings_area) ? FRAM_CRC_LO : FRAM_CRC_2_LO);				// set address for low byte of crc
+		fram.control.wr_int16 = crc;
+		fram.int16_write();
+		return SUCCESS;
+		}
+	return FAIL;
 	}
 
 
