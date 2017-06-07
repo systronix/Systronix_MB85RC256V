@@ -90,6 +90,19 @@ uint8_t Systronix_MB85RC256V::set_addr16 (uint16_t addr)
 	}
 
 
+//---------------------------< G E T _ F R A M _ A D D R 1 6 >------------------------------------------------
+//
+// byte order is important.  In Teensy memory, a uint16_t is stored least-significant byte in the lower of two
+// addresses.  The fram_addr union allows access to a single fram address as a struct of two bytes (high and
+// low), as an array of two bytes [0] and [1], or as a uint16_t.
+//
+
+uint16_t Systronix_MB85RC256V::get_addr16 (void)
+	{
+	return __builtin_bswap16 (control.addr.as_u16);
+	}
+
+
 //---------------------------< I N C _ A D D R 1 6 >----------------------------------------------------------
 //
 // byte order is important.  In Teensy memory, a uint16_t is stored least-significant byte in the lower of two

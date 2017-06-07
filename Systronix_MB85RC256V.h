@@ -88,6 +88,7 @@ class Systronix_MB85RC256V
 		uint8_t init (void);						// determines if the device at _base is correct and communicating
 
 		uint8_t set_addr16 (uint16_t);
+		uint16_t get_addr16 (void);
 		
 		uint8_t byte_write (void);						// write 1 byte to address
 		uint8_t int16_write (void);						// write 2-byte int16 to address
