@@ -241,7 +241,7 @@ void loop()
 	rcvd_count = serial_get_chars (rx_buf);
 
 	elapsed_time = stopwatch (STOP);				// capture the time
-	Serial.printf ("\r\nnrecieved %d characters in %dms\r\n", rcvd_count, elapsed_time);
+	Serial.printf ("\r\nnreceived %d characters in %dms\r\n", rcvd_count, elapsed_time);
 
 	settings.line_num = 0;							// reset to count lines taken from rx_buf
 	Serial.printf ("\r\nchecking\r\n");
