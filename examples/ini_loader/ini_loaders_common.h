@@ -254,6 +254,12 @@ boolean is_good_pin (const char* pin_ptr)
 	return true;
 	}
 
+// these are acceptable strings that the setting in the ini file must match
+char* valid_config_str [] = {(char*)"B2B", (char*)"B2BWEC", (char*)"SBS", (char*)"SS", (char*)"SSWEC"};	// for config keyword
+char* valid_yes_no_str [] = {(char*)"YES", (char*)"NO"};												// for dhcp and dst
+char* valid_t_zone_str [] = {(char*)"PST", (char*)"MST", (char*)"CST", (char*)"EST", (char*)"AKST", (char*)"HAST"};	// for time zone
+char* valid_rights_str [] = {(char*)"FACTORY", (char*)"IT TECH", (char*)"SERVICE", (char*)"LEADER", (char*)"ASSOCIATE"};	// for user rights
+
 
 //---------------------------< C H E C K _ I N I _ S Y S T E M >----------------------------------------------
 //
@@ -292,12 +298,17 @@ void check_ini_system (char* key_ptr)
 	
 	if (!strcmp (key_ptr, "config"))
 		{
-		if (strcasecmp (value_ptr, "SSWEC") && strcasecmp (value_ptr, "SS") &&
-			strcasecmp (value_ptr, "B2BWEC") && strcasecmp (value_ptr, "B2B") &&
-			strcasecmp (value_ptr, "SBS"))
+		settings.str_to_upper (value_ptr);
+		for (uint8_t i=0; i<5; i++)
+			{
+			if (!strcmp (value_ptr, valid_config_str[i]))
+				{
+				strcpy (system_config, value_ptr);
+				break;
+				}
+			if (5 <= i)
 				settings.err_msg ((char *)"unknown config");
-		else
-			strcpy (system_config, value_ptr);
+			}
 		}
 	else if (!strcmp (key_ptr, "dawn"))
 		{
@@ -373,10 +384,17 @@ void check_ini_system (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			if (strcasecmp (value_ptr, "yes") && strcasecmp (value_ptr, "no"))
-				settings.err_msg ((char *)"invalid dhcp setting");
-			else
-				strcpy (system_dhcp, value_ptr);
+			settings.str_to_upper (value_ptr);
+			for (uint8_t i=0; i<2; i++)
+				{
+				if (!strcmp (value_ptr, valid_yes_no_str[i]))
+					{
+					strcpy (system_dhcp, value_ptr);
+					break;
+					}
+				if (2 <= i)
+					settings.err_msg ((char *)"invalid dhcp setting");
+				}
 			}
 		else
 			warn_msg ();
@@ -421,12 +439,17 @@ void check_ini_system (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			if (strcasecmp (value_ptr, "pst") && strcasecmp (value_ptr, "mst") &&
-				strcasecmp (value_ptr, "cst") && strcasecmp (value_ptr, "est") &&
-				strcasecmp (value_ptr, "akst") && strcasecmp (value_ptr, "hast"))
+			settings.str_to_upper (value_ptr);
+			for (uint8_t i=0; i<6; i++)
+				{
+				if (!strcmp (value_ptr, valid_t_zone_str[i]))
+					{
+					strcpy (system_tz, value_ptr);
+					break;
+					}
+				if (6 <= i)
 					settings.err_msg ((char *)"unsupported time zone");
-			else
-				strcpy (system_tz, value_ptr);
+				}
 			}
 		else
 			warn_msg ();
@@ -435,10 +458,17 @@ void check_ini_system (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			if (strcasecmp (value_ptr, "no") && strcasecmp (value_ptr, "yes"))				// default value
-				settings.err_msg ((char *)"invalid dst setting");
-			else
-				strcpy (system_dst, value_ptr);
+			settings.str_to_upper (value_ptr);
+			for (uint8_t i=0; i<2; i++)
+				{
+				if (!strcmp (value_ptr, valid_yes_no_str[i]))
+					{
+					strcpy (system_dst, value_ptr);
+					break;
+					}
+				if (2 <= i)
+					settings.err_msg ((char *)"invalid dst setting");
+				}
 			}
 		else
 			warn_msg ();
@@ -868,7 +898,10 @@ void check_ini_users (char*	key_ptr)
 			if ((INVALID_NUM == index) || (USERS_MAX_NUM < index))
 				settings.err_msg ((char *)"invalid name index");
 			else
+				{
+				settings.str_to_upper (value_ptr);
 				strcpy (user [index].name, value_ptr);
+				}
 			}
 		}
 	else if (strstr (key_ptr, "pin_"))
@@ -900,15 +933,18 @@ void check_ini_users (char*	key_ptr)
 			if ((INVALID_NUM == index) || (USERS_MAX_NUM < index))
 				settings.err_msg ((char *)"invalid rights index");
 			else if (*value_ptr)
-				{	// TODO: should factory rights be part of the ini?
-				if (strcasecmp(value_ptr, "factory") &&
-					strcasecmp(value_ptr, "it tech") &&
-					strcasecmp(value_ptr, "service") &&
-					strcasecmp(value_ptr, "leader") &&
-					strcasecmp(value_ptr, "associate"))
+				{
+				settings.str_to_upper (value_ptr);
+				for (uint8_t i=0; i<5; i++)
+					{
+					if (!strcmp (value_ptr, valid_rights_str[i]))
+						{
+						strcpy (user [index].rights, value_ptr);
+						break;
+						}
+					if (5 <= i)
 						settings.err_msg ((char *)"invalid rights value");
-				else
-					strcpy (user [index].rights, value_ptr);
+					}
 				}
 			}
 		}
@@ -935,13 +971,13 @@ void check_min_req_users (void)
 	
 	for (i=1; i <= USERS_MAX_NUM; i++)
 		{
-		if ('l' == user [i].rights[0])				// only need to look at first letter
+		if ('L' == user [i].rights[0])				// only need to look at first letter
 			leader = true;
-		if ('s' == user [i].rights[0])
+		if ('S' == user [i].rights[0])
 			service = true;
-		if ('i' == user [i].rights[0])
+		if ('I' == user [i].rights[0])
 			it_tech = true;
-		if ('f' == user [i].rights[0])				// in the factory doesn't matter if there are leader, service, it tech users
+		if ('F' == user [i].rights[0])				// in the factory doesn't matter if there are leader, service, it tech users
 			{
 			warn_cnt++;								// tally number of warnings
 			Serial.printf ("\n[users] list contains user with factory rights: user: %d\n", i);	// warn because should not ship from factory with factory users in ini file
@@ -1067,8 +1103,8 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 	ln_ptr = ln_buf;							// reset the pointer
 	while (*ln_ptr)
 		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
-	
-	for (i=1; i<=11; i++)
+
+	for (i=1; i<=12; i++)
 		out_buf_ptr = add_line (kv_system [i], out_buf_ptr);
 
 //---------- [habitat A]

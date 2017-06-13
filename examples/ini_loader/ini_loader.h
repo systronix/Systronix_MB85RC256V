@@ -1,5 +1,9 @@
 #ifndef		ini_loader_H_
 #define		ini_loader_H_
+//
+// THIS FILE MUST HAVE THE SAME CONTENT AS ini_loader.h in the ini_loader_SD folder.
+//
+
 
 //---------------------------< D E F A U L T   S E T T I N G S >----------------------------------------------
 //
@@ -76,13 +80,13 @@ char system_dusk [8] = {"18:00"};				// minimal default: 18:00
 char system_auto_fan_1 [8] = {"80"};			// threshold temperatures 
 char system_auto_fan_2 [8] = {"85"};
 char system_auto_fan_3 [8] = {"90"};
-char system_dhcp [8] = {"no"};					// does this habitat use dhcp?
+char system_dhcp [8] = {"NO"};					// does this habitat use dhcp?
 char system_ip [16];							// habitat's ip address
 char system_mask [16];							// habitat's subnet mask
 char system_server_ip [16];						// server's ip address
 	
-char system_dst [8] = {"yes"};					// true when this locale observes daylight saving time
 char system_tz [8] = {"PST"};					// holds constant for this locale's UTC offset to standard time
+char system_dst [8] = {"YES"};					// true when this locale observes daylight saving time
 
 struct user_settings							// these initialize to empty strings or 0; the minimal default settings
 	{
