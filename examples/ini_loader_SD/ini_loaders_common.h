@@ -1208,8 +1208,12 @@ void erase_settings (uint8_t settings_area)
 
 uint8_t set_fram_crc (uint8_t settings_area, const uint16_t crc)
 	{
-	if (settings.get_crc_fram ((PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START,
-		(PRIMARY == settings_area) ? FRAM_SETTINGS_END : FRAM_SETTINGS_2_END) == crc)			// calculate the crc across the settings in fram
+	uint16_t calc_crc;
+	
+	settings.get_crc_fram (&calc_crc, (PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START,
+		(PRIMARY == settings_area) ? FRAM_SETTINGS_END : FRAM_SETTINGS_2_END);
+
+	if (calc_crc == crc)			// calculate the crc across the settings in fram
 		{
 		fram.set_addr16 ((PRIMARY == settings_area) ? FRAM_CRC_LO : FRAM_CRC_2_LO);				// set address for low byte of crc
 		fram.control.wr_int16 = crc;

@@ -382,7 +382,7 @@ void loop()
 		write_settings (BACKUP, out_buf);				// and backup areas
 
 /* debug - see note at bottom of file
-crc = settings.get_crc_fram (0x0400, FRAM_SETTINGS_END);
+settings.get_crc_fram (&crc, 0x0400, FRAM_SETTINGS_END);
 Serial.printf ("start: 0x%.4X; end: 0x%.4X; crc: 0x%4X\n", 0x0400, FRAM_SETTINGS_END, crc);
 */
 
