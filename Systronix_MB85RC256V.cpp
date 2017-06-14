@@ -33,7 +33,7 @@ uint8_t Systronix_MB85RC256V::init (void)
 		}
 	else
 		{
-		control.exists = false;
+		control.exists = false;		// only place in this file where this can be set
 		return FAIL;
 		}
 	}
@@ -59,7 +59,6 @@ void Systronix_MB85RC256V::tally_errors (uint8_t error)
 		case 2:					// slave did not ack address (write)
 		case 5:					// from call to status() (read)
 			rcv_addr_nack_count ++;
-			control.exists = false;
 			break;
 		case 3:					// slave did not ack data (write)
 		case 6:					// from call to status() (read)
@@ -68,7 +67,6 @@ void Systronix_MB85RC256V::tally_errors (uint8_t error)
 		case 4:					// arbitration lost (write) or timeout (read/write)
 		case 7:					// arbitration lost from call to status() (read)
 			other_error_count ++;
-			control.exists=false;
 		}
 	}
 
