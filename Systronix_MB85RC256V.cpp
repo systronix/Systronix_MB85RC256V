@@ -528,9 +528,9 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 		return FAIL;
 		}
 
-	a[0] = Wire.read();
-	a[1] = Wire.read();
-	a[2] = Wire.read();
+	a[0] = Wire.readByte();
+	a[1] = Wire.readByte();
+	a[2] = Wire.readByte();
 
 	// Shift values to separate manuf and prod IDs; see p.10 of
 	// http://www.fujitsu.com/downloads/MICRO/fsa/pdf/products/memory/fram/MB85RC256V-DS501-00017-3v0-E.pdf
