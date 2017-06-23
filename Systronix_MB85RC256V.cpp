@@ -8,7 +8,7 @@ uint8_t Systronix_MB85RC256V::setup (uint8_t base)
 	{
 	if ((FRAM_BASE_MIN > base) || (FRAM_BASE_MAX < base))
 		{
-		tally_errors (SILLY_PROGRAMMER);
+		tally_transaction (SILLY_PROGRAMMER);
 		return FAIL;
 		}
 
@@ -52,12 +52,12 @@ uint8_t Systronix_MB85RC256V::init (void)
 
 	if (SUCCESS == get_device_id (&manufID, &prodID) && (0x000A == manufID) && (0x0510 == prodID))
 		{
-		control.exists = true;
+		error.exists = true;
 		return SUCCESS;
 		}
 	else
 		{
-		control.exists = false;		// only place in this file where this can be set
+		error.exists = false;				// only place in this file where this can be set false
 		return FAIL;
 		}
 	}
@@ -69,17 +69,18 @@ uint8_t Systronix_MB85RC256V::init (void)
 // counts them.
 //
 
-void Systronix_MB85RC256V::tally_errors (uint8_t value)
+void Systronix_MB85RC256V::tally_transaction (uint8_t value)
 	{
-	if (error.total_error_count < UINT64_MAX)
-		error.total_error_count++; 	// every time here incr total error count
+	if (value && (error.total_error_count < UINT64_MAX))
+		error.total_error_count++; 			// every time here incr total error count
 
 	error.error_val = value;
 
 	switch (value)
 		{
-		case WR_INCOMPLETE:					// Wire.write failed to write all of the data to tx_buffer
-			error.incomplete_write_count++;
+		case SUCCESS:
+			if (error.successful_count < UINT64_MAX)
+				error.successful_count++;
 			break;
 		case 1:								// i2c_t3 and Wire: data too long from endTransmission() (rx/tx buffers are 259 bytes - slave addr + 2 cmd bytes + 256 data)
 			error.data_len_error_count++;
@@ -110,7 +111,10 @@ void Systronix_MB85RC256V::tally_errors (uint8_t value)
 		case I2C_SLAVE_RX:
 			error.other_error_count++;		// 9 & 10 from i2c_t3; these are not errors, I think
 			break;
-		case SILLY_PROGRAMMER:				// 11
+		case WR_INCOMPLETE:					// 11; Wire.write failed to write all of the data to tx_buffer
+			error.incomplete_write_count++;
+			break;
+		case SILLY_PROGRAMMER:				// 12
 			error.silly_programmer_error++;
 			break;
 		default:
@@ -138,11 +142,11 @@ uint8_t Systronix_MB85RC256V::set_addr16 (uint16_t addr)
 	{
 	if (addr & 0x8000)
 		{
-		tally_errors (SILLY_PROGRAMMER);
-		return DENIED;								// memory address out of bounds
+		tally_transaction (SILLY_PROGRAMMER);
+		return DENIED;										// memory address out of bounds
 		}
 
-	control.addr.as_u16 = __builtin_bswap16 (addr);	// byte swap and set the address
+	control.addr.as_u16 = __builtin_bswap16 (addr);			// byte swap and set the address
 	return SUCCESS;
 	}
 
@@ -221,7 +225,7 @@ uint8_t Systronix_MB85RC256V::byte_write (void)
 	{
 	uint8_t ret_val;
 	
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 
 	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
@@ -229,20 +233,18 @@ uint8_t Systronix_MB85RC256V::byte_write (void)
 	control.bytes_written += Wire.write (control.wr_byte);			// add data byte to the tx buffer
 	if (3 != control.bytes_written)
 		{
-		tally_errors (WR_INCOMPLETE);						// only here 0 is error value since we expected to write more than 0 bytes
+		tally_transaction (WR_INCOMPLETE);						// only here 0 is error value since we expected to write more than 0 bytes
 		return FAIL;
 		}
 
-	ret_val = Wire.endTransmission();				// xmit memory address and data byte
+	ret_val = Wire.endTransmission();						// xmit memory address and data byte
 	if (SUCCESS != ret_val)
 		{
-		tally_errors (ret_val);						// increment the appropriate counter
+		tally_transaction (ret_val);								// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
-	if (error.successful_count < UINT64_MAX)
-		error.successful_count++;
-
+	tally_transaction (SUCCESS);
 	return SUCCESS;
 	}
 
@@ -259,7 +261,7 @@ uint8_t Systronix_MB85RC256V::byte_write (void)
 
 uint8_t Systronix_MB85RC256V::int16_write (void)
 	{
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
 	control.wr_buf_ptr = (uint8_t*)(&control.wr_int16);		// point to the int16 member of the control struct
@@ -280,7 +282,7 @@ uint8_t Systronix_MB85RC256V::int16_write (void)
 
 uint8_t Systronix_MB85RC256V::int32_write (void)
 	{
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
 	control.wr_buf_ptr = (uint8_t*)(&control.wr_int32);		// point to the int32 member of the control struct
@@ -304,7 +306,7 @@ uint8_t Systronix_MB85RC256V::page_write (void)
 	{
 	uint8_t ret_val;
 
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
 	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
@@ -312,21 +314,19 @@ uint8_t Systronix_MB85RC256V::page_write (void)
 	control.bytes_written += Wire.write (control.wr_buf_ptr, control.rd_wr_len);	// copy source to wire tx buffer data
 	if (control.bytes_written < (2 + control.rd_wr_len))	// did we try to write too many bytes to the i2c_t3 tx buf?
 		{
-		tally_errors (WR_INCOMPLETE);						// increment the appropriate counter
+		tally_transaction (WR_INCOMPLETE);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 		
 	ret_val = Wire.endTransmission();						// xmit memory address followed by data
 	if (SUCCESS != ret_val)
 		{
-		tally_errors (ret_val);								// increment the appropriate counter
+		tally_transaction (ret_val);								// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 	adv_addr16 ();											// advance our copy of the address
 
-	if (error.successful_count < UINT64_MAX)
-		error.successful_count++;
-
+	tally_transaction (SUCCESS);
 	return SUCCESS;
 	}
 
@@ -347,23 +347,21 @@ uint8_t Systronix_MB85RC256V::current_address_read (void)
 	{
 	uint8_t ret_val;
 
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
 	control.bytes_received = Wire.requestFrom(_base, 1, I2C_STOP);
 	if (1 != control.bytes_received)						// if we got more than or less than 1 byte
 		{
-		ret_val = Wire.status();					// to get error value
-		tally_errors (ret_val);						// increment the appropriate counter
+		ret_val = Wire.status();							// to get error value
+		tally_transaction (ret_val);								// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
 	control.rd_byte = Wire.readByte();						// get the byte
 	inc_addr16 ();											// bump our copy of the address
 
-	if (error.successful_count < UINT64_MAX)
-		error.successful_count++;
-
+	tally_transaction (SUCCESS);
 	return SUCCESS;
 	}
 
@@ -382,22 +380,22 @@ uint8_t Systronix_MB85RC256V::byte_read (void)
 	{
 	uint8_t ret_val;
 
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
 	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
 	control.bytes_written = Wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
 	if (2 != control.bytes_written)							// did we get correct number of bytes into the i2c_t3 tx buf?
 		{
-		tally_errors (WR_INCOMPLETE);						// increment the appropriate counter
+		tally_transaction (WR_INCOMPLETE);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
-	ret_val = Wire.endTransmission();				// xmit memory address
+	ret_val = Wire.endTransmission();						// xmit memory address
 	
 	if (SUCCESS != ret_val)
 		{
-		tally_errors (ret_val);						// increment the appropriate counter
+		tally_transaction (ret_val);								// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 	
@@ -417,7 +415,7 @@ uint8_t Systronix_MB85RC256V::byte_read (void)
 
 uint8_t Systronix_MB85RC256V::int16_read (void)
 	{
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
 	control.rd_buf_ptr = (uint8_t*)(&control.rd_int16);
@@ -438,7 +436,7 @@ uint8_t Systronix_MB85RC256V::int16_read (void)
 
 uint8_t Systronix_MB85RC256V::int32_read (void)
 	{
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
 	control.rd_buf_ptr = (uint8_t*)(&control.rd_int32);
@@ -466,14 +464,14 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 	size_t 		i;
 	uint8_t*	ptr = control.rd_buf_ptr;					// a copy so we don't disturb the original
 	
-	if (!control.exists)									// exit immediately if device does not exist
+	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
 	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
 	control.bytes_written = Wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
 	if (2 != control.bytes_written)							// did we get correct number of bytes into the i2c_t3 tx buf?
 		{
-		tally_errors (WR_INCOMPLETE);						// increment the appropriate counter
+		tally_transaction (WR_INCOMPLETE);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -481,7 +479,7 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 
 	if (SUCCESS != ret_val)
 		{
-		tally_errors (ret_val);								// increment the appropriate counter
+		tally_transaction (ret_val);								// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -489,7 +487,7 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 	if (control.bytes_received != control.rd_wr_len)
 		{
 		ret_val = Wire.status();							// to get error value
-		tally_errors (ret_val);								// increment the appropriate counter
+		tally_transaction (ret_val);								// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -498,9 +496,7 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 
 	adv_addr16 ();											// advance our copy of the address
 
-	if (error.successful_count < UINT64_MAX)
-		error.successful_count++;
-
+	tally_transaction (SUCCESS);
 	return SUCCESS;
 	}
 
@@ -522,7 +518,7 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 	
 	if (SUCCESS != ret_val)
 		{
-		tally_errors (ret_val);						// increment the appropriate counter
+		tally_transaction (ret_val);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -531,7 +527,7 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 	if (control.rd_wr_len != control.bytes_received)
 		{
 		ret_val = Wire.status();							// to get error value
-		tally_errors (ret_val);								// increment the appropriate counter
+		tally_transaction (ret_val);								// increment the appropriate counter
 		return FAIL;
 		}
 
@@ -544,8 +540,6 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 	*manuf_id_ptr = (a[0] << 4) + (a[1]  >> 4);				// for MB85RC256V: 0x000A = fujitsu
 	*prod_id_ptr = ((a[1] & 0x0F) << 8) + a[2];				// 0x0510 (5 is the density; 10 is proprietary
 
-	if (error.successful_count < UINT64_MAX)
-		error.successful_count++;
-
+	tally_transaction (SUCCESS);
 	return SUCCESS;
 	}

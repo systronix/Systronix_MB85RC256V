@@ -24,8 +24,8 @@
 #define		FRAM_BASE_MIN 		0x50					// 7-bit address not including R/W bit
 #define		FRAM_BASE_MAX 		0x57					// 7-bit address not including R/W bit
 
-#define		WR_INCOMPLETE		0
-#define		SILLY_PROGRAMMER	11
+#define		WR_INCOMPLETE		11
+#define		SILLY_PROGRAMMER	12
 
 
 //---------------------------< C L A S S >--------------------------------------------------------------------
@@ -40,7 +40,7 @@ class Systronix_MB85RC256V
 
 		void		adv_addr16 (void);					// advance control.addr.u16 by control.rd_wr_len
 		void		inc_addr16 (void);					// increment control.addr.u16 by 1
-		void		tally_errors (uint8_t);				// maintains the i2c_t3 error counters
+		void		tally_transaction (uint8_t);				// maintains the i2c_t3 error counters
 
 	public:
 
@@ -57,7 +57,6 @@ class Systronix_MB85RC256V
 
 		struct
 			{
-			boolean				exists;					// set false during init() if the device fails to communicate
 			union fram_addr		addr;
 			uint8_t				wr_byte;				// a place to put single read and write bytes
 			uint16_t			wr_int16;
@@ -74,6 +73,7 @@ class Systronix_MB85RC256V
 
 		struct
 			{
+			boolean				exists;					// set false during init() if the device fails to communicate
 			uint8_t		error_val;						// the most recent error value, not just SUCCESS or FAIL
 			uint32_t	incomplete_write_count;			// Wire.write failed to write all of the data to tx_buffer
 			uint32_t	data_len_error_count;			// data too long
