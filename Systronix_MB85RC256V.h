@@ -57,7 +57,7 @@ class Systronix_MB85RC256V
 
 		struct
 			{
-			boolean				exists;					// set by init() only
+			boolean				exists;					// set false during init() if the device fails to communicate
 			union fram_addr		addr;
 			uint8_t				wr_byte;				// a place to put single read and write bytes
 			uint16_t			wr_int16;
@@ -70,7 +70,6 @@ class Systronix_MB85RC256V
 			size_t				rd_wr_len;				// number of bytes to read/write with page_read()/page_write()
 			size_t				bytes_written;			// number bytes written by Wire.write(); 0 = fail
 			size_t				bytes_received;			// number of bytes read by Wire.requestFrom()
-			uint8_t				ret_val;				// SUCCESS or error return value of the last transaction
 			} control;
 
 		struct
