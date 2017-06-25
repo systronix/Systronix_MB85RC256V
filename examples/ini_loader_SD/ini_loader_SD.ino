@@ -178,7 +178,7 @@ void setup()
 
 	Serial.printf ("NAP ini loader [SD]: build time: %s %s\r\n", __TIME__, __DATE__);
 
-	if (!fram.control.exists)
+	if (!fram.error.exists)
 		{
 		Serial.printf ("fatal error: cannot communicate with fram\r\n");
 		Serial.printf ("loader stopped; reset to restart\r\n");		// give up and enter an endless
