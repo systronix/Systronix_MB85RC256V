@@ -170,6 +170,27 @@ void warn_msg (void)
 	}
 
 
+//---------------------------< I S _ G O O D _ N A M E >------------------------------------------------------
+//
+// return true if all characters in the user name are alphabetic characters or whitespace characters.  Any other
+// character: return false.
+//
+
+boolean is_good_user_name (char* name_ptr)
+	{
+	while (*name_ptr)									// loop through all of the characters in the name
+		{
+		if (!isalpha(*name_ptr) && !isspace(*name_ptr))	// if any are not alphabetic or space characters
+			{
+			Serial.printf ("good name fail: %c\n", *name_ptr);
+			return false;								// fail
+			}
+		name_ptr++;										// bump the pointer
+		}
+	return true;										// success
+	}
+
+
 //---------------------------< I S _ U N I Q U E _ P I N >----------------------------------------------------
 //
 //
@@ -899,8 +920,13 @@ void check_ini_users (char*	key_ptr)
 				settings.err_msg ((char *)"invalid name index");
 			else
 				{
-				settings.str_to_upper (value_ptr);
-				strcpy (user [index].name, value_ptr);
+				if (is_good_user_name (value_ptr))
+					{
+					settings.str_to_upper (value_ptr);
+					strcpy (user [index].name, value_ptr);
+					}
+				else
+					settings.err_msg ((char *)"invalid user name");
 				}
 			}
 		}
