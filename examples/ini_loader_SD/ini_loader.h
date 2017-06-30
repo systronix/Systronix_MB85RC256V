@@ -75,6 +75,7 @@ heat_settings habitat_EC_heat_settings [3] =	// '1' indexed; [0] not used
 //	};
 
 char system_config [8] = {"SSWEC"};				// SS, SSWEC, B2B, B2BWEC, SBS
+char system_pwrfru [8] = {"2.2"};				// uses pwr dist rev 2.2 and LCM300Q power supply
 char system_dawn [8] = {"06:00"};				// minimal default: 06:00
 char system_dusk [8] = {"18:00"};				// minimal default: 18:00
 char system_auto_fan_1 [8] = {"80"};			// threshold temperatures 
@@ -105,14 +106,15 @@ user_settings user [USERS_MAX_NUM+1];			// '1' indexed; [0] not used
 
 struct kv_pair
 	{
-	const char key [20];
+	const char key [16];
 	char* value;
 	};
 
-kv_pair	kv_system [13] =
+kv_pair	kv_system [14] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
 	{{CONFIG_KEY},				system_config},
+	{{PWRFRU_KEY},				system_pwrfru},
 	{{DAWN_KEY},				system_dawn},
 	{{DUSK_KEY},				system_dusk},
 	{{AUTO_FAN_1_KEY},			system_auto_fan_1},

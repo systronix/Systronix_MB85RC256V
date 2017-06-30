@@ -293,6 +293,7 @@ void check_ini_system (char* key_ptr)
 	{
 	uint32_t	temp32;						// temp variable for holding uint32_t sized variables
 	uint16_t	temp16;						// temp variable for holding uint16_t sized variables
+	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
 	char		temp_array[32];
 
 	char*	value_ptr;						// pointers to the key and value items
@@ -304,19 +305,19 @@ void check_ini_system (char* key_ptr)
 		total_errs++;						// make sure that we don't write to fram
 		return;
 		}
-	
+
 	*value_ptr++ = '\0';					// null terminate the key and bump the pointer to point at the value
-	
+
 	settings.err_cnt = 0;							// reset the counter
-	
+
 	if (16 < strlen (value_ptr))
 		{
 		settings.err_msg ((char *)"value string too long");
 		return;
 		}
-	
+
 	strcpy (temp_array, value_ptr);			// a copy to use for evaluation
-	
+
 	if (!strcmp (key_ptr, "config"))
 		{
 		settings.str_to_upper (value_ptr);
@@ -330,6 +331,20 @@ void check_ini_system (char* key_ptr)
 			if (5 <= i)
 				settings.err_msg ((char *)"unknown config");
 			}
+		}
+	else if (!strcmp (key_ptr, "powerfru"))
+		{
+		if (*value_ptr)
+			{
+			temp8 = settings.powerfru_revision (value_ptr);
+
+			if ((FAIL == temp8) || ((0 != temp8) && (0x22 !=temp8)))	// only 0, not used, and rev2.2 supported
+				settings.err_msg ((char *)"invalid powerFRU revision");
+			else
+				strcpy (system_pwrfru, value_ptr);
+			}
+		else
+			warn_msg ();
 		}
 	else if (!strcmp (key_ptr, "dawn"))
 		{
@@ -1130,7 +1145,7 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 	while (*ln_ptr)
 		*out_buf_ptr++ = *ln_ptr++;				// write the heading to out_buf
 
-	for (i=1; i<=12; i++)
+	for (i=1; i<=13; i++)
 		out_buf_ptr = add_line (kv_system [i], out_buf_ptr);
 
 //---------- [habitat A]
