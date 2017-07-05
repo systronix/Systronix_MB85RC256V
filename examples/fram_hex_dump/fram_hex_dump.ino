@@ -95,7 +95,7 @@ void setup()
 	Serial.print (" ");							// startup
 	Serial.println (__DATE__);					// message
 
-	if (!fram.control.exists)
+	if (!fram.error.exists)
 		{
 		Serial.println ("fatal error: cannot communicate with fram");
 		Serial.println("loader stopped; reset to restart");		// give up and enter an endless
