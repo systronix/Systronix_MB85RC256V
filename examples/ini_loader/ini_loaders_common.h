@@ -5,6 +5,60 @@
 // file in the other folder.  Sigh.
 
 
+
+//---------------------------< C L O C K _ S E T >------------------------------------------------------------
+
+uint8_t clock_set (void)
+	{
+	uint8_t ret_val;
+	time_t	epoch;
+
+	for (uint8_t n=0; n<5; n++)									// do up to five tries
+		{
+		ret_val = ntp.unix_ts_get (&epoch, 120);					// get the unix timestamp; 120mS timeout
+		if (SUCCESS == ret_val)
+			{
+			if ((0 < ntp.packet_buffer.as_struct.stratum) && (16 > ntp.packet_buffer.as_struct.stratum))
+				{
+				Serial.printf ("\tUnix ts: %ld\n", epoch);
+
+				if (RTC.set (epoch))
+					{
+					Serial.printf ("\tRTC set: %lu\n", epoch);
+
+					Serial.printf ("\tUTC time: %.2d:%.2d:%.2d\n\n",	// print UTC time
+						(uint8_t)((epoch  % 86400L) / 3600),			// hour
+						(uint8_t)((epoch % 3600) / 60),					// minute
+						(uint8_t)(epoch % 60));							// second
+
+					return SUCCESS;
+					}
+				else
+					{
+					Serial.printf ("\tRTC.set() failed\n");		// can't know why; RTC.set() returns boolean
+					return FAIL;
+					}
+				}
+			else if (0 == ntp.packet_buffer.as_struct.stratum)		// kiss o' death message
+				Serial.printf ("\tserver response: %c%c%c%c\n\n", ntp.packet_buffer.as_array[12], ntp.packet_buffer.as_array[13], ntp.packet_buffer.as_array[14], ntp.packet_buffer.as_array[15]);
+
+			else // if (15 < ntp.packet_buffer.as_struct.stratum)
+				Serial.printf ("\tunsychronized server\n\n");
+			}
+		else if (TIMEOUT == ret_val)
+			Serial.printf ("NTP request timeout\n\n");
+		else
+			Serial.printf ("NTP request fail\n\n");
+
+		Serial.printf ("waiting 10 seconds before retry ...");
+		delay (10000);
+		Serial.printf ("\n");
+		}
+
+	return FAIL;												// if here, couldn't set time after n tries
+	}
+
+
 //---------------------------< S T O P W A T C H >------------------------------------------------------------
 //
 // Start and stop an elapsed timer.
@@ -62,8 +116,8 @@ uint16_t get_crc_array (uint8_t* array_ptr)
 		byte_count++;
 		array_ptr++;								// bump the pointer
 		}
-	Serial.print ("byte count: ");
-	Serial.println (byte_count);
+//	Serial.print ("byte count: ");
+//	Serial.println (byte_count);
 	return crc;
 	}
 
@@ -166,6 +220,18 @@ void warn_msg (void)
 	Serial.print ("no value in line ");
 	Serial.print (settings.line_num);
 	Serial.println ("; system will use default value");
+	warn_cnt++;								// tally number of warnings
+	}
+
+
+//---------------------------< W A R N _ M S G >--------------------------------------------------------------
+//
+//
+//
+
+void warn_msg (char* key_ptr)
+	{
+	Serial.printf ("\t%3d: %s using default\n", settings.line_num, key_ptr);
 	warn_cnt++;								// tally number of warnings
 	}
 
@@ -568,7 +634,7 @@ void check_ini_habitat_A (char* key_ptr)
 				}
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 	else if (strstr (key_ptr, "night_a_"))	// nighttime temperature target A ...
 		{
@@ -588,7 +654,7 @@ void check_ini_habitat_A (char* key_ptr)
 				}
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 	else if (strstr (key_ptr, "hlamp_a_"))						// heat lamp A ...
 		{
@@ -607,7 +673,7 @@ void check_ini_habitat_A (char* key_ptr)
 				}
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 //	else if (strstr (key_ptr, "ot_ignore_a_"))						// over-temp ignore A ...
 //		{
@@ -686,7 +752,7 @@ void check_ini_habitat_B (char* key_ptr)
 				}
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 	else if (strstr (key_ptr, "night_b_"))	// nighttime temperature target B ...
 		{
@@ -706,7 +772,7 @@ void check_ini_habitat_B (char* key_ptr)
 				}
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 	else if (strstr (key_ptr, "hlamp_b_"))	// heat lamp B ...
 		{
@@ -725,7 +791,7 @@ void check_ini_habitat_B (char* key_ptr)
 				}
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 //	else if (strstr (key_ptr, "ot_ignore_b_"))		// over temp ignore A ...
 //		{
@@ -797,7 +863,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [1].day_temp, value_ptr);
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 	else if (!strcmp (key_ptr, "night_ec_top"))	// nighttime temperature target EC top ...
 		{
@@ -811,7 +877,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [1].night_temp, value_ptr);
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 	else if (!strcmp (key_ptr, "hlamp_ec_top"))	// heat lamp B ...
 		{
@@ -824,7 +890,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [1].watts, value_ptr);
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 //	else if (strstr (key_ptr, "ot_ignore_ec_top"))		// over temp ignore EC top ...
 //		{
@@ -850,7 +916,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [2].day_temp, value_ptr);
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 	else if (!strcmp (key_ptr, "night_ec_bot"))	// nighttime temperature target EC bottom ...
 		{
@@ -864,7 +930,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [2].night_temp, value_ptr);
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 	else if (!strcmp (key_ptr, "hlamp_ec_bot"))	// heat lamp B ...
 		{
@@ -877,7 +943,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [2].watts, value_ptr);
 			}
 		else
-			warn_msg();
+			warn_msg(key_ptr);
 		}
 //	else if (strstr (key_ptr, "ot_ignore_ec_bot"))		// over temp ignore EC bot ...
 //		{
@@ -1021,7 +1087,7 @@ void check_min_req_users (void)
 		if ('F' == user [i].rights[0])				// in the factory doesn't matter if there are leader, service, it tech users
 			{
 			warn_cnt++;								// tally number of warnings
-			Serial.printf ("\n[users] list contains user with factory rights: user: %d\n", i);	// warn because should not ship from factory with factory users in ini file
+			Serial.printf ("\n\t[users] list contains user with factory rights: user: %d\n", i);	// warn because should not ship from factory with factory users in ini file
 			return;
 			}
 		}
@@ -1186,6 +1252,28 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 	}
 
 
+//---------------------------< W R I T E _ T E S T >----------------------------------------------------------
+//
+// quick and dirty test to see if we can write to fram.  Call this before erasing.
+//
+
+boolean write_test (uint8_t settings_area)
+	{
+	uint16_t	start_addr = (PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START;
+
+	fram.set_addr16 (start_addr);						// set to settings area start address
+	fram.control.wr_byte = 0x7F;						// write a delete character; something not found in an ini file
+	fram.byte_write();
+
+	fram.control.rd_byte = 0;							// make sure it's not the delete character
+
+	fram.set_addr16 (start_addr);						// reset the starting address
+	fram.byte_read();									// read the delete character
+
+	return ((uint8_t)0x7F == fram.control.rd_byte);
+	}
+
+
 //---------------------------< W R I T E _ S E T T I N G S >--------------------------------------------------
 //
 //
@@ -1194,12 +1282,13 @@ void write_settings_to_out_buf (char* out_buf_ptr)
 void write_settings (uint8_t settings_area, char* out_ptr)
 	{
 	uint16_t	start_addr = (PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START;
-	time_t		elapsed_time;
+//	time_t		elapsed_time;
 
 	settings.line_num = 0;							// reset
-	Serial.printf ("\r\nwriting\r\n");
+	Serial.printf ("writing %s settings\n", (PRIMARY == settings_area) ? (char*)"primary" : (char*)"backup");
 
-	stopwatch (START);
+//	stopwatch (START);
+
 	fram.set_addr16 (start_addr);						// set starting address where we will begin writing
 	
 	while (out_ptr)
@@ -1211,13 +1300,13 @@ void write_settings (uint8_t settings_area, char* out_ptr)
 		fram.control.wr_buf_ptr = (uint8_t*)ln_buf;
 		fram.control.rd_wr_len = line_len ((char*)ln_buf);
 		fram.page_write();								// write it
-		Serial.printf (".");
+//		Serial.printf (".");
 		}
 	fram.control.wr_byte = EOF_MARKER;					// write the EOF marker
 	fram.byte_write();
 
-	elapsed_time = stopwatch (STOP);				// capture the time
-	Serial.printf ("\r\nwrote %d lines to fram %sin %dms\r\n", settings.line_num, (PRIMARY == settings_area) ? (char*)"" : (char*)"backup ", elapsed_time);
+//	elapsed_time = stopwatch (STOP);				// capture the time
+//	Serial.printf ("\r\nwrote %d lines to fram %sin %dms\r\n", settings.line_num, (PRIMARY == settings_area) ? (char*)"" : (char*)"backup ", elapsed_time);
 	}
 
 
@@ -1228,16 +1317,16 @@ void write_settings (uint8_t settings_area, char* out_ptr)
 
 void erase_settings (uint8_t settings_area)
 	{
-	time_t		elapsed_time = 0;
+//	time_t		elapsed_time = 0;
 	uint16_t	start_addr = (PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START;
 	uint16_t	end_addr = (PRIMARY == settings_area) ? FRAM_SETTINGS_END : FRAM_SETTINGS_2_END;
 	
-	Serial.printf ("\r\nerasing %sfram settings\r\n", (PRIMARY == settings_area) ? (char*)"" : (char*)"backup ");
-	stopwatch (START);								// reset
+	Serial.printf ("erasing %s settings\n", (PRIMARY == settings_area) ? (char*)"primary" : (char*)"backup");
+//	stopwatch (START);								// reset
 	utils.fram_fill (EOF_MARKER, start_addr, (end_addr - start_addr + 1));
-	elapsed_time = stopwatch (STOP);				// capture the time
+//	elapsed_time = stopwatch (STOP);				// capture the time
 
-	Serial.printf ("\terased %d %sfram bytes in %dms\r\n", end_addr - start_addr + 1, (PRIMARY == settings_area) ? (char*)"" : (char*)"backup ", elapsed_time);
+//	Serial.printf ("\terased %d %sfram bytes in %dms\r\n", end_addr - start_addr + 1, (PRIMARY == settings_area) ? (char*)"" : (char*)"backup ", elapsed_time);
 	}
 
 

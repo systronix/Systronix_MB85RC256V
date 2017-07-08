@@ -43,7 +43,7 @@ SdFile file;
 #define		START	1
 #define		TIMING	0xFFFFFFFF
 
-#define	ETH_RST				9
+
 //---------------------------< P A G E   S C O P E   V A R I A B L E S >--------------------------------------
 
 char		rx_buf [8192];
@@ -316,7 +316,7 @@ void loop()
 	file.close();
 
 	elapsed_time = stopwatch (STOP);					// capture the time
-//	Serial.printf ("\r\nread %d characters in %dms\r\n", rcvd_count, elapsed_time);
+	Serial.printf ("\r\nread %d characters in %dms\r\n", rcvd_count, elapsed_time);
 
 	settings.line_num = 0;								// reset to count lines taken from rx_buf
 	Serial.printf ("\r\nchecking\r\n");
@@ -507,7 +507,7 @@ Serial.printf ("start: 0x%.4X; end: 0x%.4X; crc: 0x%4X\n", 0x0400, FRAM_SETTINGS
 		else
 			Serial.printf ("ntp.setup() failed; clock not set\n");
 		}
-	
+
 	Serial.printf ("\r\nloader stopped; reset to restart\r\n");		// give up and enter an endless
 	while(1);										// loop forever
 

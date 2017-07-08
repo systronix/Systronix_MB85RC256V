@@ -27,10 +27,13 @@
 #include <SALT.h>
 #include <SALT_utilities.h>
 #include <SALT_JX.h>
+#include <DS1307RTC.h>
+#include <Systronix_NTP.h>
 
-#include "ini_loader.h"				// not actually a shared file but should be exactly the same as the file used by ini_loader_SD.ino
+#include "ini_loader.h"				// not exactly a shared file but is the same file as used for ini_loader_SD.ino
 
 Systronix_MB85RC256V fram;
+Systronix_NTP ntp;
 SALT_settings settings;
 SALT_utilities utils;
 
@@ -100,7 +103,7 @@ uint16_t serial_get_chars (char* rx_ptr)
 				*rx_ptr = EOF_MARKER;			// add end-of-file whether we need to or not
 				*(rx_ptr+1) = '\0';				// null terminate whether we need to or not
 				
-				Serial.print (".");				// show that we're received a line
+				Serial.printf (".");				// show that we're received a line
 				continue;
 				}
 			else if ('\r' == c)					// carriage return
@@ -136,6 +139,26 @@ uint16_t serial_get_chars (char* rx_ptr)
 
 void setup()
 	{
+	pinMode(4, INPUT_PULLUP);		// not used on salt
+												// make sure all spi chip selects inactive
+	pinMode (FLASH_CS_PIN, INPUT_PULLUP);		// SALT FLASH_CS(L)
+	pinMode (T_CS_PIN, INPUT_PULLUP);			// SALT T_CS(L)
+	pinMode (ETH_CS_PIN, INPUT_PULLUP);			// SALT ETH_CS(L)
+	pinMode (DISP_CS_PIN, INPUT_PULLUP);		// SALT DISP_CS(L)
+	
+	pinMode (uSD_DETECT, INPUT_PULLUP);			// so we know if a uSD is in the socket
+	
+	delay(1);
+
+	pinMode(PERIPH_RST, OUTPUT);
+	pinMode (ETHER_RST, OUTPUT);
+	digitalWrite(PERIPH_RST, LOW);				// resets asserted
+	digitalWrite(ETHER_RST, LOW);
+	delay(1);
+	digitalWrite(PERIPH_RST, HIGH);				// resets released
+	digitalWrite(ETHER_RST, HIGH);
+	delay(1);									// time for WIZ850io to reset
+
 	Serial.begin(115200);						// usb; could be any value
 	while((!Serial) && (millis()<10000));		// wait until serial monitor is open or timeout
 
@@ -145,6 +168,8 @@ void setup()
 
 	Serial2.begin(9600);								// UI habitat B LCD and keypad
 	while((!Serial2) && (millis()<10000));				// wait until serial port is open or timeout
+
+	Serial.printf ("NAP utility: ini loader SD\nBuild %s %s\r\n", __TIME__, __DATE__);
 
 	// These functions have a bug in TD 1.29 see forum post by KurtE...
 	// ...https://forum.pjrc.com/threads/32502-Serial2-Alternate-pins-26-and-31
@@ -159,9 +184,10 @@ void setup()
 	Serial1.printf ("dNAP utility:    ini loader      \r");
 	Serial2.printf ("dNAP utility:    ini loader      \r");
 
-	pinMode(PERIPH_RST, OUTPUT);
-	digitalWrite(PERIPH_RST, LOW);				// resets asserted
-	digitalWrite(PERIPH_RST, HIGH);				// resets released
+
+
+
+
 	FETs.setup (I2C_FET);						// constructor for SALT_FETs, and PCA9557
 	FETs.begin ();
 	FETs.init ();								// lights, fans, and alarms all off
@@ -188,8 +214,6 @@ void setup()
 	fram.setup (0x50);
 	fram.begin ();								// join i2c as master
 	fram.init();
-
-	Serial.printf ("NAP ini loader: build time: %s %s\r\n", __TIME__, __DATE__);
 
 	if (!fram.error.exists)
 		{
@@ -224,15 +248,13 @@ void loop()
 		pins[i][0] = '\0';
 
 	millis_prev = millis();							// init
-	Serial.print ("\r\n\r\nloader> waiting for file ...");
+	Serial.printf ("\n\nloader> waiting for file ...");
 	while (!Serial.available())
 		{
 		if (10000 < (millis() - millis_prev))
 			{
 			millis_prev = millis();					// reset
-			Serial.print ("\r\nloader> waiting for file (");
-			Serial.print (waiting_counter++);
-			Serial.print (") ...");
+			Serial.printf ("\nloader> waiting for file (%d)", waiting_counter++);
 			}
 		}
 		
@@ -296,7 +318,7 @@ void loop()
 	check_min_req_users ();							// there must be at minimum 1 each leader, service, & it tech user except when there is a factory user
 
 	elapsed_time = stopwatch (STOP);				// capture the time
-	Serial.printf ("\nchecked %d lines in %dms; ", settings.line_num, elapsed_time);
+//	Serial.printf ("\nchecked %d lines in %dms; ", settings.line_num, elapsed_time);
 	if (total_errs)									// if there have been any errors
 		Serial.printf ("%d error(s); %d warning(s);\r\nconfiguration not written.\r\n", total_errs, warn_cnt);
 	else
@@ -317,8 +339,33 @@ void loop()
 		{
 		write_settings_to_out_buf (out_buf);		// write settings to the output buffer
 
+		if (!write_test(PRIMARY))
+			{
+			Serial.printf ("unable to write to fram primary. loader stopped; reset to restart. check write protect jumper\n");
+			while(1);
+			}
+
+		Serial.printf ("\n");
 		erase_settings (PRIMARY);						// erase any existing setting from both the primary
+		if (!settings.is_settings_empty (PRIMARY))
+			{
+			Serial.printf ("\tprimary settings area did not erase. loader stopped; reset to restart\r\n");
+			utils.fram_hex_dump (0);
+			while(1);
+			}
+
+		if (!write_test(BACKUP))
+			{
+			Serial.printf ("unable to write to fram backup. loader stopped; reset to restart. check write protect jumper\n");
+			while(1);
+			}
+
 		erase_settings (BACKUP);						// and backup areas
+		if (!settings.is_settings_empty (BACKUP))
+			{
+			Serial.printf ("\tbackup settings area did not erase. loader stopped; reset to restart\r\n");
+			while(1);
+			}
 
 		write_settings (PRIMARY, out_buf);				// write new settings to both the primary
 		write_settings (BACKUP, out_buf);				// and backup areas
@@ -329,7 +376,7 @@ Serial.printf ("start: 0x%.4X; end: 0x%.4X; crc: 0x%4X\n", 0x0400, FRAM_SETTINGS
 */
 
 // crc primary
-		stopwatch (START);
+//		stopwatch (START);
 		crc = get_crc_array ((uint8_t*)out_buf);	// calculate the crc across the entire buffer
 
 		if (set_fram_crc (PRIMARY, crc))
@@ -342,11 +389,12 @@ Serial.printf ("start: 0x%.4X; end: 0x%.4X; crc: 0x%4X\n", 0x0400, FRAM_SETTINGS
 			while(1);									// loop
 			}
 	
-		elapsed_time = stopwatch (STOP);
-		Serial.printf ("\r\ncrc value (0x%.4X) calculated and written to fram in %dms", crc, elapsed_time);
-			
+//		elapsed_time = stopwatch (STOP);
+//		Serial.printf ("\r\ncrc value (0x%.4X) calculated and written to fram in %dms", crc, elapsed_time);
+		Serial.printf ("primary crc: 0x%.4X\n", crc);
+		
 // crc backup
-		stopwatch (START);
+//		stopwatch (START);
 		crc = get_crc_array ((uint8_t*)out_buf);		// calculate the crc across the entire buffer
 	
 		if (set_fram_crc (BACKUP, crc))
@@ -359,10 +407,12 @@ Serial.printf ("start: 0x%.4X; end: 0x%.4X; crc: 0x%4X\n", 0x0400, FRAM_SETTINGS
 			while(1);									// loop
 			}
 	
-		elapsed_time = stopwatch (STOP);
-		Serial.printf ("\r\nbackup crc value (0x%.4X) calculated and written to fram in %dms", crc, elapsed_time);
+//		elapsed_time = stopwatch (STOP);
+//		Serial.printf ("\r\nbackup crc value (0x%.4X) calculated and written to fram in %dms", crc, elapsed_time);
+		Serial.printf ("backup crc:  0x%.4X\n", crc);
+
 //--
-		Serial.print("\r\n\r\nfram settings write complete\r\n\r\n");
+		Serial.printf("\r\n\r\nfram settings write complete\r\n\r\n");
 
 		while (Serial.available())
 			ret_val = Serial.read();					// if anything in the Serial input, get rid of it
@@ -392,6 +442,17 @@ Serial.printf ("start: 0x%.4X; end: 0x%.4X; crc: 0x%4X\n", 0x0400, FRAM_SETTINGS
 		elapsed_time = stopwatch (STOP);				// capture the time
 
 		Serial.printf ("\r\nerased %d fram bytes in %dms\r\n", FRAM_LOG_END - FRAM_LOG_START + 1, elapsed_time); 
+		}
+
+	while (Serial.available())
+		ret_val = Serial.read();					// if anything in the Serial input, get rid of it
+
+	if (utils.get_user_yes_no ((char*)"loader", (char*)"set SALT clock?", true))	// default answer yes
+		{
+		if (SUCCESS == ntp.setup(POOL))
+			clock_set ();
+		else
+			Serial.printf ("ntp.setup() failed; clock not set\n");
 		}
 
 	Serial.printf ("\r\nloader stopped; reset to restart\r\n");		// give up and enter an endless
