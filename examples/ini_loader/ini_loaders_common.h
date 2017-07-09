@@ -410,7 +410,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_pwrfru, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "dawn"))
 		{
@@ -424,7 +424,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_dawn, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "dusk"))
 		{
@@ -438,7 +438,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_dusk, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "fan_temp_1"))
 		{
@@ -452,7 +452,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_auto_fan_1, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "fan_temp_2"))
 		{
@@ -466,7 +466,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_auto_fan_2, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "fan_temp_3"))
 		{
@@ -480,7 +480,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_auto_fan_3, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "dhcp"))
 		{
@@ -499,7 +499,7 @@ void check_ini_system (char* key_ptr)
 				}
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "ip"))
 		{
@@ -511,7 +511,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_ip, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "mask"))
 		{
@@ -523,7 +523,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_mask, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "server_ip"))
 		{
@@ -535,7 +535,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_server_ip, value_ptr);
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "tz"))
 		{
@@ -554,7 +554,7 @@ void check_ini_system (char* key_ptr)
 				}
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "dst"))
 		{
@@ -573,7 +573,7 @@ void check_ini_system (char* key_ptr)
 				}
 			}
 		else
-			warn_msg ();
+			warn_msg (key_ptr);
 		}
 	else
 		settings.err_msg ((char *)"unrecognized setting");
@@ -634,7 +634,7 @@ void check_ini_habitat_A (char* key_ptr)
 				}
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 	else if (strstr (key_ptr, "night_a_"))	// nighttime temperature target A ...
 		{
@@ -654,7 +654,7 @@ void check_ini_habitat_A (char* key_ptr)
 				}
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 	else if (strstr (key_ptr, "hlamp_a_"))						// heat lamp A ...
 		{
@@ -673,7 +673,7 @@ void check_ini_habitat_A (char* key_ptr)
 				}
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 //	else if (strstr (key_ptr, "ot_ignore_a_"))						// over-temp ignore A ...
 //		{
@@ -752,7 +752,7 @@ void check_ini_habitat_B (char* key_ptr)
 				}
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 	else if (strstr (key_ptr, "night_b_"))	// nighttime temperature target B ...
 		{
@@ -772,7 +772,7 @@ void check_ini_habitat_B (char* key_ptr)
 				}
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 	else if (strstr (key_ptr, "hlamp_b_"))	// heat lamp B ...
 		{
@@ -791,7 +791,7 @@ void check_ini_habitat_B (char* key_ptr)
 				}
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 //	else if (strstr (key_ptr, "ot_ignore_b_"))		// over temp ignore A ...
 //		{
@@ -863,7 +863,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [1].day_temp, value_ptr);
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "night_ec_top"))	// nighttime temperature target EC top ...
 		{
@@ -877,7 +877,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [1].night_temp, value_ptr);
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "hlamp_ec_top"))	// heat lamp B ...
 		{
@@ -890,7 +890,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [1].watts, value_ptr);
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 //	else if (strstr (key_ptr, "ot_ignore_ec_top"))		// over temp ignore EC top ...
 //		{
@@ -916,7 +916,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [2].day_temp, value_ptr);
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "night_ec_bot"))	// nighttime temperature target EC bottom ...
 		{
@@ -930,7 +930,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [2].night_temp, value_ptr);
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 	else if (!strcmp (key_ptr, "hlamp_ec_bot"))	// heat lamp B ...
 		{
@@ -943,7 +943,7 @@ void check_ini_habitat_EC (char* key_ptr)
 				strcpy (habitat_EC_heat_settings [2].watts, value_ptr);
 			}
 		else
-			warn_msg(key_ptr);
+			warn_msg (key_ptr);
 		}
 //	else if (strstr (key_ptr, "ot_ignore_ec_bot"))		// over temp ignore EC bot ...
 //		{
