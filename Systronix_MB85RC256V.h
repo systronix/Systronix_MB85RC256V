@@ -1,24 +1,24 @@
 #ifndef MB85RC256V_H_
 #define	MB85RC256V_H_
 
+
+//---------------------------< I N C L U D E S >--------------------------------------------------------------
+
 #include<Arduino.h>
 
-//---------------------------< D E F I N E S >----------------------------------------------------------------
-//
-// Include the lowest level I2C library
-//
-
-#if defined (__MK20DX256__) || defined (__MK20DX128__) 	// Teensy 3.1 or 3.2 || Teensy 3.0
+#if defined(KINETISK) || defined(KINETISL)	// Teensy 3.X and LC
 #include <i2c_t3.h>		
 #else
-#include <Wire.h>										// for AVR I2C library
+#include <Wire.h>	// for AVR I2C library
 #endif
 
+
+//---------------------------< D E F I N E S >----------------------------------------------------------------
 #define RSVD_SLAVE_ID	(0xF8)
 
 #define		SUCCESS				0
 #define		FAIL				(~SUCCESS)
-#define		DENIED					0xFE
+#define		DENIED				0xFE
 #define		ABSENT				0xFD
 
 #define		FRAM_BASE_MIN 		0x50					// 7-bit address not including R/W bit
@@ -40,10 +40,12 @@ class Systronix_MB85RC256V
 
 		void		adv_addr16 (void);					// advance control.addr.u16 by control.rd_wr_len
 		void		inc_addr16 (void);					// increment control.addr.u16 by 1
-		void		tally_transaction (uint8_t);				// maintains the i2c_t3 error counters
+		void		tally_transaction (uint8_t);		// maintains the i2c_t3 error counters
+
+		char* 		_wire_name = (char*)"empty";
+		i2c_t3		_wire = Wire;						// why is this assigned value = Wire? [bab]
 
 	public:
-
 		union fram_addr
 			{
 			struct
@@ -90,13 +92,21 @@ class Systronix_MB85RC256V
 			uint64_t	successful_count;				// successful access cycle
 			} error;
 
-		uint8_t		setup (uint8_t base);				// constructor
+		char*		wire_name;							// name of Wire, Wire1, etc in use
+
+		Systronix_MB85RC256V();							// default constructor
+		~Systronix_MB85RC256V();						// deconstructor
+
 		uint8_t		base_get(void);						// return this instances _base address
-		void		begin (void);						// joins I2C as master
+
+		uint8_t		setup (uint8_t base, i2c_t3 wire = Wire, char* name = (char*)"Wire");
+//		uint8_t		setup (uint8_t base);
+		void 		begin (i2c_pins pins, i2c_rate rate);
+		void		begin (void);						// default begin
 		uint8_t		init (void);						// determines if the device at _base is correct and communicating
 
 		uint8_t		set_addr16 (uint16_t addr);
-		uint16_t		get_addr16 (void);
+		uint16_t	get_addr16 (void);
 
 		uint8_t		byte_write (void);					// write 1 byte to address
 		uint8_t		int16_write (void);					// write 2-byte int16 to address
@@ -110,6 +120,7 @@ class Systronix_MB85RC256V
 		uint8_t		page_read (void);					// read n number of bytes beginning at address
 		uint8_t		get_device_id (uint16_t* manuf_id_ptr, uint16_t* prod_id_ptr);	// get the device id
 
+		uint8_t		ping_eeprom (void);
 	private:
 	};
 	

@@ -2,9 +2,39 @@
 #include "Systronix_MB85RC256V.h"
 
 
-//---------------------------< S E T U P >--------------------------------------------------------------------
+//---------------------------< D E F A U L T   C O N S R U C T O R >------------------------------------------
+//
+// default constructor assumes lowest base address
+//
 
-uint8_t Systronix_MB85RC256V::setup (uint8_t base)
+Systronix_MB85RC256V::Systronix_MB85RC256V()
+	{
+	_base = FRAM_BASE_MIN;
+	error.total_error_count = 0;				// clear the error counter
+	}
+
+
+//---------------------------< D E S T R U C T O R >----------------------------------------------------------
+//
+// destructor
+//
+
+Systronix_MB85RC256V::~Systronix_MB85RC256V()
+{
+	// Anything to do here? Leave I2C as master? Set flag?
+}
+
+
+//---------------------------< S E T U P >--------------------------------------------------------------------
+//
+// TODO: merge with begin()? This function doesn't actually do anything, it just sets some private values. It's
+// redundant and some params must be effectively specified again in begin (Wire net and pins are not independent).	what parameters are specified again? [wsk]
+//
+// TODO: add a page size argument?  If this code is to be adapted to support fram and 4kx8 eeprom, some way of
+// indicating max address, page size, etc must be employed.
+//
+
+uint8_t Systronix_MB85RC256V::setup (uint8_t base, i2c_t3 wire, char* name)
 	{
 	if ((FRAM_BASE_MIN > base) || (FRAM_BASE_MAX < base))
 		{
@@ -13,18 +43,33 @@ uint8_t Systronix_MB85RC256V::setup (uint8_t base)
 		}
 
 	_base = base;
+	_wire = wire;
+	_wire_name = wire_name = name;		// protected and public
 	return SUCCESS;
 	}
 
 
 //---------------------------< B E G I N >--------------------------------------------------------------------
 //
-// TODO: add support for Wire1, Wire2, ... alternate pins, etc
+//
+//
+
+void Systronix_MB85RC256V::begin (i2c_pins pins, i2c_rate rate)
+	{
+	_wire.begin (I2C_MASTER, 0x00, pins, I2C_PULLUP_EXT, rate);	// join I2C as master
+//	Serial.printf ("275 lib begin %s\r\n", _wire_name);
+	_wire.setDefaultTimeout (200000); 							// 200ms
+	}
+
+
+//---------------------------< D E F A U L T   B E G I N >----------------------------------------------------
+//
+//
 //
 
 void Systronix_MB85RC256V::begin (void)
 	{
-	Wire.begin();				// initialize I2C as master
+	_wire.begin();				// initialize I2C as master
 	}
 
 
@@ -49,6 +94,11 @@ uint8_t Systronix_MB85RC256V::init (void)
 	{
 	uint16_t	prodID;
 	uint16_t	manufID;
+
+	if (ping_eeprom ())
+		Serial.printf ("ping\n");
+	else
+		Serial.printf ("no ping\n");
 
 	if (SUCCESS == get_device_id (&manufID, &prodID) && (0x000A == manufID) && (0x0510 == prodID))
 		{
@@ -202,6 +252,26 @@ void Systronix_MB85RC256V::adv_addr16 (void)
 	}
 
 
+//---------------------------< P I N G _ E E P R O M >--------------------------------------------------------
+//
+// send slave address to eeprom to determine 1) if the device exists, 2) if ready to accept another write 
+//
+
+uint8_t Systronix_MB85RC256V::ping_eeprom (void)
+	{
+	uint8_t ret_val;
+	
+	if (!error.exists)										// exit immediately if device does not exist
+		return ABSENT;
+
+	_wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	ret_val = _wire.endTransmission();						// xmit memory address and data byte
+	if (SUCCESS != ret_val)
+		return FAIL;										// calling function decides what to do with the error
+
+	return SUCCESS;
+	}
+
 //---------------------------< B Y T E _ W R I T E >----------------------------------------------------------
 //
 // i2c_t3 error returns
@@ -228,16 +298,16 @@ uint8_t Systronix_MB85RC256V::byte_write (void)
 	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 
-	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
-	control.bytes_written = Wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
-	control.bytes_written += Wire.write (control.wr_byte);			// add data byte to the tx buffer
+	_wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	control.bytes_written = _wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
+	control.bytes_written += _wire.write (control.wr_byte);			// add data byte to the tx buffer
 	if (3 != control.bytes_written)
 		{
 		tally_transaction (WR_INCOMPLETE);					// only here 0 is error value since we expected to write more than 0 bytes
 		return FAIL;
 		}
 
-	ret_val = Wire.endTransmission();						// xmit memory address and data byte
+	ret_val = _wire.endTransmission();						// xmit memory address and data byte
 	if (SUCCESS != ret_val)
 		{
 		tally_transaction (ret_val);						// increment the appropriate counter
@@ -309,16 +379,16 @@ uint8_t Systronix_MB85RC256V::page_write (void)
 	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
-	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
-	control.bytes_written = Wire.write (control.addr.as_array, 2);					// put the memory address in the tx buffer
-	control.bytes_written += Wire.write (control.wr_buf_ptr, control.rd_wr_len);	// copy source to wire tx buffer data
+	_wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	control.bytes_written = _wire.write (control.addr.as_array, 2);					// put the memory address in the tx buffer
+	control.bytes_written += _wire.write (control.wr_buf_ptr, control.rd_wr_len);	// copy source to wire tx buffer data
 	if (control.bytes_written < (2 + control.rd_wr_len))	// did we try to write too many bytes to the i2c_t3 tx buf?
 		{
 		tally_transaction (WR_INCOMPLETE);					// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 		
-	ret_val = Wire.endTransmission();						// xmit memory address followed by data
+	ret_val = _wire.endTransmission();						// xmit memory address followed by data
 	if (SUCCESS != ret_val)
 		{
 		tally_transaction (ret_val);						// increment the appropriate counter
@@ -350,15 +420,15 @@ uint8_t Systronix_MB85RC256V::current_address_read (void)
 	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
-	control.bytes_received = Wire.requestFrom(_base, 1, I2C_STOP);
+	control.bytes_received = _wire.requestFrom(_base, 1, I2C_STOP);
 	if (1 != control.bytes_received)						// if we got more than or less than 1 byte
 		{
-		ret_val = Wire.status();							// to get error value
+		ret_val = _wire.status();							// to get error value
 		tally_transaction (ret_val);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
-	control.rd_byte = Wire.readByte();						// get the byte
+	control.rd_byte = _wire.readByte();						// get the byte
 	inc_addr16 ();											// bump our copy of the address
 
 	tally_transaction (SUCCESS);
@@ -383,15 +453,15 @@ uint8_t Systronix_MB85RC256V::byte_read (void)
 	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
-	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
-	control.bytes_written = Wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
+	_wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	control.bytes_written = _wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
 	if (2 != control.bytes_written)							// did we get correct number of bytes into the i2c_t3 tx buf?
 		{
 		tally_transaction (WR_INCOMPLETE);					// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
-	ret_val = Wire.endTransmission();						// xmit memory address
+	ret_val = _wire.endTransmission();						// xmit memory address
 	
 	if (SUCCESS != ret_val)
 		{
@@ -467,15 +537,15 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 	if (!error.exists)										// exit immediately if device does not exist
 		return ABSENT;
 	
-	Wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
-	control.bytes_written = Wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
+	_wire.beginTransmission(_base);							// init tx buff for xmit to slave at _base address
+	control.bytes_written = _wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
 	if (2 != control.bytes_written)							// did we get correct number of bytes into the i2c_t3 tx buf?
 		{
 		tally_transaction (WR_INCOMPLETE);					// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
-	ret_val = Wire.endTransmission (I2C_NOSTOP);			// xmit memory address
+	ret_val = _wire.endTransmission (I2C_NOSTOP);			// xmit memory address
 
 	if (SUCCESS != ret_val)
 		{
@@ -483,16 +553,16 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 		return FAIL;										// calling function decides what to do with the error
 		}
 
-	control.bytes_received = Wire.requestFrom(_base, control.rd_wr_len, I2C_STOP);	// read the bytes
+	control.bytes_received = _wire.requestFrom(_base, control.rd_wr_len, I2C_STOP);	// read the bytes
 	if (control.bytes_received != control.rd_wr_len)
 		{
-		ret_val = Wire.status();							// to get error value
+		ret_val = _wire.status();							// to get error value
 		tally_transaction (ret_val);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
 	for (i=0;i<control.rd_wr_len; i++)						// copy wire rx buffer data to destination
-		*ptr++ = Wire.readByte();
+		*ptr++ = _wire.readByte();
 
 	adv_addr16 ();											// advance our copy of the address
 
@@ -512,9 +582,9 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 	uint8_t ret_val;
 	uint8_t a[3] = { 0, 0, 0 };
 
-	Wire.beginTransmission(RSVD_SLAVE_ID >> 1);				// (0xF8>>1)=0xFC; Wire shifts left to 0xF8
-	Wire.write(_base << 1);
-	ret_val = Wire.endTransmission(I2C_NOSTOP);
+	_wire.beginTransmission(RSVD_SLAVE_ID >> 1);				// (0xF8>>1)=0xFC; Wire shifts left to 0xF8
+	_wire.write(_base << 1);
+	ret_val = _wire.endTransmission(I2C_NOSTOP);
 	
 	if (SUCCESS != ret_val)
 		{
@@ -523,17 +593,17 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 		}
 
 	control.rd_wr_len = 3;									// set the number of bytes to read
-	control.bytes_received = Wire.requestFrom(RSVD_SLAVE_ID >> 1, control.rd_wr_len, I2C_STOP);	// r/w bit for read makes 0xF9
+	control.bytes_received = _wire.requestFrom(RSVD_SLAVE_ID >> 1, control.rd_wr_len, I2C_STOP);	// r/w bit for read makes 0xF9
 	if (control.rd_wr_len != control.bytes_received)
 		{
-		ret_val = Wire.status();							// to get error value
+		ret_val = _wire.status();							// to get error value
 		tally_transaction (ret_val);						// increment the appropriate counter
 		return FAIL;
 		}
 
-	a[0] = Wire.readByte();
-	a[1] = Wire.readByte();
-	a[2] = Wire.readByte();
+	a[0] = _wire.readByte();
+	a[1] = _wire.readByte();
+	a[2] = _wire.readByte();
 
 	// Shift values to separate manuf and prod IDs; see p.10 of
 	// http://www.fujitsu.com/downloads/MICRO/fsa/pdf/products/memory/fram/MB85RC256V-DS501-00017-3v0-E.pdf

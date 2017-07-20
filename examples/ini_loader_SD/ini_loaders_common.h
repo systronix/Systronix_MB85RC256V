@@ -384,7 +384,20 @@ void check_ini_system (char* key_ptr)
 
 	strcpy (temp_array, value_ptr);			// a copy to use for evaluation
 
-	if (!strcmp (key_ptr, "config"))
+	if (!strcmp (key_ptr, "store"))
+		{
+		if (4 == strlen (value_ptr))
+			{
+			temp16 = (uint16_t)atoi (value_ptr);
+			if (9999 >= temp16)						// must be 0-9999
+				strcpy (system_store, value_ptr);
+			else
+				settings.err_msg ((char *)"invalid store number");	// TODO: find a better way to do this so that there aren't two error messages
+			}
+		else
+			settings.err_msg ((char *)"invalid store number");
+		}
+	else if (!strcmp (key_ptr, "config"))
 		{
 		settings.str_to_upper (value_ptr);
 		for (uint8_t i=0; i<5; i++)
