@@ -407,7 +407,7 @@ void check_ini_system (char* key_ptr)
 				strcpy (system_config, value_ptr);
 				break;
 				}
-			if (5 <= i)
+			if (4 <= i)
 				settings.err_msg ((char *)"unknown config");
 			}
 		}
@@ -507,7 +507,7 @@ void check_ini_system (char* key_ptr)
 					strcpy (system_dhcp, value_ptr);
 					break;
 					}
-				if (2 <= i)
+				if (1 <= i)
 					settings.err_msg ((char *)"invalid dhcp setting");
 				}
 			}
@@ -562,7 +562,7 @@ void check_ini_system (char* key_ptr)
 					strcpy (system_tz, value_ptr);
 					break;
 					}
-				if (6 <= i)
+				if (5 <= i)
 					settings.err_msg ((char *)"unsupported time zone");
 				}
 			}
@@ -581,7 +581,7 @@ void check_ini_system (char* key_ptr)
 					strcpy (system_dst, value_ptr);
 					break;
 					}
-				if (2 <= i)
+				if (1 <= i)
 					settings.err_msg ((char *)"invalid dst setting");
 				}
 			}
@@ -1062,7 +1062,7 @@ void check_ini_users (char*	key_ptr)
 						strcpy (user [index].rights, value_ptr);
 						break;
 						}
-					if (5 <= i)
+					if (4 <= i)
 						settings.err_msg ((char *)"invalid rights value");
 					}
 				}
