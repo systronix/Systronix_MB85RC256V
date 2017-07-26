@@ -231,7 +231,7 @@ void warn_msg (void)
 
 void warn_msg (char* key_ptr)
 	{
-	Serial.printf ("\t%3d: %s using default\n", settings.line_num, key_ptr);
+	Serial.printf ("\twarning: %3d: %s using default\n", settings.line_num, key_ptr);
 	warn_cnt++;								// tally number of warnings
 	}
 
@@ -1088,6 +1088,8 @@ void check_min_req_users (void)
 	boolean	leader = false;
 	boolean	service = false;
 	boolean it_tech = false;
+	boolean factory = false;
+	char err_msg[128];
 	
 	for (i=1; i <= USERS_MAX_NUM; i++)
 		{
@@ -1099,15 +1101,21 @@ void check_min_req_users (void)
 			it_tech = true;
 		if ('F' == user [i].rights[0])				// in the factory doesn't matter if there are leader, service, it tech users
 			{
+			factory = true;
 			warn_cnt++;								// tally number of warnings
-			Serial.printf ("\n\t[users] list contains user with factory rights: user: %d\n", i);	// warn because should not ship from factory with factory users in ini file
-			return;
+			Serial.printf ("\twarning: [users] list contains user with factory rights: user: %d\n", i);	// warn because should not ship from factory with factory users in ini file
+//			return;
 			}
 		}
 	if (!(leader && service && it_tech))
 		{
-		settings.err_msg ((char *)"one each of leader, service, and it tech users required");
-		total_errs += settings.err_cnt;
+		if (factory)
+			warn_cnt++;
+		else
+			total_errs += settings.err_cnt + 1;
+
+		sprintf (err_msg, "\t%s: one each of leader, service, and IT tech users required\n", factory ? (char*)"warning" : (char*)"ERROR");
+		Serial.printf ("%s", err_msg);
 		}
 	}
 
