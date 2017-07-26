@@ -286,8 +286,18 @@ void loop()
 
 		if (('\r' == *ln_buf) || (EOL_MARKER == *ln_buf))	// do these here so we have source line numbers for error messages
 			continue;								// cr or lf; we don't save newlines in fram
-		if (strstr (ln_buf, "#"))
+
+		strcpy (ln_buf, settings.trim (ln_buf));	// trim leading white space
+
+		if ('#' == *ln_buf)							// first non-whitespace character is '#'?
 			continue;								// comment; we don't save comments in fram
+
+		if (strstr (ln_buf, "#"))					// find '#' anywhere in the line
+			{
+			settings.err_msg ((char *)"misplaced comment");		// misplaced; comment must be on separate lines
+			total_errs++;							// prevent writing to fram
+			continue;								// back to get next line
+			}
 
 		ret_val = normalize_kv_pair (ln_buf);		//if kv pair: trim, spaces to underscores; if heading: returns heading define; else returns error
 

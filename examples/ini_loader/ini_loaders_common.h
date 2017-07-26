@@ -374,17 +374,13 @@ void check_ini_system (char* key_ptr)
 
 	*value_ptr++ = '\0';					// null terminate the key and bump the pointer to point at the value
 
-	settings.err_cnt = 0;							// reset the counter
-
-	if (16 < strlen (value_ptr))
-		{
-		settings.err_msg ((char *)"value string too long");
-		return;
-		}
-
+	settings.err_cnt = 0;					// reset the counter
 	strcpy (temp_array, value_ptr);			// a copy to use for evaluation
 
-	if (!strcmp (key_ptr, "store"))
+	if (16 < strlen (value_ptr))
+		settings.err_msg ((char *)"value string too long");
+
+	else if (!strcmp (key_ptr, "store"))
 		{
 		if (4 == strlen (value_ptr))
 			{
@@ -624,12 +620,9 @@ void check_ini_habitat_A (char* key_ptr)
 	settings.err_cnt = 0;							// reset the counter
 
 	if (8 < strlen (value_ptr))
-		{
 		settings.err_msg ((char *)"value string too long");
-		return;
-		}
 	
-	if (strstr (key_ptr, "day_a_"))	// daytime temperature target A ...
+	else if (strstr (key_ptr, "day_a_"))	// daytime temperature target A ...
 		{
 		if (*value_ptr)
 			{
@@ -742,12 +735,9 @@ void check_ini_habitat_B (char* key_ptr)
 	settings.err_cnt = 0;							// reset the counter
 
 	if (8 < strlen (value_ptr))
-		{
 		settings.err_msg ((char *)"value string too long");
-		return;
-		}
 	
-	if (strstr (key_ptr, "day_b_"))	// daytime temperature target B ...
+	else if (strstr (key_ptr, "day_b_"))	// daytime temperature target B ...
 		{
 		if (*value_ptr)
 			{
@@ -859,12 +849,9 @@ void check_ini_habitat_EC (char* key_ptr)
 	settings.err_cnt = 0;							// reset the counter
 
 	if (8 < strlen (value_ptr))
-		{
 		settings.err_msg ((char *)"value string too long");
-		return;
-		}
 	
-	if (!strcmp (key_ptr, "day_ec_top"))	// daytime temperature target EC top ...
+	else if (!strcmp (key_ptr, "day_ec_top"))	// daytime temperature target EC top ...
 		{
 		if (*value_ptr)
 			{
@@ -1104,7 +1091,6 @@ void check_min_req_users (void)
 			factory = true;
 			warn_cnt++;								// tally number of warnings
 			Serial.printf ("\twarning: [users] list contains user with factory rights: user: %d\n", i);	// warn because should not ship from factory with factory users in ini file
-//			return;
 			}
 		}
 	if (!(leader && service && it_tech))
