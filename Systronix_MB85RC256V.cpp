@@ -51,7 +51,7 @@ uint8_t Systronix_MB85RC256V::setup (uint8_t base, i2c_t3 wire, char* name)
 
 //---------------------------< B E G I N >--------------------------------------------------------------------
 //
-//
+// I2C_PINS_18_19 or I2C_PINS_29_30
 //
 
 void Systronix_MB85RC256V::begin (i2c_pins pins, i2c_rate rate)
