@@ -305,7 +305,7 @@ boolean is_good_pin (const char* pin_ptr)
 	test_ptr = (char*)pin_ptr+1;
 	for (i=0; i<4; i++)						// must not be a string of all same digits
 		{
-		if (*pin_ptr != *test_ptr)
+		if (*pin_ptr != *test_ptr++)
 			break;
 		}
 	if (4 == i)
@@ -631,7 +631,7 @@ void check_ini_habitat_A (char* key_ptr)
 				settings.err_msg ((char *)"invalid drawer/compartment");
 			else
 				{
-				temp16 = settings.fahrenheit_string_to_raw13 (value_ptr);	// convert to binary raw13 format
+				temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 
 				if (TEMP_ERROR == temp16)							// if can't be converted
 					settings.err_msg ((char *)"invalid temperature");
@@ -651,7 +651,7 @@ void check_ini_habitat_A (char* key_ptr)
 				settings.err_msg ((char *)"invalid drawer/compartment");
 			else
 				{
-				temp16 = settings.fahrenheit_string_to_raw13 (value_ptr);	// convert to binary raw13 format
+				temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 
 				if (TEMP_ERROR == temp16)							// if can't be converted
 					settings.err_msg ((char *)"invalid temperature");
@@ -746,7 +746,7 @@ void check_ini_habitat_B (char* key_ptr)
 				settings.err_msg ((char *)"invalid drawer/compartment");
 			else
 				{
-				temp16 = settings.fahrenheit_string_to_raw13 (value_ptr);	// convert to binary raw13 format
+				temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 
 				if (TEMP_ERROR == temp16)							// if can't be converted
 					settings.err_msg ((char *)"invalid temperature");
@@ -766,7 +766,7 @@ void check_ini_habitat_B (char* key_ptr)
 				settings.err_msg ((char *)"invalid drawer/compartment");
 			else
 				{
-				temp16 = settings.fahrenheit_string_to_raw13 (value_ptr);	// convert to binary raw13 format
+				temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 
 				if (TEMP_ERROR == temp16)							// if can't be converted
 					settings.err_msg ((char *)"invalid temperature");
@@ -855,7 +855,7 @@ void check_ini_habitat_EC (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			temp16 = settings.fahrenheit_string_to_raw13 (value_ptr);
+			temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 			
 			if (TEMP_ERROR == temp16)
 				settings.err_msg ((char *)"invalid temperature");
@@ -869,7 +869,7 @@ void check_ini_habitat_EC (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			temp16 = settings.fahrenheit_string_to_raw13 (value_ptr);
+			temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 			
 			if (TEMP_ERROR == temp16)
 				settings.err_msg ((char *)"invalid temperature");
@@ -908,7 +908,7 @@ void check_ini_habitat_EC (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			temp16 = settings.fahrenheit_string_to_raw13 (value_ptr);
+			temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 			
 			if (TEMP_ERROR == temp16)
 				settings.err_msg ((char *)"invalid temperature");
@@ -922,7 +922,7 @@ void check_ini_habitat_EC (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			temp16 = settings.fahrenheit_string_to_raw13 (value_ptr);
+			temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 			
 			if (TEMP_ERROR == temp16)
 				settings.err_msg ((char *)"invalid temperature");
