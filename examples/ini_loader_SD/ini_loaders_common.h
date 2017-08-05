@@ -6,6 +6,52 @@
 
 
 
+//---------------------------< I S O _ D A T E _ G E T >------------------------------------------------------
+//
+// attempt to convert iso8601 date string to time_t value
+//
+
+extern time_t makeTime(tmElements_t &tm);
+
+uint8_t iso_date_get (char *value_ptr, time_t* manuf_date_ptr)
+	{
+	tmElements_t tm;
+	uint32_t	year=0;
+	uint32_t	month=1;
+	uint32_t	day=1;
+	char*		end_ptr;
+
+	year = strtol (value_ptr, &end_ptr, 10);
+	if ('-' == *end_ptr)
+		end_ptr++;
+	else
+		return FAIL;
+
+	month = strtol (end_ptr, &end_ptr, 10);
+	if ('-' == *end_ptr)
+		end_ptr++;
+	else
+		return FAIL;
+
+	day = strtol (end_ptr, &end_ptr, 10);
+	if ('\0' != *end_ptr)
+		return FAIL;
+
+	if (!utils.is_valid_date ((uint16_t)year, (uint8_t)month, (uint8_t)day))
+		return FAIL;
+
+	tm.Year = (uint8_t)(year - 1970);
+	tm.Month = (uint8_t)month;
+	tm.Day = (uint8_t)day;
+	tm.Hour = 0;
+	tm.Minute = 0;
+	tm.Second = 0;
+
+	*manuf_date_ptr = makeTime (tm);
+	return SUCCESS;
+	}
+
+
 //---------------------------< C L O C K _ S E T >------------------------------------------------------------
 
 uint8_t clock_set (void)
@@ -407,6 +453,17 @@ void check_ini_system (char* key_ptr)
 				settings.err_msg ((char *)"unknown config");
 			}
 		}
+//==========
+// not a setting per se, this value is programmed into a separate section of fram and not part of primary or backup settings
+	else if (!strcmp (key_ptr, "manuf_date"))
+		{
+		if (!(*value_ptr) || iso_date_get (value_ptr, &manufacture_date))
+			{
+//			if (iso_date_get (value_ptr, &manufacture_date))
+				settings.err_msg ((char *)"invalid manuf date");
+			}
+		}
+//==========
 	else if (!strcmp (key_ptr, "powerfru"))
 		{
 		if (*value_ptr)
@@ -1361,3 +1418,32 @@ uint8_t set_fram_crc (uint8_t settings_area, const uint16_t crc)
 	}
 
 
+//---------------------------< S E T _ F R A M _ M A N U F _ D A T E >----------------------------------------
+//
+// write a time_t unix timestamp to fram control block 2; not a 'setting' so not made part of settings struct
+//
+
+void set_fram_manuf_date (void)
+	{
+	fram.set_addr16 (HABITAT_MANUF_DATE);				// set address for low byte of habitat manufacture date
+	fram.int32_read();									// get the manuf date
+
+	if (fram.control.rd_int32 == manufacture_date)		// if already set to same value we're done
+		return;
+
+	if (fram.control.rd_int32 == 0)						// manuf date not set
+		{
+		fram.set_addr16 (HABITAT_MANUF_DATE);			// set address for low byte of habitat manufacture date
+		fram.control.wr_int32 = manufacture_date;		// get manuf date
+		fram.int32_write();								// and set it
+		}
+	else
+		{
+		if (utils.get_user_yes_no ((char*)"loader", (char*)"WARNING: manufacture date already set to different value; overwrite with new date?", false))	// default answer no
+			{
+			fram.set_addr16 (HABITAT_MANUF_DATE);		// set address for low byte of habitat manufacture date
+			fram.control.wr_int32 = manufacture_date;	// get manuf date
+			fram.int32_write();							// and set it
+			}
+		}
+	}

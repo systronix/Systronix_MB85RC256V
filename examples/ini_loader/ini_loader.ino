@@ -421,6 +421,7 @@ Serial.printf ("start: 0x%.4X; end: 0x%.4X; crc: 0x%4X\n", 0x0400, FRAM_SETTINGS
 //		Serial.printf ("\r\nbackup crc value (0x%.4X) calculated and written to fram in %dms", crc, elapsed_time);
 		Serial.printf ("backup crc:  0x%.4X\n", crc);
 
+		set_fram_manuf_date ();
 //--
 		Serial.printf("\r\n\r\nfram settings write complete\r\n\r\n");
 
