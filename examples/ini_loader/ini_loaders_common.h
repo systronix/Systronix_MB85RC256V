@@ -1428,7 +1428,7 @@ void set_fram_manuf_date (void)
 	fram.set_addr16 (HABITAT_MANUF_DATE);				// set address for low byte of habitat manufacture date
 	fram.int32_read();									// get the manuf date
 
-	if (fram.control.rd_int32 == manufacture_date)		// if already set to same value we're done
+	if (fram.control.rd_int32 == (uint32_t)manufacture_date)		// if already set to same value we're done
 		return;
 
 	if (fram.control.rd_int32 == 0)						// manuf date not set
