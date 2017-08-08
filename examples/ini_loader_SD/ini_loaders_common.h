@@ -405,7 +405,7 @@ void check_ini_system (char* key_ptr)
 	{
 	uint32_t	temp32;						// temp variable for holding uint32_t sized variables
 	uint16_t	temp16;						// temp variable for holding uint16_t sized variables
-	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
+//	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
 	char		temp_array[32];
 
 	char*	value_ptr;						// pointers to the key and value items
@@ -458,9 +458,20 @@ void check_ini_system (char* key_ptr)
 	else if (!strcmp (key_ptr, "manuf_date"))
 		{
 		if (!(*value_ptr) || iso_date_get (value_ptr, &manufacture_date))
+			settings.err_msg ((char *)"invalid manuf date");
+		}
+//==========
+// not a setting per se, this value is programmed into a separate section of fram and not part of primary or backup settings
+	else if (!strcmp (key_ptr, "habitat_rev"))
+		{
+		if (*value_ptr)
 			{
-//			if (iso_date_get (value_ptr, &manufacture_date))
-				settings.err_msg ((char *)"invalid manuf date");
+			temp16 = settings.revision_check (value_ptr);
+
+			if (FAIL == temp16)
+				settings.err_msg ((char *)"invalid habitat revision");
+			else
+				habitat_rev = temp16;
 			}
 		}
 //==========
@@ -468,10 +479,13 @@ void check_ini_system (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			temp8 = settings.powerfru_revision (value_ptr);
+			temp16 = settings.revision_check (value_ptr);
 
-			if ((FAIL == temp8) || ((0 != temp8) && (0x22 !=temp8)))	// only 0, not used, and rev2.2 supported
+			if ((FAIL == temp16) || ((0 != temp16) && (0x0220 !=temp16)))	// only 0, not used, and rev2.2 supported
+			{
+				Serial.printf ("pwrFRR rev: 0x%.4X\n", temp16);
 				settings.err_msg ((char *)"invalid powerFRU revision");
+			}
 			else
 				strcpy (system_pwrfru, value_ptr);
 			}
@@ -1444,6 +1458,40 @@ void set_fram_manuf_date (void)
 			fram.set_addr16 (HABITAT_MANUF_DATE);		// set address for low byte of habitat manufacture date
 			fram.control.wr_int32 = manufacture_date;	// get manuf date
 			fram.int32_write();							// and set it
+			}
+		}
+	}
+
+
+//---------------------------< S E T _ F R A M _ H A B I T A T _ R E V >--------------------------------------
+//
+// write the habitat revision to fram control block 2; not a 'setting' so not made part of settings struct
+//
+
+void set_fram_habitat_rev (void)
+	{
+	fram.set_addr16 (HABITAT_REV);				// set address for low byte of habitat revision
+	fram.int16_read();									// get HABITAT_REV
+
+	if (0xFFFF == habitat_rev)							// not specified in ini file
+		return;											// do nothing
+
+	if (fram.control.rd_int16 == habitat_rev)			// if already set to same value we're done
+		return;
+
+	if (fram.control.rd_int16 == 0)						// HABITAT_REV not set
+		{
+		fram.set_addr16 (HABITAT_REV);			// set address for low byte of habitat revision
+		fram.control.wr_int16 = habitat_rev;		// get the revision
+		fram.int16_write();								// and set it
+		}
+	else
+		{
+		if (utils.get_user_yes_no ((char*)"loader", (char*)"WARNING: habitat revision already set to different value; overwrite with new revision?", false))	// default answer no
+			{
+			fram.set_addr16 (HABITAT_REV);		// set address for low byte of habitat revision
+			fram.control.wr_int16 = habitat_rev;	// get revision
+			fram.int16_write();							// and set it
 			}
 		}
 	}

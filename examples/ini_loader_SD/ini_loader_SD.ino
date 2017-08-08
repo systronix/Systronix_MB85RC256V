@@ -53,7 +53,8 @@ char		ln_buf [256];
 uint16_t	total_errs = 0;
 uint16_t	warn_cnt = 0;
 char		pins[USERS_MAX_NUM+1][6] = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
-time_t		manufacture_date;			// not a 'setting' but is stored in fram control block 2
+time_t		manufacture_date = 0;		// not a 'setting' but is stored in fram control block 2
+uint16_t	habitat_rev = 0xFFFF;		// not a 'setting' but is stored in fram control block 2
 
 
 //---------------------------< C O M M O N _ F U N C T I O N S >----------------------------------------------
@@ -379,6 +380,22 @@ void loop()
 			check_ini_users (ln_buf);
 		}
 
+	if ('\0' == *system_config)						// these are the required key/value pairs; emit error messages if these have not been modified
+		{
+		Serial.printf ("ERROR: required config missing\n");
+		total_errs++;
+		}
+	if ('\0' == *system_store)
+		{
+		Serial.printf ("ERROR: required store missing\n");
+		total_errs++;
+		}
+	if (0 == manufacture_date)
+		{
+		Serial.printf ("ERROR: required manuf date missing\n");
+		total_errs++;
+		}
+
 	check_min_req_users ();								// there must be at minimum 1 each leader, service, & it tech user except when there is a factory user
 	
 	elapsed_time = stopwatch (STOP);					// capture the time
@@ -477,6 +494,7 @@ Serial.printf ("start: 0x%.4X; end: 0x%.4X; crc: 0x%4X\n", 0x0400, FRAM_SETTINGS
 		Serial.printf ("backup crc:  0x%.4X\n", crc);
 
 		set_fram_manuf_date ();
+		set_fram_habitat_rev ();
 //--
 		Serial.printf("\r\n\r\nfram settings write complete\r\n\r\n");
 

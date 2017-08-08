@@ -21,40 +21,40 @@ struct heat_settings
 heat_settings habitat_A_heat_settings [13] =	// '1' indexed; [0] not used
 	{
 	{0, 0, 0},									// 0 - not used
-	{{"85"}, {"80"}, {"25"}},	// 1: 85 day/80 night degrees F target, 25 watt heat lamp
-	{{"85"}, {"80"}, {"25"}},	// 2
-	{{"85"}, {"80"}, {"25"}},	// 3
-	{{"85"}, {"80"}, {"25"}},	// 4
-	{{"85"}, {"80"}, {"25"}},	// 5
-	{{"85"}, {"80"}, {"25"}},	// 6
-	{{"85"}, {"80"}, {"25"}},	// 7
-	{{"85"}, {"80"}, {"25"}},	// 8
-	{{"85"}, {"80"}, {"25"}},	// 9
-	{{"85"}, {"80"}, {"25"}},	// 10
-	{{"85"}, {"80"}, {"25"}},	// 11
-	{{"85"}, {"80"}, {"25"}}	// 12
+	{{"85"}, {"75"}, {"25"}},	// 1: 85 day/75 night degrees F target, 25 watt heat lamp
+	{{"85"}, {"75"}, {"25"}},	// 2
+	{{"85"}, {"75"}, {"25"}},	// 3
+	{{"85"}, {"75"}, {"25"}},	// 4
+	{{"85"}, {"75"}, {"25"}},	// 5
+	{{"85"}, {"75"}, {"25"}},	// 6
+	{{"85"}, {"75"}, {"25"}},	// 7
+	{{"85"}, {"75"}, {"25"}},	// 8
+	{{"85"}, {"75"}, {"25"}},	// 9
+	{{"85"}, {"75"}, {"25"}},	// 10
+	{{"85"}, {"75"}, {"25"}},	// 11
+	{{"85"}, {"75"}, {"25"}}	// 12
 	};
 heat_settings habitat_B_heat_settings [13] =	// '1' indexed; [0] not used
 	{
 	{0, 0, 0},									// 0 - not used
-	{{"85"}, {"80"}, {"25"}},	// 1: 85 day/80 night degrees F target, 25 watt heat lamp
-	{{"85"}, {"80"}, {"25"}},	// 2
-	{{"85"}, {"80"}, {"25"}},	// 3
-	{{"85"}, {"80"}, {"25"}},	// 4
-	{{"85"}, {"80"}, {"25"}},	// 5
-	{{"85"}, {"80"}, {"25"}},	// 6
-	{{"85"}, {"80"}, {"25"}},	// 7
-	{{"85"}, {"80"}, {"25"}},	// 8
-	{{"85"}, {"80"}, {"25"}},	// 9
-	{{"85"}, {"80"}, {"25"}},	// 10
-	{{"85"}, {"80"}, {"25"}},	// 11
-	{{"85"}, {"80"}, {"25"}}	// 12
+	{{"85"}, {"75"}, {"25"}},	// 1: 85 day/75 night degrees F target, 25 watt heat lamp
+	{{"85"}, {"75"}, {"25"}},	// 2
+	{{"85"}, {"75"}, {"25"}},	// 3
+	{{"85"}, {"75"}, {"25"}},	// 4
+	{{"85"}, {"75"}, {"25"}},	// 5
+	{{"85"}, {"75"}, {"25"}},	// 6
+	{{"85"}, {"75"}, {"25"}},	// 7
+	{{"85"}, {"75"}, {"25"}},	// 8
+	{{"85"}, {"75"}, {"25"}},	// 9
+	{{"85"}, {"75"}, {"25"}},	// 10
+	{{"85"}, {"75"}, {"25"}},	// 11
+	{{"85"}, {"75"}, {"25"}}	// 12
 	};
 heat_settings habitat_EC_heat_settings [3] =	// '1' indexed; [0] not used
 	{
 	{0, 0, 0},									// 0 - not used
-	{{"85"}, {"80"}, {"25"}},	// 1: 85 day/80 night degrees F target, 25 watt heat lamp
-	{{"85"}, {"80"}, {"25"}}	// 2
+	{{"85"}, {"75"}, {"25"}},	// 1: 85 day/75 night degrees F target, 25 watt heat lamp
+	{{"85"}, {"75"}, {"25"}}	// 2
 	};
 
 //char overtemp_ignore_A [13][8] = 	// compartment overtemp alarm ignored when corresponding bit set here
@@ -74,8 +74,8 @@ heat_settings habitat_EC_heat_settings [3] =	// '1' indexed; [0] not used
 //	{""}, {"no"}, {"no"}
 //	};
 
-char system_store [8] = {"0000"};				// 0000 for development should be 1000 <= store <= 9999
-char system_config [8] = {"SSWEC"};				// SS, SSWEC, B2B, B2BWEC, SBS
+char system_store [8] = {""};					// required; if NULL at end of settings read the ERROR; should be 0000 <= store <= 9999
+char system_config [8] = {""};					// required; if NULL at end of settings read the ERROR; SS, SSWEC, B2B, B2BWEC, SBS
 char system_pwrfru [8] = {"2.2"};				// uses pwr dist rev 2.2 and LCM300Q power supply
 char system_dawn [8] = {"06:00"};				// minimal default: 06:00
 char system_dusk [8] = {"18:00"};				// minimal default: 18:00
