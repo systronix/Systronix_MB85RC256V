@@ -484,9 +484,9 @@ void check_ini_system (char* key_ptr)
 			{
 			temp16 = settings.revision_check (value_ptr);
 
-			if ((FAIL == temp16) || ((0 != temp16) && (0x0220 !=temp16)))	// only 0, not used, and rev2.2 supported
+			if ((FAIL == temp16) || ((0 != temp16) && (((2 << 8) | 20) !=temp16)))	// only 0, not used, and rev2.2 supported
 			{
-				Serial.printf ("pwrFRR rev: 0x%.4X\n", temp16);
+				Serial.printf ("pwrFRU rev: 0x%.4X\n", temp16);
 				settings.err_msg ((char *)"invalid powerFRU revision");
 			}
 			else
@@ -1442,6 +1442,8 @@ uint8_t set_fram_crc (uint8_t settings_area, const uint16_t crc)
 
 void set_fram_manuf_date (void)
 	{
+	tmElements_t 	tm;
+
 	fram.set_addr16 (HABITAT_MANUF_DATE);				// set address for low byte of habitat manufacture date
 	fram.int32_read();									// get the manuf date
 
@@ -1456,7 +1458,13 @@ void set_fram_manuf_date (void)
 		}
 	else
 		{
-		if (utils.get_user_yes_no ((char*)"loader", (char*)"WARNING: manufacture date already set to different value; overwrite with new date?", false))	// default answer no
+		Serial.printf ("\twarning: manufacture date already set:\n");
+		breakTime (fram.control.rd_int32, tm);	// convert current manuf date time stamp
+		Serial.printf ("\t\tstored manufacture date: %d-%02d-%02d\n", tm.Year+1970, tm.Month, tm.Day);
+		breakTime (manufacture_date, tm);	// convert current manuf date time stamp
+		Serial.printf ("\t\t   new manufacture date: %d-%02d-%02d", tm.Year+1970, tm.Month, tm.Day);
+
+		if (utils.get_user_yes_no ((char*)"loader", (char*)"overwrite stored date with new date?", false))	// default answer no
 			{
 			fram.set_addr16 (HABITAT_MANUF_DATE);		// set address for low byte of habitat manufacture date
 			fram.control.wr_int32 = manufacture_date;	// get manuf date
@@ -1490,7 +1498,11 @@ void set_fram_habitat_rev (void)
 		}
 	else
 		{
-		if (utils.get_user_yes_no ((char*)"loader", (char*)"WARNING: habitat revision already set to different value; overwrite with new revision?", false))	// default answer no
+		Serial.printf ("\twarning: habitat revision already set:\n");
+		Serial.printf ("\t\tstored habitat revision: %2d.%.2d\n", (uint8_t)(fram.control.rd_int16 >> 8), (uint8_t)fram.control.rd_int16);
+		Serial.printf ("\t\t   new habitat revision: %2d.%.2d\n", (uint8_t)(habitat_rev >> 8), (uint8_t)habitat_rev);
+
+		if (utils.get_user_yes_no ((char*)"loader", (char*)"overwrite stored revision with new revision?", false))	// default answer no
 			{
 			fram.set_addr16 (HABITAT_REV);		// set address for low byte of habitat revision
 			fram.control.wr_int16 = habitat_rev;	// get revision
@@ -1524,7 +1536,11 @@ void set_fram_store (void)
 		}
 	else
 		{
-		if (utils.get_user_yes_no ((char*)"loader", (char*)"WARNING: store number already set to different value; overwrite with new number?", false))	// default answer no
+		Serial.printf ("\twarning: store number already set:\n");
+		Serial.printf ("\t\tstored store number: %.4d\n", fram.control.rd_int16);
+		Serial.printf ("\t\t   new store number: %.4d\n", store);
+
+		if (utils.get_user_yes_no ((char*)"loader", (char*)"overwrite stored revision with new revision?", false))	// default answer no
 			{
 			fram.set_addr16 (STORE);					// set address for low byte of habitat revision
 			fram.control.wr_int16 = store;				// get revision
