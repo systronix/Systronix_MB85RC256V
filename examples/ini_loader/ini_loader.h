@@ -74,8 +74,7 @@ heat_settings habitat_EC_heat_settings [3] =	// '1' indexed; [0] not used
 //	{""}, {"no"}, {"no"}
 //	};
 
-char system_store [8] = {""};					// required; if NULL at end of settings read the ERROR; should be 0000 <= store <= 9999
-char system_config [8] = {""};					// required; if NULL at end of settings read the ERROR; SS, SSWEC, B2B, B2BWEC, SBS
+char system_config [8] = {""};					// required; if NULL at end of settings read then ERROR; SS, SSWEC, B2B, B2BWEC, SBS
 char system_pwrfru [8] = {"2.2"};				// uses pwr dist rev 2.2 and LCM300Q power supply
 char system_dawn [8] = {"06:00"};				// minimal default: 06:00
 char system_dusk [8] = {"18:00"};				// minimal default: 18:00
@@ -114,7 +113,6 @@ struct kv_pair
 kv_pair	kv_system [15] =
 	{
 	{{""}, 0},			// 1 indexed; [0] not used
-	{{STORE_KEY},				system_store},
 	{{CONFIG_KEY},				system_config},
 	{{PWRFRU_KEY},				system_pwrfru},
 	{{DAWN_KEY},				system_dawn},

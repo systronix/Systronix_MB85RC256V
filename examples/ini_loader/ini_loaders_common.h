@@ -426,19 +426,22 @@ void check_ini_system (char* key_ptr)
 	if (16 < strlen (value_ptr))
 		settings.err_msg ((char *)"value string too long");
 
+//==========
+// not a setting per se, this value is programmed into a separate section of fram and not part of primary or backup settings
 	else if (!strcmp (key_ptr, "store"))
 		{
 		if (4 == strlen (value_ptr))
 			{
 			temp16 = (uint16_t)atoi (value_ptr);
 			if (9999 >= temp16)						// must be 0-9999
-				strcpy (system_store, value_ptr);
+				store = temp16;
 			else
 				settings.err_msg ((char *)"invalid store number");	// TODO: find a better way to do this so that there aren't two error messages
 			}
 		else
 			settings.err_msg ((char *)"invalid store number");
 		}
+//==========
 	else if (!strcmp (key_ptr, "config"))
 		{
 		settings.str_to_upper (value_ptr);
@@ -1470,11 +1473,11 @@ void set_fram_manuf_date (void)
 
 void set_fram_habitat_rev (void)
 	{
-	fram.set_addr16 (HABITAT_REV);				// set address for low byte of habitat revision
-	fram.int16_read();									// get HABITAT_REV
-
 	if (0xFFFF == habitat_rev)							// not specified in ini file
 		return;											// do nothing
+
+	fram.set_addr16 (HABITAT_REV);				// set address for low byte of habitat revision
+	fram.int16_read();									// get HABITAT_REV
 
 	if (fram.control.rd_int16 == habitat_rev)			// if already set to same value we're done
 		return;
@@ -1491,6 +1494,40 @@ void set_fram_habitat_rev (void)
 			{
 			fram.set_addr16 (HABITAT_REV);		// set address for low byte of habitat revision
 			fram.control.wr_int16 = habitat_rev;	// get revision
+			fram.int16_write();							// and set it
+			}
+		}
+	}
+
+
+//---------------------------< S E T _ F R A M _ S T O R E >--------------------------------------------------
+//
+// write the store to fram control block 2; not a 'setting' so not made part of settings struct
+//
+
+void set_fram_store (void)
+	{
+	if (0xFFFF == store)								// not specified in ini file
+		return;											// do nothing
+
+	fram.set_addr16 (STORE);							// set address for low byte of store
+	fram.int16_read();									// get STORE
+
+	if (fram.control.rd_int16 == store)					// if already set to same value we're done
+		return;
+
+	if (fram.control.rd_int16 == 0)						// STORE not set
+		{
+		fram.set_addr16 (STORE);						// set address for low byte of habitat revision
+		fram.control.wr_int16 = store;					// get the store
+		fram.int16_write();								// and set it
+		}
+	else
+		{
+		if (utils.get_user_yes_no ((char*)"loader", (char*)"WARNING: store number already set to different value; overwrite with new number?", false))	// default answer no
+			{
+			fram.set_addr16 (STORE);					// set address for low byte of habitat revision
+			fram.control.wr_int16 = store;				// get revision
 			fram.int16_write();							// and set it
 			}
 		}
