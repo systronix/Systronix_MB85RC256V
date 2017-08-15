@@ -95,11 +95,6 @@ uint8_t Systronix_MB85RC256V::init (void)
 	uint16_t	prodID;
 	uint16_t	manufID;
 
-	if (ping_eeprom ())
-		Serial.printf ("ping\n");
-	else
-		Serial.printf ("no ping\n");
-
 	if (SUCCESS == get_device_id (&manufID, &prodID) && (0x000A == manufID) && (0x0510 == prodID))
 		{
 		error.exists = true;
