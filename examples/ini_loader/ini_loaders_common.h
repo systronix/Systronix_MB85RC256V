@@ -333,7 +333,7 @@ boolean is_unique_pin (uint8_t index, char* value_ptr)
 //
 //
 
-boolean is_good_pin (const char* pin_ptr)
+boolean is_good_pin (const char* const pin_ptr)
 	{
 	uint8_t i;
 	char*	test_ptr;
