@@ -1421,8 +1421,10 @@ uint8_t set_fram_crc (uint8_t settings_area, const uint16_t crc)
 	{
 	uint16_t calc_crc;
 	
-	settings.get_crc_fram (&calc_crc, (PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START,
-		(PRIMARY == settings_area) ? FRAM_SETTINGS_END : FRAM_SETTINGS_2_END);
+//	settings.get_crc_fram (&calc_crc, (PRIMARY == settings_area) ? FRAM_SETTINGS_START : FRAM_SETTINGS_2_START,
+//		(PRIMARY == settings_area) ? FRAM_SETTINGS_END : FRAM_SETTINGS_2_END);
+
+	settings.get_crc_fram (&calc_crc, settings_area);
 
 	if (calc_crc == crc)			// calculate the crc across the settings in fram
 		{
