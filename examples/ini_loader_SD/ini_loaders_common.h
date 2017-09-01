@@ -390,7 +390,7 @@ boolean is_good_pin (const char* const pin_ptr)
 // these are acceptable strings that the setting in the ini file must match
 char* valid_config_str [] = {(char*)"B2B", (char*)"B2BWEC", (char*)"SBS", (char*)"SS", (char*)"SSWEC"};	// for config keyword
 char* valid_yes_no_str [] = {(char*)"YES", (char*)"NO"};												// for dhcp and dst
-char* valid_t_zone_str [] = {(char*)"PST", (char*)"MST", (char*)"CST", (char*)"EST", (char*)"AKST", (char*)"HAST"};	// for time zone
+char* valid_t_zone_str [] = {(char*)"PST", (char*)"MST", (char*)"CST", (char*)"EST", (char*)"AST", (char*)"AKST", (char*)"HAST"};	// for time zone
 char* valid_rights_str [] = {(char*)"FACTORY", (char*)"IT TECH", (char*)"SERVICE", (char*)"LEADER", (char*)"ASSOCIATE"};	// for user rights
 
 
