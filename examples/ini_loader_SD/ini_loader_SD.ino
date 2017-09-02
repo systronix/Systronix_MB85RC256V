@@ -212,7 +212,7 @@ void setup()
 //
 //
 
-char file_list [11][64];							// a 1 indexed array of file names; file_list[0] not used
+char file_list [100][64];							// a 1 indexed array of file names; file_list[0] not used
 
 
 void loop()
@@ -221,6 +221,7 @@ void loop()
 	uint16_t	rcvd_count;
 	time_t		elapsed_time;
 	uint8_t		ret_val;
+	uint8_t		c = 0;
 	uint8_t		heading = 0;
 	uint8_t		file_count;							// indexer into file_list; a 1-indexed array; file_list[0] not used
 
@@ -248,7 +249,7 @@ void loop()
 		while (1);
 		}
 
-	Serial.printf ("choose ini file to load:\r\n");
+	Serial.printf ("monitor must send newline\nchoose ini file to load:\r\n");
 
 	file_count = 0;	
 	SD.vwd()->rewind();									// rewind to start of virtual working directory
@@ -276,7 +277,7 @@ void loop()
 		Serial.printf ("\r\n");							// terminate the menu
 		file.close();									// 
 
-		if (10 <= file_count)							// only list 10 files
+		if (99 <= file_count)							// only list 99 files
 			break;
 		}
 
@@ -293,26 +294,48 @@ void loop()
 
 		Serial.printf ("SALT/loader> ");				// print the SALT prompt and accept serial input
 
-		while (!Serial.available());					// wait for input
-		ret_val = Serial.read();						// get whatever is there
-		Serial.printf ("%c\r\n", ret_val);				// print the character at the end of the prompt
-
-		ret_val = ret_val - '0';						// convert to number
-		if ((0 < ret_val) && (ret_val <= file_count))
+		ret_val = 0;
+		while (1)
 			{
-			if (file.open (file_list[ret_val]))
+			if (Serial.available())						// wait for input
 				{
-				Serial.printf ("\r\nreading %s\r\n", file_list[ret_val]);
-				ret_val = 0xFF;
+				c = Serial.read();						// get whatever is there
+
+				if (!isdigit(c))
+					break;
+
+				c -= '0';								// make binary
+				if (!c && !ret_val)
+					continue;							// ignore leading zeros
+
+				ret_val *= 10;							// make room for new digit
+				ret_val += c;							// add the new digit
+				}
+			}
+
+		if ('\n' == c)									// newline ends entry
+			{
+			if (ret_val && (ret_val <= file_count))		// entry must be within range of 1 to file_count
+				{
+				Serial.printf ("%d\r\n", ret_val);		// valid entry, terminate the prompt
+				if (file.open (file_list[ret_val]))
+					{
+					Serial.printf ("\r\nreading %s\r\n", file_list[ret_val]);
+					ret_val = 0xFF;
+					}
+				else
+					Serial.printf ("\r\nfile %s did not open\r\n", file_list[ret_val]);
+				break;
 				}
 			else
-				Serial.printf ("\r\nfile %s did not open\r\n", file_list[ret_val]);
-			break;
+				Serial.printf ("invalid choice: %d\n", ret_val);
 			}
 		else
-			Serial.printf ("\r\nselection must be between 1 and %d\r\n", file_count);
+			Serial.printf ("illegal character: %c\n", c);
+
+		ret_val = 0;									// non-digit character that is not a new line; restart
 		}
-		
+
 	Serial.printf ("\r\nreading\r\n");
 	stopwatch (START);
 	rcvd_count = file_get_chars (rx_buf);
