@@ -426,7 +426,16 @@ void loop()
 //	Serial.printf ("\nchecked %d lines in %dms; ", settings.line_num, elapsed_time);
 
 	if (total_errs)										// if there have been any errors
-		Serial.printf ("%d error(s); %d warning(s);\r\nconfiguration not written.\r\n", total_errs, warn_cnt);
+		{
+		Serial.printf ("\n###############################################\n");
+		Serial.printf ("##\n");
+		Serial.printf ("##\t%d error(s); %d warning(s);\n", total_errs, warn_cnt);
+		Serial.printf ("##\tconfiguration not written.\r\n");
+		Serial.printf ("##\tloader stopped; reset to restart\n");
+		Serial.printf ("##\n");
+		Serial.printf ("###############################################\n");
+		while (1);
+		}
 	else
 		Serial.printf ("0 error(s); %d warning(s).\r\n", warn_cnt);
 
