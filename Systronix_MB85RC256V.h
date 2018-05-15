@@ -4,28 +4,16 @@
 
 //---------------------------< I N C L U D E S >--------------------------------------------------------------
 
-#include<Arduino.h>
-
-#if defined(KINETISK) || defined(KINETISL)	// Teensy 3.X and LC
-#include <i2c_t3.h>		
-#else
-#include <Wire.h>	// for AVR I2C library
-#endif
+#include <Arduino.h>
+#include <Systronix_i2c_common.h>
 
 
 //---------------------------< D E F I N E S >----------------------------------------------------------------
-#define RSVD_SLAVE_ID	(0xF8)
-
-#define		SUCCESS				0
-#define		FAIL				(~SUCCESS)
+#define		RSVD_SLAVE_ID		(0xF8)
 #define		DENIED				0xFE
-#define		ABSENT				0xFD
-
+ 
 #define		FRAM_BASE_MIN 		0x50					// 7-bit address not including R/W bit
 #define		FRAM_BASE_MAX 		0x57					// 7-bit address not including R/W bit
-
-#define		WR_INCOMPLETE		11
-#define		SILLY_PROGRAMMER	12
 
 
 //---------------------------< C L A S S >--------------------------------------------------------------------
@@ -73,24 +61,7 @@ class Systronix_MB85RC256V
 			size_t				bytes_received;			// number of bytes read by Wire.requestFrom()
 			} control;
 
-		struct
-			{
-			boolean				exists;					// set false during init() if the device fails to communicate
-			uint8_t		error_val;						// the most recent error value, not just SUCCESS or FAIL
-			uint32_t	incomplete_write_count;			// Wire.write failed to write all of the data to tx_buffer
-			uint32_t	data_len_error_count;			// data too long
-			uint32_t	timeout_count;					// slave response took too long
-			uint32_t	rcv_addr_nack_count;			// slave did not ack address
-			uint32_t	rcv_data_nack_count;			// slave did not ack data
-			uint32_t	arbitration_lost_count;
-			uint32_t	buffer_overflow_count;
-			uint32_t	other_error_count;				// from endTransmission there is "other" error
-			uint32_t	unknown_error_count;
-			uint32_t	data_value_error_count;			// I2C message OK but value read was wrong; how can this be?
-			uint32_t	silly_programmer_error;			// I2C address to big or something else that "should never happen"
-			uint64_t	total_error_count;				// quick check to see if any have happened
-			uint64_t	successful_count;				// successful access cycle
-			} error;
+		error_t		error;								// error struct typdefed in Systronix_i2c_common.h
 
 		char*		wire_name;							// name of Wire, Wire1, etc in use
 
@@ -100,7 +71,6 @@ class Systronix_MB85RC256V
 		uint8_t		base_get(void);						// return this instances _base address
 
 		uint8_t		setup (uint8_t base, i2c_t3 wire = Wire, char* name = (char*)"Wire");
-//		uint8_t		setup (uint8_t base);
 		void 		begin (i2c_pins pins, i2c_rate rate);
 		void		begin (void);						// default begin
 		uint8_t		init (void);						// determines if the device at _base is correct and communicating

@@ -38,7 +38,7 @@ uint8_t Systronix_MB85RC256V::setup (uint8_t base, i2c_t3 wire, char* name)
 	{
 	if ((FRAM_BASE_MIN > base) || (FRAM_BASE_MAX < base))
 		{
-		tally_transaction (SILLY_PROGRAMMER);
+		i2c_common.tally_transaction (SILLY_PROGRAMMER, &error);
 		return FAIL;
 		}
 
@@ -187,7 +187,7 @@ uint8_t Systronix_MB85RC256V::set_addr16 (uint16_t addr)
 	{
 	if (addr & 0x8000)
 		{
-		tally_transaction (SILLY_PROGRAMMER);
+		i2c_common.tally_transaction (SILLY_PROGRAMMER, &error);
 		return DENIED;										// memory address out of bounds
 		}
 
@@ -298,18 +298,18 @@ uint8_t Systronix_MB85RC256V::byte_write (void)
 	control.bytes_written += _wire.write (control.wr_byte);			// add data byte to the tx buffer
 	if (3 != control.bytes_written)
 		{
-		tally_transaction (WR_INCOMPLETE);					// only here 0 is error value since we expected to write more than 0 bytes
+		i2c_common.tally_transaction (WR_INCOMPLETE, &error);					// only here 0 is error value since we expected to write more than 0 bytes
 		return FAIL;
 		}
 
 	ret_val = _wire.endTransmission();						// xmit memory address and data byte
 	if (SUCCESS != ret_val)
 		{
-		tally_transaction (ret_val);						// increment the appropriate counter
+		i2c_common.tally_transaction (ret_val, &error);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
-	tally_transaction (SUCCESS);
+	i2c_common.tally_transaction (SUCCESS, &error);
 	return SUCCESS;
 	}
 
@@ -379,19 +379,19 @@ uint8_t Systronix_MB85RC256V::page_write (void)
 	control.bytes_written += _wire.write (control.wr_buf_ptr, control.rd_wr_len);	// copy source to wire tx buffer data
 	if (control.bytes_written < (2 + control.rd_wr_len))	// did we try to write too many bytes to the i2c_t3 tx buf?
 		{
-		tally_transaction (WR_INCOMPLETE);					// increment the appropriate counter
+		i2c_common.tally_transaction (WR_INCOMPLETE, &error);					// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 		
 	ret_val = _wire.endTransmission();						// xmit memory address followed by data
 	if (SUCCESS != ret_val)
 		{
-		tally_transaction (ret_val);						// increment the appropriate counter
+		i2c_common.tally_transaction (ret_val, &error);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 	adv_addr16 ();											// advance our copy of the address
 
-	tally_transaction (SUCCESS);
+	i2c_common.tally_transaction (SUCCESS, &error);
 	return SUCCESS;
 	}
 
@@ -419,14 +419,14 @@ uint8_t Systronix_MB85RC256V::current_address_read (void)
 	if (1 != control.bytes_received)						// if we got more than or less than 1 byte
 		{
 		ret_val = _wire.status();							// to get error value
-		tally_transaction (ret_val);						// increment the appropriate counter
+		i2c_common.tally_transaction (ret_val, &error);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
 	control.rd_byte = _wire.readByte();						// get the byte
 	inc_addr16 ();											// bump our copy of the address
 
-	tally_transaction (SUCCESS);
+	i2c_common.tally_transaction (SUCCESS, &error);
 	return SUCCESS;
 	}
 
@@ -452,7 +452,7 @@ uint8_t Systronix_MB85RC256V::byte_read (void)
 	control.bytes_written = _wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
 	if (2 != control.bytes_written)							// did we get correct number of bytes into the i2c_t3 tx buf?
 		{
-		tally_transaction (WR_INCOMPLETE);					// increment the appropriate counter
+		i2c_common.tally_transaction (WR_INCOMPLETE, &error);					// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -460,7 +460,7 @@ uint8_t Systronix_MB85RC256V::byte_read (void)
 	
 	if (SUCCESS != ret_val)
 		{
-		tally_transaction (ret_val);						// increment the appropriate counter
+		i2c_common.tally_transaction (ret_val, &error);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 	
@@ -536,7 +536,7 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 	control.bytes_written = _wire.write (control.addr.as_array, 2);	// put the memory address in the tx buffer
 	if (2 != control.bytes_written)							// did we get correct number of bytes into the i2c_t3 tx buf?
 		{
-		tally_transaction (WR_INCOMPLETE);					// increment the appropriate counter
+		i2c_common.tally_transaction (WR_INCOMPLETE, &error);					// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -544,7 +544,7 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 
 	if (SUCCESS != ret_val)
 		{
-		tally_transaction (ret_val);						// increment the appropriate counter
+		i2c_common.tally_transaction (ret_val, &error);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -552,7 +552,7 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 	if (control.bytes_received != control.rd_wr_len)
 		{
 		ret_val = _wire.status();							// to get error value
-		tally_transaction (ret_val);						// increment the appropriate counter
+		i2c_common.tally_transaction (ret_val, &error);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -561,7 +561,7 @@ uint8_t Systronix_MB85RC256V::page_read (void)
 
 	adv_addr16 ();											// advance our copy of the address
 
-	tally_transaction (SUCCESS);
+	i2c_common.tally_transaction (SUCCESS, &error);
 	return SUCCESS;
 	}
 
@@ -583,7 +583,7 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 	
 	if (SUCCESS != ret_val)
 		{
-		tally_transaction (ret_val);						// increment the appropriate counter
+		i2c_common.tally_transaction (ret_val, &error);						// increment the appropriate counter
 		return FAIL;										// calling function decides what to do with the error
 		}
 
@@ -592,7 +592,7 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 	if (control.rd_wr_len != control.bytes_received)
 		{
 		ret_val = _wire.status();							// to get error value
-		tally_transaction (ret_val);						// increment the appropriate counter
+		i2c_common.tally_transaction (ret_val, &error);						// increment the appropriate counter
 		return FAIL;
 		}
 
@@ -605,6 +605,6 @@ uint8_t Systronix_MB85RC256V::get_device_id (uint16_t* manuf_id_ptr, uint16_t* p
 	*manuf_id_ptr = (a[0] << 4) + (a[1]  >> 4);				// for MB85RC256V: 0x000A = fujitsu
 	*prod_id_ptr = ((a[1] & 0x0F) << 8) + a[2];				// 0x0510 (5 is the density; 10 is proprietary
 
-	tally_transaction (SUCCESS);
+	i2c_common.tally_transaction (SUCCESS, &error);
 	return SUCCESS;
 	}
