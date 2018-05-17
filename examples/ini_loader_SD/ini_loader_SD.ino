@@ -14,10 +14,12 @@
 #include <SPI.h>
 #include <SdFat.h>
 #include <DS1307RTC.h>
+#include <Systronix_i2c_common.h>
 #include <Systronix_NTP.h>
 
 #include "ini_loader.h"				// not exactly a shared file but is the same file as used for ini_loader.ino
 
+Systronix_i2c_common i2c_common;
 Systronix_MB85RC256V fram;
 Systronix_NTP ntp;
 SALT_settings settings;

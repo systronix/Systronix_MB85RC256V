@@ -5,7 +5,6 @@
 // file in the other folder.  Sigh.
 
 
-
 //---------------------------< I S O _ D A T E _ G E T >------------------------------------------------------
 //
 // attempt to convert iso8601 date string to time_t value
@@ -388,7 +387,7 @@ boolean is_good_pin (const char* const pin_ptr)
 	}
 
 // these are acceptable strings that the setting in the ini file must match
-char* valid_config_str [] = {(char*)"B2B", (char*)"B2BWEC", (char*)"SBS", (char*)"SS", (char*)"SSWEC"};	// for config keyword
+char* valid_config_str [] = {(char*)"B2B", (char*)"B2BWEC", (char*)"B2BWEC4", (char*)"SBS", (char*)"SS", (char*)"SSWEC", (char*)"SSWEC4"};	// for config keyword
 char* valid_yes_no_str [] = {(char*)"YES", (char*)"NO"};												// for dhcp and dst
 char* valid_t_zone_str [] = {(char*)"PST", (char*)"MST", (char*)"CST", (char*)"EST", (char*)"AST", (char*)"AKST", (char*)"HAST"};	// for time zone
 char* valid_rights_str [] = {(char*)"FACTORY", (char*)"IT TECH", (char*)"SERVICE", (char*)"LEADER", (char*)"ASSOCIATE"};	// for user rights
@@ -445,14 +444,14 @@ void check_ini_system (char* key_ptr)
 	else if (!strcmp (key_ptr, "config"))
 		{
 		settings.str_to_upper (value_ptr);
-		for (uint8_t i=0; i<5; i++)
+		for (uint8_t i=0; i<7; i++)
 			{
 			if (!strcmp (value_ptr, valid_config_str[i]))
 				{
 				strcpy (system_config, value_ptr);
 				break;
 				}
-			if (4 <= i)
+			if (6 <= i)
 				settings.err_msg ((char *)"unknown config");
 			}
 		}
@@ -677,7 +676,7 @@ void check_ini_habitat_A (char* key_ptr)
 	{
 	uint8_t		index;						// used for habitat heat settings
 	uint16_t	temp16;						// temp variable for holding uint16_t sized variables
-	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
+//	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
 
 	char*		value_ptr;						// pointers to the key and value items
 
@@ -745,11 +744,15 @@ void check_ini_habitat_A (char* key_ptr)
 				settings.err_msg ((char *)"invalid drawer/compartment");
 			else
 				{
-				temp8 = (uint8_t)settings.str_to_int (value_ptr);
-				if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
-					settings.err_msg ((char *)"invalid wattage");
-				else
+				if (settings.heater_type_check (value_ptr))
 					strcpy (habitat_A_heat_settings [index].watts, value_ptr);
+				else
+					settings.err_msg ((char *)"invalid wattage");
+//				temp8 = (uint8_t)settings.str_to_int (value_ptr);
+//				if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
+//					settings.err_msg ((char *)"invalid wattage");
+//				else
+//					strcpy (habitat_A_heat_settings [index].watts, value_ptr);
 				}
 			}
 		else
@@ -792,7 +795,7 @@ void check_ini_habitat_B (char* key_ptr)
 	{
 	uint8_t		index;						// used for habitat heat settings
 	uint16_t	temp16;						// temp variable for holding uint16_t sized variables
-	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
+//	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
 
 	char*		value_ptr;					// pointers to the key and value items
 
@@ -860,11 +863,15 @@ void check_ini_habitat_B (char* key_ptr)
 				settings.err_msg ((char *)"invalid drawer/compartment");
 			else
 				{
-				temp8 = (uint8_t)settings.str_to_int (value_ptr);
-				if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
-					settings.err_msg ((char *)"invalid wattage");
-				else
+				if (settings.heater_type_check (value_ptr))
 					strcpy (habitat_B_heat_settings [index].watts, value_ptr);
+				else
+					settings.err_msg ((char *)"invalid wattage");
+//				temp8 = (uint8_t)settings.str_to_int (value_ptr);
+//				if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
+//					settings.err_msg ((char *)"invalid wattage");
+//				else
+//					strcpy (habitat_B_heat_settings [index].watts, value_ptr);
 				}
 			}
 		else
@@ -906,7 +913,7 @@ void check_ini_habitat_B (char* key_ptr)
 void check_ini_habitat_EC (char* key_ptr)
 	{
 	uint16_t	temp16;						// temp variable for holding uint16_t sized variables
-	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
+//	uint8_t		temp8;						// temp variable for holding uint8_t sized variables
 
 	char*		value_ptr;					// pointers to the key and value items
 
@@ -957,11 +964,15 @@ void check_ini_habitat_EC (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			temp8 = (uint8_t)settings.str_to_int (value_ptr);
-			if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
-				settings.err_msg ((char *)"invalid wattage");
-			else
+			if (settings.heater_type_check (value_ptr))
 				strcpy (habitat_EC_heat_settings [1].watts, value_ptr);
+			else
+				settings.err_msg ((char *)"invalid wattage");
+//			temp8 = (uint8_t)settings.str_to_int (value_ptr);
+//			if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
+//				settings.err_msg ((char *)"invalid wattage");
+//			else
+//				strcpy (habitat_EC_heat_settings [1].watts, value_ptr);
 			}
 		else
 			warn_msg (key_ptr);
@@ -1010,11 +1021,15 @@ void check_ini_habitat_EC (char* key_ptr)
 		{
 		if (*value_ptr)
 			{
-			temp8 = (uint8_t)settings.str_to_int (value_ptr);
-			if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
-				settings.err_msg ((char *)"invalid wattage");
-			else
+			if (settings.heater_type_check (value_ptr))
 				strcpy (habitat_EC_heat_settings [2].watts, value_ptr);
+			else
+				settings.err_msg ((char *)"invalid wattage");
+//			temp8 = (uint8_t)settings.str_to_int (value_ptr);
+//			if (INVALID_NUM == temp8 || ((25 != temp8) && (40 != temp8) && (50 != temp8)))
+//				settings.err_msg ((char *)"invalid wattage");
+//			else
+//				strcpy (habitat_EC_heat_settings [2].watts, value_ptr);
 			}
 		else
 			warn_msg (key_ptr);
@@ -1189,7 +1204,7 @@ void check_min_req_users (void)
 //
 // Upon completion, the setting is
 //		<key>=<value><null bytes><eol>
-//	where <null bytes> is 0 or more bytes such that the number of <value> bytes + number of <null bytes> = limt
+//	where <null bytes> is 0 or more bytes such that the number of <value> bytes + number of <null bytes> = limit
 //  and where limit can be 8 or 16 (ip, server ip, mask, name_n, and rights_n keys)
 //
 
