@@ -3,14 +3,20 @@
 // Alas, it doesn't seem that arduino allows it to be seen from another example folder.  So, there are two
 // copies.  Changes made to one should be made to the other by copying the whole changed file on top of the
 // file in the other folder.  Sigh.
-
+//
+//	####
+//		1 January 2020: ini_loader.ino no longer supported
+//
+//		TODO: move the content of this file into ini_loader_SD
+//	####
+//
 
 //---------------------------< I S O _ D A T E _ G E T >------------------------------------------------------
 //
 // attempt to convert iso8601 date string to time_t value
 //
 
-extern time_t makeTime(tmElements_t &tm);
+extern time_t makeTime(const tmElements_t &tm);
 
 uint8_t iso_date_get (char *value_ptr, time_t* manuf_date_ptr)
 	{
@@ -706,10 +712,10 @@ void check_ini_habitat_A (char* key_ptr)
 				{
 				temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 
-				if (TEMP_ERROR == temp16)							// if can't be converted
-					settings.err_msg ((char *)"invalid temperature");
-				else
+				if (settings.salt_temp_limit_check (temp16))					// if specified temp within bounds
 					strcpy (habitat_A_heat_settings [index].day_temp, value_ptr);
+				else
+					settings.err_msg ((char *)"invalid temperature");
 				}
 			}
 		else
@@ -726,10 +732,10 @@ void check_ini_habitat_A (char* key_ptr)
 				{
 				temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 
-				if (TEMP_ERROR == temp16)							// if can't be converted
-					settings.err_msg ((char *)"invalid temperature");
-				else
+				if (settings.salt_temp_limit_check (temp16))					// if specified temp within bounds
 					strcpy (habitat_A_heat_settings [index].night_temp, value_ptr);
+				else
+					settings.err_msg ((char *)"invalid temperature");
 				}
 			}
 		else
@@ -825,10 +831,10 @@ void check_ini_habitat_B (char* key_ptr)
 				{
 				temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 
-				if (TEMP_ERROR == temp16)							// if can't be converted
-					settings.err_msg ((char *)"invalid temperature");
-				else
+				if (settings.salt_temp_limit_check (temp16))					// if specified temp isn't within bounds
 					strcpy (habitat_B_heat_settings [index].day_temp, value_ptr);
+				else
+					settings.err_msg ((char *)"invalid temperature");
 				}
 			}
 		else
@@ -845,10 +851,10 @@ void check_ini_habitat_B (char* key_ptr)
 				{
 				temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 
-				if (TEMP_ERROR == temp16)							// if can't be converted
-					settings.err_msg ((char *)"invalid temperature");
-				else
+				if (settings.salt_temp_limit_check (temp16))					// if specified temp within bounds
 					strcpy (habitat_B_heat_settings [index].night_temp, value_ptr);
+				else
+					settings.err_msg ((char *)"invalid temperature");
 				}
 			}
 		else
@@ -938,10 +944,10 @@ void check_ini_habitat_EC (char* key_ptr)
 			{
 			temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 			
-			if (TEMP_ERROR == temp16)
-				settings.err_msg ((char *)"invalid temperature");
-			else
+			if (settings.salt_temp_limit_check (temp16))					// if specified temp within bounds
 				strcpy (habitat_EC_heat_settings [1].day_temp, value_ptr);
+			else
+				settings.err_msg ((char *)"invalid temperature");
 			}
 		else
 			warn_msg (key_ptr);
@@ -952,10 +958,10 @@ void check_ini_habitat_EC (char* key_ptr)
 			{
 			temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 			
-			if (TEMP_ERROR == temp16)
-				settings.err_msg ((char *)"invalid temperature");
-			else
+			if (settings.salt_temp_limit_check (temp16))					// if specified temp within bounds
 				strcpy (habitat_EC_heat_settings [1].night_temp, value_ptr);
+			else
+				settings.err_msg ((char *)"invalid temperature");
 			}
 		else
 			warn_msg (key_ptr);
@@ -995,10 +1001,10 @@ void check_ini_habitat_EC (char* key_ptr)
 			{
 			temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 			
-			if (TEMP_ERROR == temp16)
-				settings.err_msg ((char *)"invalid temperature");
-			else
+			if (settings.salt_temp_limit_check (temp16))					// if specified temp within bounds
 				strcpy (habitat_EC_heat_settings [2].day_temp, value_ptr);
+			else
+				settings.err_msg ((char *)"invalid temperature");
 			}
 		else
 			warn_msg (key_ptr);
@@ -1009,10 +1015,10 @@ void check_ini_habitat_EC (char* key_ptr)
 			{
 			temp16 = settings.fahrenheit_string_to_SALT_temp (value_ptr);	// convert to SALT temp format
 			
-			if (TEMP_ERROR == temp16)
-				settings.err_msg ((char *)"invalid temperature");
-			else
+			if (settings.salt_temp_limit_check (temp16))					// if specified temp within bounds
 				strcpy (habitat_EC_heat_settings [2].night_temp, value_ptr);
+			else
+				settings.err_msg ((char *)"invalid temperature");
 			}
 		else
 			warn_msg (key_ptr);
