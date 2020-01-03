@@ -1,3 +1,8 @@
+//	####
+//		1 January 2020
+//		ini_loader.ino no longer supported
+//	####
+
 #ifndef		ini_loader_H_
 #define		ini_loader_H_
 //

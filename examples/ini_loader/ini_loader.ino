@@ -1,3 +1,8 @@
+//	####
+//		1 January 2020
+//		ini_loader.ino no longer supported
+//	####
+
 //
 // this code writes a SALT ini file to the primary FRAM_SETTINGS section of fram (0x0100-0x0FFF) and writes a
 // second, backup copy, to the backup FRAM_SETTINGS_2 section (0x1100-0x1FFF)

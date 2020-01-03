@@ -1,3 +1,8 @@
+//	####
+//		1 January 2020
+//		ini_loader.ino no longer supported
+//	####
+
 // this file holds functions that are common to both ini_loader.ino and ini_loader_SD.ino
 //
 // Alas, it doesn't seem that arduino allows it to be seen from another example folder.  So, there are two
