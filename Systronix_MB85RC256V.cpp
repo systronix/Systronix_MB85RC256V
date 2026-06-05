@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "Systronix_MB85RC256V.h"
 
+#define		FM24W256	// hack to use this file because MB85RC256V has become unavailable; matches #define in SALT_reptile_release.h
 
 //---------------------------< D E F A U L T   C O N S R U C T O R >------------------------------------------
 //
@@ -86,13 +87,40 @@ uint8_t Systronix_MB85RC256V::base_get(void)
 
 //---------------------------< I N I T >----------------------------------------------------------------------
 //
-// determines if there is a MB85RC256V at _base address by attempting to fetch the device manufacturer and
-// product identifiers.
+// 2026-04-11: this function has been hacked to allow us to use reduced to a Cypress FM24W256 fram device in
+// place of the Fujitsu MB85RC256V which may no longer be available.  Alas, the FM24W256 device apparently does
+// not support manufacturer and product IDs (or if it does, returns different values – this has not been tested).
+//
+// When FM24W256 is defined, we call ping_eeprom() which sends just the address portion of an I2C write to the
+// fram's slave ID.  If we get an ack from the slave at the device id address then we presume that the fram
+// exists.
+//
+// When FM24W256 is not defined, we call get_device_id() to fetch the manufacturer and product IDs from the device
+// at the fram slave ID.  When the returned values match the known IDs, we know conclusively that the device is
+// a Fujitsu MB85RC256V.
+//
+// (original description from before 2026-04-11)
+// determines if there is a MB85RC256V at _base address by attempting to fetch the device manufacturer and product identifiers.
 //
 
 uint8_t Systronix_MB85RC256V::init (void)
 	{
-	uint16_t	prodID;
+#ifdef		FM24W256						// defined at the top of this page; also duplicated in SALT_reptile_release.h
+	uint8_t		ret_val;
+	
+	error.exists = true;					// presume that a fram device exists; set here because ping_eeprom() tests <error.exists>
+	
+	ret_val = ping_eeprom();				// send base address to the fram
+	
+	if (SUCCESS != ret_val)					// if not ack'd then FAIL; SUCCESS else
+		{
+		error.exists = false;				// only place in this file where this can be set false
+		return FAIL;
+		}
+
+	return SUCCESS;
+#else
+ 	uint16_t	prodID;
 	uint16_t	manufID;
 
 	if (SUCCESS == get_device_id (&manufID, &prodID) && (0x000A == manufID) && (0x0510 == prodID))
@@ -105,6 +133,7 @@ uint8_t Systronix_MB85RC256V::init (void)
 		error.exists = false;				// only place in this file where this can be set false
 		return FAIL;
 		}
+#endif
 	}
 
 
