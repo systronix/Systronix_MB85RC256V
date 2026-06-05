@@ -1,6 +1,13 @@
 # Systronix_MB85RC256V
-Arduino library for Fujitsu MB85RC256V 256 Kbit (32 KByte) I2C FRAM.
-- 20260605 modified to ignore mfgr and prod ID so that we can use new Cypress/Infineon FM24W256 FRAM which does not have the Fujistu IDs. 
+Arduino library for Fujitsu MB85RC256V 256 Kbit (32 KByte) I2C FRAM and compatibles.
+
+## 20260605 
+- modified to ignore mfgr and prod ID 
+- so that we can use new Cypress/Infineon FM24W256 FRAM which does not have the Fujistu IDs. 
+- examples are not changed, but need to be recompiled to use the modified library.
+- in particular this applies to ini_loader_SD
+
+---
 
 ## example files
 ### ini_loader_SD
@@ -21,6 +28,9 @@ initial hack at a diagnostic tool.  Currently this code just tests the FRAM.
 this code dumps 256 byte pages from fram beginning at address provided by user.  addresses must be in the range 0x0000-0x7FFF.  The low byte address is set to 0x00 because pages are dumped in 256-byte chunks.
 ### other examples
 Look in the source code, there are more. As of 2026 it's unclear how useful these might be.
+
+---
+ 
 ##control struct
 interface to and from the functions in this file are through a struct.  This allows the individual functions to return simple SUCCESS or FAIL status.
 
