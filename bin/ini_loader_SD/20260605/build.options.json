@@ -1,0 +1,11 @@
+{
+  "additionalFiles": "..,..",
+  "builtInLibrariesFolders": "/home/bruce/Documents/arduino-1.8.10/libraries",
+  "customBuildProperties": "",
+  "fqbn": "teensy:avr:teensy31:usb=serial,speed=48,opt=o1std,keys=en-us",
+  "hardwareFolders": "/home/bruce/Documents/arduino-1.8.10/hardware,/home/bruce/.arduino15/packages",
+  "otherLibrariesFolders": "/home/bruce/Documents/code/Arduino/libraries",
+  "runtime.ide.version": "10810",
+  "sketchLocation": "/home/bruce/Documents/code/Arduino/libraries/Systronix_MB85RC256V/examples/ini_loader_SD/ini_loader_SD.ino",
+  "toolsFolders": "/home/bruce/Documents/arduino-1.8.10/tools-builder,/home/bruce/Documents/arduino-1.8.10/hardware/tools/avr,/home/bruce/.arduino15/packages"
+}

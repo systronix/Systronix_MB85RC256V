@@ -1,0 +1,1073 @@
+
+/tmp/arduino_build_477974/ini_loader_SD.ino.elf:     file format elf32-littlearm
+
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00017dc8 l    d  .fini	00000000 .fini
+00017dcc l    d  .ARM.exidx	00000000 .ARM.exidx
+1fff8000 l    d  .usbdescriptortable	00000000 .usbdescriptortable
+1fff8200 l    d  .dmabuffers	00000000 .dmabuffers
+1fff83bc l    d  .usbbuffers	00000000 .usbbuffers
+1fff8720 l    d  .data	00000000 .data
+1fffa828 l    d  .bss	00000000 .bss
+00000000 l    d  .ARM.attributes	00000000 .ARM.attributes
+00000000 l    d  .comment	00000000 .comment
+00000000 l    d  .debug_info	00000000 .debug_info
+00000000 l    d  .debug_abbrev	00000000 .debug_abbrev
+00000000 l    d  .debug_loc	00000000 .debug_loc
+00000000 l    d  .debug_aranges	00000000 .debug_aranges
+00000000 l    d  .debug_ranges	00000000 .debug_ranges
+00000000 l    d  .debug_line	00000000 .debug_line
+00000000 l    d  .debug_str	00000000 .debug_str
+00000000 l    d  .debug_frame	00000000 .debug_frame
+00000000 l    df *ABS*	00000000 mk20dx128.c
+0000b688 l     F .text	0000000c startup_default_early_hook
+0000b694 l     F .text	00000002 startup_default_late_hook
+00000000 l    df *ABS*	00000000 crtstuff.c
+00000410 l     F .text	00000000 __do_global_dtors_aux
+1fffa828 l       .bss	00000000 completed.8603
+00000434 l     F .text	00000000 frame_dummy
+1fffa82c l       .bss	00000000 object.8608
+00017da8 l     O .text	00000000 __frame_dummy_init_array_entry
+00000000 l    df *ABS*	00000000 ini_loader_SD.ino.cpp
+00002818 l     F .text	00000334 _GLOBAL__sub_I_habitat_A_heat_settings
+1ffffc70 l     O .bss	00000004 stopwatch(bool)::start_time
+20001ca0 l     O .bss	00000004 stopwatch(bool)::state
+00000000 l    df *ABS*	00000000 Systronix_MB85RC256V.cpp
+00000000 l    df *ABS*	00000000 Systronix_i2c_common.cpp
+00000000 l    df *ABS*	00000000 i2c_t3.cpp
+00003628 l       .text	00000000 L_1414_delayMicroseconds
+00003636 l       .text	00000000 L_1428_delayMicroseconds
+00003664 l       .text	00000000 L_1465_delayMicroseconds
+0000366e l       .text	00000000 L_1477_delayMicroseconds
+00003b02 l       .text	00000000 L_2565_delayMicroseconds
+00003d96 l       .text	00000000 L_3131_delayMicroseconds
+00004130 l       .text	00000000 L_3900_delayMicroseconds
+000041fa l       .text	00000000 L_4039_delayMicroseconds
+0000453c l     F .text	00000040 _GLOBAL__sub_I__ZN6i2c_t37i2cDataE
+000168b4 l     O .text	000000dc i2c_div_num
+00016990 l     O .text	00000037 i2c_div_ratio
+00000000 l    df *ABS*	00000000 SALT_settings.cpp
+00000000 l    df *ABS*	00000000 SALT_logging.cpp
+00004bf4 l     F .text	0000002c _GLOBAL__sub_I_sd
+00000000 l    df *ABS*	00000000 SALT_utilities.cpp
+00000000 l    df *ABS*	00000000 DS1307RTC.cpp
+00004f50 l     F .text	00000010 _GLOBAL__sub_I__ZN9DS1307RTCC2Ev
+00000000 l    df *ABS*	00000000 Time.cpp
+00016fcc l     O .text	0000000c monthDays
+00000000 l    df *ABS*	00000000 SALT_FETs.cpp
+00000000 l    df *ABS*	00000000 Systronix_PCA9557.cpp
+00000000 l    df *ABS*	00000000 SALT_JX.cpp
+00000000 l    df *ABS*	00000000 SPI.cpp
+00000000 l    df *ABS*	00000000 SdFat.cpp
+00000000 l    df *ABS*	00000000 FatFile.cpp
+00000000 l    df *ABS*	00000000 FatFileLFN.cpp
+000063a4 l     F .text	0000002c lfnGetChar(longDirectoryEntry*, unsigned char)
+00000000 l    df *ABS*	00000000 FatFilePrint.cpp
+00006c50 l     F .text	00000044 print2u(Print*, unsigned char)
+00000000 l    df *ABS*	00000000 FatFileSFN.cpp
+00000000 l    df *ABS*	00000000 FatVolume.cpp
+00000000 l    df *ABS*	00000000 FmtNumber.cpp
+00000000 l    df *ABS*	00000000 SdSpiCard.cpp
+00000000 l    df *ABS*	00000000 SdSpiTeensy3.cpp
+00000000 l    df *ABS*	00000000 Systronix_NTP.cpp
+00007a6c l     F .text	0000002c _GLOBAL__sub_I_Udp
+00000000 l    df *ABS*	00000000 Dhcp.cpp
+00000000 l    df *ABS*	00000000 Dns.cpp
+0000823c l     F .text	00000014 _GLOBAL__sub_I__ZN9DNSClient5beginERK9IPAddress
+20002710 l     O .bss	00000008 INADDR_NONE
+00000000 l    df *ABS*	00000000 Ethernet.cpp
+00008928 l     F .text	00000014 _GLOBAL__sub_I__ZN13EthernetClass17_dnsServerAddressE
+20002718 l     O .bss	00000004 guard variable for EthernetClass::begin(unsigned char*, unsigned long, unsigned long)::s_dhcp
+2000271c l     O .bss	00000068 EthernetClass::begin(unsigned char*, unsigned long, unsigned long)::s_dhcp
+00000000 l    df *ABS*	00000000 EthernetUdp.cpp
+00000000 l    df *ABS*	00000000 socket.cpp
+00008b98 l     F .text	000000c4 write_data(unsigned char, unsigned short, unsigned char const*, unsigned short)
+00008c5c l     F .text	00000068 getSnTX_FSR(unsigned char)
+00008cc4 l     F .text	00000064 getSnRX_RSR(unsigned char)
+00008f02 l       .text	00000000 L_932_delayMicroseconds
+000091fc l       .text	00000000 L_1650_delayMicroseconds
+1fff9cb8 l     O .data	00000002 local_port
+20002798 l     O .bss	00000020 state
+00000000 l    df *ABS*	00000000 w5100.cpp
+00000000 l    df *ABS*	00000000 TeensyID.cpp
+0000b490 l     F .text	00000038 getTeensySerial()
+00000000 l    df *ABS*	00000000 memcpy-armv7m.S.o
+00000000 l    df *ABS*	00000000 nonstd.c
+00000000 l    df *ABS*	00000000 pins_teensy.c
+0000b778 l     F .text	00000002 dummy_isr
+1fff8720 l     F .data	0000002c port_E_isr
+1fff874c l     F .data	0000002c port_D_isr
+1fff8778 l     F .data	0000002c port_C_isr
+1fff87a4 l     F .data	0000002c port_B_isr
+1fff87d0 l     F .data	0000002c port_A_isr
+00000000 l    df *ABS*	00000000 serial1.c
+200027d8 l     O .bss	00000004 rts_pin
+200027dc l     O .bss	00000001 transmitting
+200027dd l     O .bss	00000001 rx_buffer_tail
+200027e0 l     O .bss	00000040 tx_buffer
+20002820 l     O .bss	00000001 rx_pin_num
+20002824 l     O .bss	00000040 rx_buffer
+20002864 l     O .bss	00000001 rx_buffer_head
+1fff9da0 l     O .data	00000001 tx_pin_num
+20002865 l     O .bss	00000001 tx_buffer_tail
+20002868 l     O .bss	00000004 transmit_pin
+2000286c l     O .bss	00000001 tx_buffer_head
+00000000 l    df *ABS*	00000000 serial2.c
+20002870 l     O .bss	00000004 rts_pin
+20002874 l     O .bss	00000001 transmitting
+1fff9da1 l     O .data	00000001 rx_pin_num
+20002875 l     O .bss	00000001 rx_buffer_tail
+20002878 l     O .bss	00000028 tx_buffer
+200028a0 l     O .bss	00000040 rx_buffer
+200028e0 l     O .bss	00000001 rx_buffer_head
+1fff9da2 l     O .data	00000001 tx_pin_num
+200028e1 l     O .bss	00000001 tx_buffer_tail
+200028e4 l     O .bss	00000004 transmit_pin
+200028e8 l     O .bss	00000001 tx_buffer_head
+00000000 l    df *ABS*	00000000 usb_dev.c
+200028ec l     O .bss	00000004 ep0_tx_ptr
+200028f0 l     O .bss	00000010 rx_last
+20002900 l     O .bss	00000002 ep0_tx_len
+20002904 l     O .bss	00000040 ep0_rx0_buf
+20002944 l     O .bss	00000010 rx_first
+20002954 l     O .bss	00000001 ep0_tx_data_toggle
+20002958 l     O .bss	00000040 ep0_rx1_buf
+20002998 l     O .bss	00000010 tx_first
+1fff8000 l     O .usbdescriptortable	000000a0 table
+200029a8 l     O .bss	00000010 tx_last
+200029b8 l     O .bss	00000008 setup
+200029c0 l     O .bss	00000001 ep0_tx_bdt_bank
+200029c4 l     O .bss	00000008 reply_buffer
+200029d0 l     O .bss	00000004 tx_state
+00000000 l    df *ABS*	00000000 usb_mem.c
+1fff9da4 l     O .data	00000004 usb_buffer_available
+00000000 l    df *ABS*	00000000 usb_serial.c
+200029d5 l     O .bss	00000001 tx_noautoflush
+200029d8 l     O .bss	00000004 tx_packet
+200029dc l     O .bss	00000001 transmit_previous_timeout
+200029e0 l     O .bss	00000004 rx_packet
+00000000 l    df *ABS*	00000000 DMAChannel.cpp
+00000000 l    df *ABS*	00000000 EventResponder.cpp
+00000000 l    df *ABS*	00000000 HardwareSerial1.cpp
+00000000 l    df *ABS*	00000000 HardwareSerial2.cpp
+00000000 l    df *ABS*	00000000 IPAddress.cpp
+00000000 l    df *ABS*	00000000 Print.cpp
+00000000 l    df *ABS*	00000000 WMath.cpp
+20002a04 l     O .bss	00000004 seed
+00000000 l    df *ABS*	00000000 main.cpp
+00000000 l    df *ABS*	00000000 new.cpp
+00000000 l    df *ABS*	00000000 usb_inst.cpp
+00000000 l    df *ABS*	00000000 yield.cpp
+20002a11 l     O .bss	00000001 yield::running
+00000000 l    df *ABS*	00000000 analog.c
+20002a12 l     O .bss	00000001 calibrating
+1fff9dd8 l     O .data	00000001 analog_config_bits
+20002a13 l     O .bss	00000001 analog_reference_internal
+1fff9dd9 l     O .data	00000001 analog_num_average
+00000000 l    df *ABS*	00000000 serial3.c
+20002a14 l     O .bss	00000004 rts_pin
+20002a18 l     O .bss	00000001 transmitting
+20002a19 l     O .bss	00000001 rx_buffer_tail
+20002a1c l     O .bss	00000028 tx_buffer
+20002a44 l     O .bss	00000040 rx_buffer
+20002a84 l     O .bss	00000001 rx_buffer_head
+20002a85 l     O .bss	00000001 tx_buffer_tail
+20002a88 l     O .bss	00000004 transmit_pin
+20002a8c l     O .bss	00000001 tx_buffer_head
+00000000 l    df *ABS*	00000000 usb_desc.c
+1fff9ddc l     O .data	00000012 device_descriptor
+1fff9e08 l     O .data	00000043 config_descriptor
+00000000 l    df *ABS*	00000000 HardwareSerial3.cpp
+00000000 l    df *ABS*	00000000 _arm_addsubdf3.o
+00000000 l    df *ABS*	00000000 _arm_muldivdf3.o
+00000000 l    df *ABS*	00000000 _arm_cmpdf2.o
+00000000 l    df *ABS*	00000000 _arm_unorddf2.o
+00000000 l    df *ABS*	00000000 _arm_fixdfsi.o
+00000000 l    df *ABS*	00000000 _arm_fixunsdfsi.o
+00000000 l    df *ABS*	00000000 aeabi_atexit.c
+00000000 l    df *ABS*	00000000 atoi.c
+00000000 l    df *ABS*	00000000 cxa_atexit.c
+00000000 l    df *ABS*	00000000 errno.c
+00000000 l    df *ABS*	00000000 init.c
+00000000 l    df *ABS*	00000000 isalpha.c
+00000000 l    df *ABS*	00000000 isspace.c
+00000000 l    df *ABS*	00000000 locale.c
+0000ef34 l     F .text	00000018 __get_current_locale
+00000000 l    df *ABS*	00000000 malloc.c
+00000000 l    df *ABS*	00000000 mallocr.c
+00000000 l    df *ABS*	00000000 mbtowc_r.c
+00000000 l    df *ABS*	00000000 lib_a-memchr.o
+00000000 l    df *ABS*	00000000 memcmp.c
+00000000 l    df *ABS*	00000000 memmove.c
+00000000 l    df *ABS*	00000000 memset.c
+00000000 l    df *ABS*	00000000 mlock.c
+00000000 l    df *ABS*	00000000 mallocr.c
+00000000 l    df *ABS*	00000000 sbrkr.c
+00000000 l    df *ABS*	00000000 sprintf.c
+00000000 l    df *ABS*	00000000 strcasecmp.c
+00000000 l    df *ABS*	00000000 strchr.c
+00000000 l    df *ABS*	00000000 lib_a-strcmp.o
+00000000 l    df *ABS*	00000000 strcpy.c
+00000000 l    df *ABS*	00000000 lib_a-strlen.o
+00000000 l    df *ABS*	00000000 strncmp.c
+00000000 l    df *ABS*	00000000 strstr.c
+0001023c l     F .text	000000b8 critical_factorization
+000102f4 l     F .text	000001fe two_way_long_needle
+00000000 l    df *ABS*	00000000 strtod.c
+00010714 l     F .text	00000042 sulp
+000179d4 l     O .text	00000014 fpinan.6207
+000179e8 l     O .text	00000028 tinytens
+00017a10 l     O .text	00000014 fpi.6171
+00000000 l    df *ABS*	00000000 strtol.c
+00011608 l     F .text	00000136 _strtol_l.isra.0
+00000000 l    df *ABS*	00000000 vfprintf.c
+00017a24 l     O .text	00000010 zeroes.7256
+00017a74 l     O .text	00000010 blanks.7255
+00000000 l    df *ABS*	00000000 tolower.c
+00000000 l    df *ABS*	00000000 toupper.c
+00000000 l    df *ABS*	00000000 vdprintf.c
+00000000 l    df *ABS*	00000000 wctomb_r.c
+00000000 l    df *ABS*	00000000 writer.c
+00000000 l    df *ABS*	00000000 __atexit.c
+00000000 l    df *ABS*	00000000 __call_atexit.c
+00012fa4 l     F .text	00000014 register_fini
+00000000 l    df *ABS*	00000000 atexit.c
+00000000 l    df *ABS*	00000000 dtoa.c
+00012fc4 l     F .text	00000128 quorem
+00000000 l    df *ABS*	00000000 fini.c
+00000000 l    df *ABS*	00000000 mallocr.c
+00000000 l    df *ABS*	00000000 gdtoa-gethex.c
+000141dc l     F .text	000000a8 rshift
+00000000 l    df *ABS*	00000000 gdtoa-hexnan.c
+00000000 l    df *ABS*	00000000 localeconv.c
+00000000 l    df *ABS*	00000000 mprec.c
+00017d60 l     O .text	0000000c p05.6085
+00000000 l    df *ABS*	00000000 vfprintf.c
+00000000 l    df *ABS*	00000000 vasnprintf.c
+00000000 l    df *ABS*	00000000 mallocr.c
+00000000 l    df *ABS*	00000000 _aeabi_uldivmod.o
+00000000 l    df *ABS*	00000000 libgcc2.c
+00000000 l    df *ABS*	00000000 _dvmd_tls.o
+00000000 l    df *ABS*	00000000 impure.c
+1fff9e80 l     O .data	00000428 impure_data
+00000000 l    df *ABS*	00000000 ctype_.c
+00000000 l    df *ABS*	00000000 /home/bruce/Documents/arduino-1.8.10/hardware/tools/arm/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7e-m/crti.o
+00000000 l    df *ABS*	00000000 /home/bruce/Documents/arduino-1.8.10/hardware/tools/arm/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7e-m/crtn.o
+00000000 l    df *ABS*	00000000 EthernetServer.cpp
+00000000 l    df *ABS*	00000000 avr_emulation.cpp
+00000000 l    df *ABS*	00000000 reent.c
+00000000 l    df *ABS*	00000000 
+00000000 l       *UND*	00000000 e7n
+00000000 l       *UND*	00000000 logs
+1fffa828 l       .bss	00000000 __bss_start__
+00000000 l       *UND*	00000000 fru
+00000000 l       *UND*	00000000 mailbox_common
+20002adc l       .bss	00000000 __bss_end__
+00000000 l       *UND*	00000000 software_init_hook
+00000000 l       *UND*	00000000 hardware_init_hook
+00000000 l       *UND*	00000000 __stack
+00000000 l       *UND*	00000000 lcm300
+00000000 l       *UND*	00000000 tmp102
+0000b680  w    F .text	00000006 adc0_isr
+00002e00 g     F .text	0000001c Systronix_MB85RC256V::int32_write()
+0000edd4 g     F .text	0000002c .hidden __aeabi_dcmpun
+0000d8c8 g     F .text	0000001c usb_serial_available
+000151cc g     F .text	0000005a __any_on
+0000aee8 g     F .text	000000ac W5100Class::isW5200()
+0000ed98 g     F .text	00000012 .hidden __aeabi_dcmple
+0000fffc g     F .text	000000ba strcpy
+0000ddac  w    F .text	00000018 HardwareSerial::write(char const*)
+0000ecd4 g     F .text	0000007a .hidden __cmpdf2
+0000e1e8  w    F .text	000000a0 yield
+00002de4 g     F .text	0000001c Systronix_MB85RC256V::int16_write()
+00007754 g     F .text	00000028 SdSpi::receive()
+00006fa4 g     F .text	00000138 FatVolume::init(unsigned char)
+00007afc g     F .text	00000024 DhcpClass::getDnsServerIp()
+00004a84 g     F .text	00000064 SALT_settings::key_decode(char*)
+0000af94 g     F .text	000000ac W5100Class::isW5500()
+00000970 g     F .text	000000c2 is_good_pin(char const*)
+000061b8 g     F .text	000001ec FatFile::write(void const*, unsigned int)
+0000ecd4 g     F .text	0000007a .hidden __eqdf2
+20002040 g     O .bss	00000078 FETs
+0000452c g     F .text	00000010 i2c_t3::sda1_rising_isr()
+1fff9df0 g     O .data	00000018 usb_string_manufacturer_name_default
+0000c08c g     F .text	00000020 serial_available
+000090ac g     F .text	00000318 EthernetClass::socketBeginMulticast(unsigned char, IPAddress, unsigned short)
+2000224c g     O .bss	00000014 Wire1
+0000de14  w    F .text	0000000a HardwareSerial::transmitterEnable(unsigned char)
+00004478 g     F .text	000000a2 i2c_t3::sda_rising_isr_handler(i2cStruct*, unsigned char)
+0000e844 g     F .text	0000005a .hidden __floatdidf
+00007694 g     F .text	00000024 SdSpi::begin(unsigned char)
+1fff9764 g     O .data	00000008 system_auto_fan_2
+0000b644  w    F .text	0000003c hard_fault_isr
+00002c3c g     F .text	00000012 Systronix_MB85RC256V::inc_addr16()
+0000dddc  w    F .text	00000010 HardwareSerial::attachCts(unsigned char)
+0000b680  w    F .text	00000006 dma_ch6_isr
+00006174 g     F .text	00000042 FatFile::dirEntry(directoryEntry*)
+000053a8 g     F .text	00000040 Systronix_PCA9557::setup(unsigned char, i2c_t3, char*)
+0000781c g     F .text	00000020 SdSpi::send(unsigned char)
+0000e028 g     F .text	00000020 Print::println()
+00004bcc g     F .text	00000028 SALT_settings::err_msg(char*)
+0000c800 g     F .text	00000020 serial2_available
+0000b680  w    F .text	00000006 uart0_lon_isr
+0000caa0 g     F .text	000000c8 usb_rx_memory
+0000df24  w    F .text	0000000c HardwareSerial2::setTX(unsigned char, bool)
+0000e168 g     F .text	00000014 random(long, long)
+1fff9748 g     O .data	0000001c valid_config_str
+0000b680  w    F .text	00000006 dma_ch8_isr
+0000f79c g     F .text	00000002 __malloc_unlock
+1fff9cc0 g     O .data	00000038 isr_table_portA
+000060c0 g     F .text	000000b2 FatFile::open(FatFile*, char const*, unsigned char)
+0000c3f8 g     F .text	000000c8 serial2_end
+0000e288 g     F .text	00000114 analog_init
+0000cb68 g     F .text	00000088 usb_tx
+0000b680  w    F .text	00000006 portcd_isr
+00006d24 g     F .text	00000034 FatFile::printModifyDateTime(Print*)
+00012e54 g     F .text	0000004a _vdprintf_r
+000079a4 g     F .text	000000c8 Systronix_NTP::unix_ts_get(long*, unsigned long)
+00001820 g     F .text	00000080 add_line(kv_pair, char*)
+000046c8 g     F .text	000000a0 SALT_settings::fahrenheit_string_to_raw13(char*)
+000007b8 g     F .text	0000001c array_add_line(char*, char*)
+0000bd74 g     F .text	00000078 serial_set_tx
+0000f634 g     F .text	000000c6 memmove
+1fffa848 g     O .bss	00000090 fram
+0000dce0 g     F .text	00000070 MillisTimer::runFromTimer()
+0000de60  w    F .text	00000008 HardwareSerial::peek()
+0000ef54 g     F .text	00000014 __locale_ctype_ptr
+00014964 g     F .text	0000004c _Balloc
+0000b680  w    F .text	00000006 can1_rx_warn_isr
+000071a4 g     F .text	00000020 SdSpiCard::chipSelectLow()
+00017dd4 g       .ARM.exidx	00000000 __exidx_end
+00005630 g     F .text	00000048 Systronix_PCA9557::register_read(unsigned char, unsigned char*)
+0000b680  w    F .text	00000006 dma_error_isr
+0000793c g     F .text	00000068 Systronix_NTP::NTP_request(char*)
+00004e88 g     F .text	00000040 SALT_utilities::_is_leap_year(unsigned short)
+00004b18 g     F .text	00000038 SALT_settings::str_to_int(char*)
+00002ff8 g     F .text	000000ac Systronix_i2c_common::tally_transaction(unsigned char, error_t*)
+200029fc g     O .bss	00000001 EventResponder::runningFromYield
+00007274 g     F .text	00000074 SdSpiCard::cardCommand(unsigned char, unsigned long)
+00004458 g     F .text	00000010 i2c0_isr
+0000dffc g     F .text	0000002c Print::write(unsigned char const*, unsigned int)
+0000ecc4 g     F .text	0000008a .hidden __gtdf2
+000056fc g     F .text	0000004c SALT_JX::setup(unsigned char)
+000063d0 g     F .text	0000001e FatFile::lfnChecksum(unsigned char*)
+0000eeb0 g     F .text	0000000c __errno
+00005568 g     F .text	0000004c Systronix_PCA9557::init(unsigned char, unsigned char, unsigned char)
+20002a0c g     O .bss	00000004 SPIFIFOclass::reg
+0000b680  w    F .text	00000006 portd_isr
+00008acc g     F .text	0000006c EthernetUDP::parsePacket()
+0000b680  w    F .text	00000006 enet_error_isr
+00004d5c g     F .text	000000b0 SALT_utilities::hex_dump_core(unsigned short, unsigned char*)
+200029e8 g     O .bss	00000004 EventResponder::firstInterrupt
+00014944 g     F .text	00000004 __localeconv_l
+0000c154 g     F .text	0000004c serial_clear
+1fff9054 g     O .data	00000014 valid_rights_str
+0000df48  w    F .text	00000008 HardwareSerial2::end()
+0000df30  w    F .text	0000000a HardwareSerial2::setRX(unsigned char)
+1fff9da8 g     O .data	00000010 Serial1
+0000b680  w    F .text	00000006 tpm1_isr
+000010e4 g     F .text	000001a8 check_ini_habitat_B(char*)
+00007b40 g     F .text	00000214 DhcpClass::send_DHCP_MESSAGE(unsigned char, unsigned short)
+000048a4 g     F .text	00000050 SALT_settings::heater_type_check(char*)
+1fffc6d0 g     O .bss	00000008 system_config
+0000e1cc  w    F .text	0000000c usb_serial_class::write(unsigned char const*, unsigned int)
+00017758 g     O .text	00000110 digital_pin_to_info_PGM
+0000457c g     F .text	00000020 SALT_settings::crc16_update(unsigned short, unsigned char)
+20002ad8 g     O .bss	00000004 errno
+00007aa8 g     F .text	0000001c DhcpClass::getLocalIp()
+1fffc7d8 g     O .bss	000013d0 settings
+00017dd4 g       .ARM.exidx	00000000 _etext
+0000581c g     F .text	00000144 _spi_dma_rxISR0()
+00005360 g     F .text	00000048 Systronix_PCA9557::Systronix_PCA9557()
+1fffa828 g       .bss	00000000 _sbss
+00004768 g     F .text	00000012 SALT_settings::salt_temp_limit_check(unsigned short)
+0000ed60 g     F .text	00000010 .hidden __aeabi_cdcmple
+0000dd64  w    F .text	0000000c HardwareSerial::write(unsigned long)
+0000de70  w    F .text	00000008 HardwareSerial::available()
+1fff8ae4 g     O .data	000002e4 kv_habitat_B
+1fff8f14 g     O .data	00000138 habitat_A_heat_settings
+0000b878 g     F .text	0000001c digitalRead
+0000b680  w    F .text	00000006 porte_isr
+000020bc g     F .text	0000075c loop
+0000b680  w    F .text	00000006 portb_isr
+00003510 g     F .text	000000d8 i2c_t3::begin_(i2cStruct*, unsigned char, i2c_mode, unsigned char, unsigned char, i2c_pins, i2c_pullup, unsigned long, i2c_op_mode)
+00005f8c g     F .text	000000a2 FatFile::openNext(FatFile*, unsigned char)
+0000b680  w    F .text	00000006 spi1_isr
+00004b00 g     F .text	00000018 SALT_settings::str_to_upper(char*)
+0000b680  w    F .text	00000006 uart3_status_isr
+0000de88  w    F .text	00000002 serialEvent1()
+0000b680  w    F .text	00000006 mcm_isr
+0000dc68 g     F .text	00000078 MillisTimer::addToActiveList()
+00004b50 g     F .text	0000007c SALT_settings::is_dot_decimal(char*)
+0000deb0  w    F .text	0000000c HardwareSerial2::write(int)
+0000dfb4 g     F .text	00000046 IPAddress::printTo(Print&) const
+1fff97a0 g     O .data	000004e0 i2c_t3::i2cData
+0000dda0  w    F .text	0000000c HardwareSerial::write(unsigned char)
+000071c4 g     F .text	00000078 SdSpiCard::readData(unsigned char*, unsigned int)
+00001680 g     F .text	000000d0 check_min_req_users()
+200029ec g     O .bss	00000004 EventResponder::lastInterrupt
+0000c914 g     F .text	00000124 uart1_status_isr
+0000c4f8 g     F .text	00000078 serial2_set_tx
+0000b510 g     F .text	00000134 memcpy
+0000b680  w    F .text	00000006 randnum_isr
+000147c4 g     F .text	00000180 __hexnan
+0000c8c8 g     F .text	0000004c serial2_clear
+0000ed50 g     F .text	00000020 .hidden __aeabi_cdrcmple
+000035e8 g     F .text	000000da i2c_t3::resetBus_(i2cStruct*, unsigned char)
+00000a34 g     F .text	00000508 check_ini_system(char*)
+0001176c g     F .text	000016b0 _svfprintf_r
+0000e7d4 g     F .text	00000022 .hidden __floatsidf
+000076b8 g     F .text	0000009c SdSpi::beginTransaction(unsigned char)
+1fff9d48 g     O .data	00000030 isr_table_portC
+200027d4 g     O .bss	00000004 systick_millis_count
+0000eccc g     F .text	00000082 .hidden __ltdf2
+000052fc g     F .text	0000004c SALT_FETs::setup(unsigned char)
+0000502c g     F .text	00000016 DS1307RTC::set(long)
+0000b644  w    F .text	0000003c bus_fault_isr
+00005ad0 g     F .text	0000000c SdFatBase::initErrorHalt(Print*)
+0000b680  w    F .text	00000006 watchdog_isr
+000153e8 g     F .text	00000000 .hidden __aeabi_uldivmod
+0000b6e4 g     F .text	00000040 nvic_execution_priority
+00004468 g     F .text	00000010 i2c1_isr
+200029cc g     O .bss	00000001 usb_configuration
+0000b680  w    F .text	00000006 dma_ch11_isr
+0000debc  w    F .text	0000000c HardwareSerial2::write9bit(unsigned long)
+00000000  w      *UND*	00000000 __fini_array_end
+20002a08 g     O .bss	00000001 SPCRemulation::pinout
+0000dea4  w    F .text	0000000c HardwareSerial2::write(unsigned int)
+000007d4 g     F .text	000000e4 normalize_kv_pair(char*)
+1fff8dd0 g     O .data	00000002 store
+00005df8 g     F .text	0000003e FatFile::readDirCache(bool)
+00012e1c g     F .text	0000001c tolower
+0000dfb0  w    F .text	00000002 serialEvent2()
+00015130 g     F .text	00000054 __ratio
+0000b680  w    F .text	00000006 i2c2_isr
+00003e30  w    F .text	0000000a i2c_t3::read()
+1fff9df0  w    O .data	00000018 usb_string_manufacturer_name
+20002ac4 g     O .bss	00000008 usb_rx_byte_count_data
+00002fdc g     F .text	0000001c Systronix_MB85RC256V::int32_read()
+0000b680  w    F .text	00000006 pit1_isr
+0000ef68 g     F .text	00000010 malloc
+0000b680  w    F .text	00000006 dma_ch4_isr
+0000b680  w    F .text	00000006 software_isr
+0000c4c0 g     F .text	00000038 serial2_set_transmit_pin
+00003804 g     F .text	0000018e i2c_t3::sendTransmission_(i2cStruct*, unsigned char, i2c_stop, unsigned long)
+0000b680  w    F .text	00000006 dma_ch7_isr
+00017c98 g     O .text	000000c8 __mprec_tens
+0000d6c4 g     F .text	000000d8 usb_init
+0000a398 g     F .text	00000a78 W5100Class::read(unsigned short, unsigned char*, unsigned short)
+1fff9774 g     O .data	00000008 valid_yes_no_str
+0000869c g     F .text	00000280 EthernetClass::begin(unsigned char*, unsigned long, unsigned long)
+0000de08  w    F .text	0000000a HardwareSerial::setRX(unsigned char)
+000078d8 g     F .text	00000002 SdSpi::endTransaction()
+00003dac g     F .text	00000026 i2c_t3::endTransmission(i2cStruct*, unsigned char, i2c_stop, unsigned long)
+1fff976c g     O .data	00000008 system_auto_fan_3
+00003c88 g     F .text	00000034 i2c_t3::getError()
+0000ee50 g     F .text	00000040 .hidden __fixunsdfsi
+0000b680  w    F .text	00000006 lptmr_isr
+000036c4 g     F .text	00000124 i2c_t3::acquireBus_(i2cStruct*, unsigned char, unsigned long, unsigned char&)
+20002a98 g     O .bss	00000004 __malloc_top_pad
+0000b810 g     F .text	00000020 rtc_set
+000030b4  w    F .text	00000002 i2c_t3::flush()
+00001498 g     F .text	000001e8 check_ini_users(char*)
+00001a20 g     F .text	00000048 write_test(unsigned char)
+1fff87fc g     O .data	00000000 .hidden __dso_handle
+0000e7b4 g     F .text	0000001e .hidden __aeabi_ui2d
+00005754 g     F .text	00000010 SALT_JX::init()
+00014948 g     F .text	0000001c _localeconv_r
+0000c39c g     F .text	0000005c serial2_format
+00016890 g     O .text	00000024 vtable for i2c_t3
+00014b78 g     F .text	00000012 __i2b
+000178c8  w    O .text	00000060 vtable for HardwareSerial2
+0000dd70  w    F .text	0000000c HardwareSerial::write(long)
+1fff8720 g       .data	00000000 _sdata
+00006d8c g     F .text	0000004e FatCache::sync()
+00015418 g     F .text	000002e2 .hidden __udivmoddi4
+0000e530 g     F .text	00000000 .hidden __aeabi_drsub
+00005b04 g     F .text	00000018 FatFile::addCluster()
+0000fb80 g     F .text	00000024 _sbrk_r
+200026ec g     O .bss	00000004 FatFile::m_dateTime
+0000c044 g     F .text	00000024 serial_flush
+000017dc g     F .text	00000044 line_len(char*)
+00008958  w    F .text	00000004 EthernetUDP::remotePort()
+000001bc g     F .text	000001d4 ResetHandler
+0000d830 g     F .text	00000058 usb_serial_getchar
+0000b680  w    F .text	00000006 can1_bus_off_isr
+0000b680  w    F .text	00000006 ftm2_isr
+000081a4 g     F .text	0000002e DhcpClass::beginWithDHCP(unsigned char*, unsigned long, unsigned long)
+20002acc g     O .bss	00000008 usb_cdc_line_coding
+000054b4 g     F .text	000000b4 Systronix_PCA9557::register_write(unsigned char, unsigned char)
+0000b830 g     F .text	00000048 digitalWrite
+000094a0 g     F .text	00000204 EthernetClass::socketRecv(unsigned char, unsigned char*, short)
+200029f4 g     O .bss	00000004 EventResponder::lastYield
+0000b680  w    F .text	00000006 uart5_status_isr
+0000b680  w    F .text	00000006 lpuart0_status_isr
+00017960 g     O .text	00000004 usb_endpoint_config_table
+1fff96f4 g     O .data	00000002 habitat_rev
+0000b680  w    F .text	00000006 dma_ch9_isr
+0000de28  w    F .text	00000016 HardwareSerial::begin(unsigned long)
+0000b680  w    F .text	00000006 pit2_isr
+0000c2c4 g     F .text	000000d8 serial2_begin
+0000ef20 g     F .text	00000012 isspace
+0000ed84 g     F .text	00000012 .hidden __aeabi_dcmplt
+0000e39c g     F .text	00000020 serial3_available
+00002e1c g     F .text	00000064 Systronix_MB85RC256V::current_address_read()
+20002a94 g     O .bss	00000004 __malloc_max_sbrked_mem
+00003d14 g     F .text	00000096 i2c_t3::finish_(i2cStruct*, unsigned char, unsigned long)
+0000defc  w    F .text	00000008 HardwareSerial2::clear()
+0000b894 g     F .text	00000080 pinMode
+0000761c g     F .text	0000003c SdSpiCard::writeStop()
+0000d7dc g     F .text	00000054 usb_free
+0000b680  w    F .text	00000006 i2c3_isr
+0000e7f8 g     F .text	0000003a .hidden __extendsfdf2
+0000eaf4 g     F .text	000001d0 .hidden __aeabi_ddiv
+00007658 g     F .text	0000003a SdSpiCard::writeBlocks(unsigned long, unsigned char const*, unsigned int)
+00008b58 g     F .text	00000040 EthernetUDP::beginMulticast(IPAddress, unsigned short)
+00009794 g     F .text	0000010c EthernetClass::socketPeek(unsigned char)
+0000e53c g     F .text	00000276 .hidden __adddf3
+0000c654 g     F .text	000000a4 serial2_putchar
+000075a4 g     F .text	00000030 SdSpiCard::writeData(unsigned char const*)
+0000df98  w    F .text	00000008 HardwareSerial2::available()
+0000c820 g     F .text	00000074 serial2_getchar
+00014fa4 g     F .text	000000d4 __b2d
+00017dcc g       .ARM.exidx	00000000 __exidx_start
+0000e8a0 g     F .text	00000254 .hidden __aeabi_dmul
+0000b680  w    F .text	00000006 pit0_isr
+00008960 g     F .text	00000018 EthernetUDP::write(unsigned char)
+00007ac4 g     F .text	0000001c DhcpClass::getSubnetMask()
+0000ddfc  w    F .text	0000000c HardwareSerial::setTX(unsigned char, bool)
+200029f8 g     O .bss	00000004 EventResponder::firstYield
+000179b8 g     O .text	00000004 _global_impure_ptr
+000074d4 g     F .text	00000042 SdSpiCard::readBlocks(unsigned long, unsigned char*, unsigned int)
+1fff90f4 g     O .data	000004c4 kv_users
+0000b680  w    F .text	00000006 can1_error_isr
+0000f7a0 g     F .text	000003de _realloc_r
+0000eebc g     F .text	00000050 __libc_init_array
+20002adc g       .bss	00000000 __bss_end
+0000b680  w    F .text	00000006 can0_wakeup_isr
+200026e8 g     O .bss	00000004 FatFile::m_cwd
+00017b98 g     O .text	00000100 __hexdig
+0000ded4  w    F .text	00000018 HardwareSerial2::write(char const*)
+0000deec  w    F .text	00000010 HardwareSerial2::write(unsigned char const*, unsigned int)
+0000b680  w    F .text	00000006 flash_cmd_isr
+00007518 g     F .text	0000004a SdSpiCard::writeData(unsigned char, unsigned char const*)
+00017d70 g     O .text	00000028 __mprec_bigtens
+00014a44 g     F .text	00000098 __s2b
+000006e0 g     F .text	00000068 stopwatch(bool)
+0000e19c  w    F .text	00000008 usb_serial_class::clear()
+0000e7b4 g     F .text	0000001e .hidden __floatunsidf
+0000e3bc g     F .text	000000e4 uart2_status_isr
+0000b698 g     F .text	00000034 _sbrk
+0000783c g     F .text	0000009c SdSpi::send(unsigned char const*, unsigned int)
+00014e0c g     F .text	0000003e __mcmp
+20002a00 g     O .bss	00000004 MillisTimer::listWaiting
+00003168 g     F .text	0000002c i2c_t3::i2c_t3(unsigned char)
+0000b914 g     F .text	00000100 attachInterrupt
+000004a0  w    F .text	0000000c SdFatBase::readBlocks(unsigned long, unsigned char*, unsigned int)
+1fff9cbc g     O .data	00000004 __brkval
+00004f60 g     F .text	000000cc DS1307RTC::write(tmElements_t&)
+200029e4 g     O .bss	00000001 usb_cdc_line_rtsdtr
+00002ba0 g     F .text	00000040 Systronix_MB85RC256V::setup(unsigned char, i2c_t3, char*)
+00002c50 g     F .text	00000014 Systronix_MB85RC256V::adv_addr16()
+0000dae4 g     F .text	00000048 usb_serial_flush_callback
+0000df68  w    F .text	0000001e HardwareSerial2::begin(unsigned long, unsigned long)
+00017d98 g     F .text	00000000 _init
+00005ba4 g     F .text	00000024 FatFile::cacheDirEntry(unsigned char)
+00008a50 g     F .text	00000018 EthernetUDP::write(unsigned char const*, unsigned int)
+00011740 g     F .text	0000002c strtol
+200027b8 g     O .bss	00000002 W5100Class::SSIZE
+000070dc g     F .text	0000005c fmtDec(unsigned short, char*)
+00017560 g     O .text	00000050 vtable for EthernetUDP
+0000b680  w    F .text	00000006 svcall_isr
+1fffc6d8 g     O .bss	00000080 coreJ4
+0000b680  w    F .text	00000006 dma_ch15_isr
+00000774 g     F .text	00000044 array_get_line(char*, char*)
+0000bb44 g     F .text	000000d4 serial_begin
+000072e8 g     F .text	00000158 SdSpiCard::begin(SdSpi*, unsigned char, unsigned char)
+0000de40  w    F .text	0000001e HardwareSerial::begin(unsigned long, unsigned long)
+0000b680  w    F .text	00000006 uart1_error_isr
+00013f48 g     F .text	00000028 __libc_fini_array
+00010758 g     F .text	00000e8c _strtod_l
+00014794 g     F .text	00000030 __match
+20001ca4 g     O .bss	00000348 user
+0000b680  w    F .text	00000006 usbhs_phy_isr
+20002adc g       .bss	00000000 _ebss
+000030b8 g     F .text	00000028 i2c_t3::write(unsigned char)
+200027bc g     O .bss	00000002 W5100Class::CH_BASE
+00001afc g     F .text	00000054 erase_settings(unsigned char)
+00007138 g     F .text	00000044 fmtDec(unsigned long, char*)
+0000c068 g     F .text	00000024 serial_write_buffer_free
+00006ddc g     F .text	00000048 FatCache::read(unsigned long, unsigned char)
+1fffc650 g     O .bss	00000080 coreJ2
+0000de80  w    F .text	00000008 HardwareSerial::availableForWrite()
+00014adc g     F .text	00000040 __hi0bits
+00002cc0 g     F .text	0000008c Systronix_MB85RC256V::byte_write()
+0000ee00 g     F .text	0000004e .hidden __fixdfsi
+0000b680 g     F .text	00000006 unused_isr
+00003138 g     F .text	00000030 i2c_t3::~i2c_t3()
+0000b680  w    F .text	00000006 spi0_isr
+000056d0 g     F .text	0000002a Systronix_PCA9557::pin_drive(unsigned char, bool)
+00004ef8 g     F .text	0000003c DS1307RTC::DS1307RTC()
+00008b38 g     F .text	00000020 EthernetUDP::peek()
+0000b680  w    F .text	00000006 dma_ch3_isr
+000115e4 g     F .text	00000024 strtod
+00001d30 g     F .text	000000b4 set_fram_store()
+00008358 g     F .text	00000278 DNSClient::ProcessResponse(unsigned short, IPAddress&)
+00005360 g     F .text	00000048 Systronix_PCA9557::Systronix_PCA9557()
+2000278c g     O .bss	00000004 EthernetClass::_dhcp
+00002e80 g     F .text	00000074 Systronix_MB85RC256V::byte_read()
+0000ddec  w    F .text	00000010 HardwareSerial::attachRts(unsigned char)
+0000dd94  w    F .text	0000000c HardwareSerial::write9bit(unsigned long)
+0000717c g     F .text	00000026 SdSpiCard::chipSelectHigh()
+00005350 g     F .text	0000000e SALT_FETs::init()
+000031a0 g     F .text	00000190 i2c_t3::setOpMode_(i2cStruct*, unsigned char, i2c_op_mode)
+00002b4c g     F .text	00000044 Systronix_MB85RC256V::Systronix_MB85RC256V()
+0000e194 g     F .text	00000008 operator delete(void*, unsigned int)
+000089c0 g     F .text	00000074 EthernetUDP::beginPacket(char const*, unsigned short)
+0000ddd4  w    F .text	00000008 HardwareSerial::clear()
+0000b680  w    F .text	00000006 flash_error_isr
+00008994 g     F .text	0000002c EthernetUDP::begin(unsigned short)
+0000e53c g     F .text	00000276 .hidden __aeabi_dadd
+1ffffc74 g     O .bss	0000002c file
+0000eccc g     F .text	00000082 .hidden __ledf2
+0000de78  w    F .text	00000008 HardwareSerial::flush()
+00002c10 g     F .text	00000024 Systronix_MB85RC256V::set_addr16(unsigned short)
+0000bee0 g     F .text	000000a4 serial_putchar
+0000b680  w    F .text	00000006 uart5_error_isr
+0000b680  w    F .text	00000006 rtc_seconds_isr
+0001700c g     O .text	00000078 SPIClass::spi0_hardware
+0000b680  w    F .text	00000006 pdb_isr
+00014cbc g     F .text	000000a0 __pow5mult
+0000e834 g     F .text	0000006a .hidden __aeabi_ul2d
+0000b644  w    F .text	0000003c usage_fault_isr
+0000b680  w    F .text	00000006 dac1_isr
+00000000 g     O .text	000001bc _VectorsFlash
+00007440 g     F .text	00000042 SdSpiCard::readBlock(unsigned long, unsigned char*)
+0000b680  w    F .text	00000006 dma_ch14_isr
+0000b77c g     F .text	00000094 detachInterrupt
+00000000  w      *UND*	00000000 __deregister_frame_info
+20002ad4 g     O .bss	00000004 usb_cdc_line_rtsdtr_millis
+00004c8c g     F .text	000000d0 SALT_utilities::get_user_yes_no(char*, char*, bool)
+000030e0 g     F .text	00000058 i2c_t3::write(unsigned char const*, unsigned int)
+0000dd50 g     F .text	00000014 systick_isr
+0000b680  w    F .text	00000006 rtc_alarm_isr
+0000df14  w    F .text	00000010 HardwareSerial2::attachRts(unsigned char)
+0000b44c g     F .text	00000044 W5100Class::execCmdSn(unsigned char, SockCMD)
+00006d58 g     F .text	00000034 FatFile::getSFN(char*)
+0000ae10 g     F .text	00000044 W5100Class::softReset()
+0000b680  w    F .text	00000006 dma_ch2_isr
+1fff9dc8 g     O .data	00000010 Serial
+00008d28 g     F .text	00000024 EthernetClass::socketPortRand(unsigned short)
+0000b680  w    F .text	00000006 ftm1_isr
+00017868  w    O .text	00000060 vtable for HardwareSerial
+0000e1d8  w    F .text	0000000a usb_serial_class::write(unsigned char)
+0000b688  w    F .text	0000000c startup_early_hook
+0000b680  w    F .text	00000006 dma_ch13_isr
+0000dfa0  w    F .text	00000008 HardwareSerial2::flush()
+0000b680  w    F .text	00000006 uart2_error_isr
+0000d888 g     F .text	00000040 usb_serial_peekchar
+0000edc0 g     F .text	00000012 .hidden __aeabi_dcmpgt
+00003e3c g     F .text	0000001c i2c_t3::peek_(i2cStruct*)
+200020b8 g     O .bss	00000002 warn_cnt
+0000f530 g     F .text	00000000 memchr
+00001b98 g     F .text	000000dc set_fram_manuf_date()
+1fff9e68 g     O .data	00000016 usb_string_serial_number_default
+00005428 g     F .text	0000008c Systronix_PCA9557::control_write(unsigned char)
+0000b644 g     F .text	0000003c fault_isr
+0001400c g     F .text	000001d0 _free_r
+00004f34 g     F .text	0000001c DS1307RTC::dec2bcd(unsigned char)
+0000464c g     F .text	00000078 SALT_settings::is_settings_empty(unsigned char)
+0000891c g     F .text	0000000c EthernetClass::init(unsigned char)
+00002ef4 g     F .text	000000cc Systronix_MB85RC256V::page_read()
+0000edac g     F .text	00000012 .hidden __aeabi_dcmpge
+0000b680  w    F .text	00000006 usb_charge_isr
+00000748 g     F .text	0000002c get_crc_array(unsigned char*)
+00007564 g     F .text	00000040 SdSpiCard::writeBlock(unsigned long, unsigned char const*)
+0000b4c8 g     F .text	00000018 teensySN(unsigned char*)
+1fff96ec g     O .data	00000008 system_auto_fan_1
+0000e1bc  w    F .text	00000008 usb_serial_class::flush()
+00003cbc g     F .text	00000056 i2c_t3::done_(i2cStruct*)
+00009ad0 g     F .text	00000274 EthernetClass::socketSendUDP(unsigned char)
+00002b90 g     F .text	0000000e Systronix_MB85RC256V::~Systronix_MB85RC256V()
+0000b680  w    F .text	00000006 cmt_isr
+0000e538 g     F .text	0000027a .hidden __aeabi_dsub
+0000b680  w    F .text	00000006 usbhs_isr
+1fffa824 g     O .data	00000004 __malloc_sbrk_base
+0000e1ac  w    F .text	00000008 usb_serial_class::read()
+0000b680  w    F .text	00000006 ftm3_isr
+000104f4 g     F .text	0000021e strstr
+0000b680  w    F .text	00000006 tsi0_isr
+0000de20  w    F .text	00000008 HardwareSerial::end()
+1fff95c0 g     O .data	0000012c kv_system
+0000e834 g     F .text	0000006a .hidden __floatundidf
+0000b6cc  w    F .text	00000002 __cxa_pure_virtual
+00014d5c g     F .text	000000ae __lshift
+00006ea0 g     F .text	00000058 FatVolume::fatPut(unsigned long, unsigned long)
+0000b680  w    F .text	00000006 spi2_isr
+200026f0 g     O .bss	00000020 Udp
+00015228 g     F .text	00000100 __ssprint_r
+000081d4 g     F .text	0000000a DNSClient::begin(IPAddress const&)
+00015328 g     F .text	0000005e _vasnprintf_r
+0000e1e4  w    F .text	00000002 serialEvent()
+00017928 g     O .text	0000000c vtable for IPAddress
+20002955 g     O .bss	00000001 usb_reboot_timer
+00000928 g     F .text	00000048 is_unique_pin(unsigned char, char*)
+00012f00 g     F .text	000000a4 __register_exitproc
+0000459c g     F .text	000000b0 SALT_settings::get_crc_fram(unsigned short*, unsigned char)
+00000494  w    F .text	0000000c SdFatBase::writeBlocks(unsigned long, unsigned char const*, unsigned int)
+0001019c g     F .text	000000a0 strncmp
+000030a4  w    F .text	0000000e i2c_t3::available()
+0000d8e4 g     F .text	00000038 usb_serial_flush_input
+00002c34 g     F .text	00000008 Systronix_MB85RC256V::get_addr16()
+00014b8c g     F .text	00000130 __multiply
+1fff9d98 g     O .data	00000008 isr_table_portE
+1fff977c g     O .data	0000001c valid_t_zone_str
+0000da14 g     F .text	00000018 usb_serial_putchar
+0000895c g     F .text	00000004 EthernetUDP::available()
+00000021 g       *ABS*	00000000 _teensy_model_identifier
+00002ca0 g     F .text	0000001e Systronix_MB85RC256V::init()
+20002a9c g     O .bss	00000028 __malloc_current_mallinfo
+00015078 g     F .text	000000b6 __d2b
+0000fbf0 g     F .text	00000046 strcasecmp
+0000b680  w    F .text	00000006 can0_bus_off_isr
+20002a10 g     O .bss	00000001 SPIFIFOclass::pcs
+0000c6f8 g     F .text	000000c0 serial2_write
+000081e0 g     F .text	0000005c DNSClient::inet_aton(char const*, IPAddress&)
+0000dec8  w    F .text	0000000c HardwareSerial2::write(unsigned char)
+1ffffc50 g     O .bss	00000010 system_mask
+0000de8c  w    F .text	0000000c HardwareSerial2::write(unsigned long)
+0000c7dc g     F .text	00000024 serial2_write_buffer_free
+200029c1 g     O .bss	00000001 usb_rx_memory_needed
+20001fec g     O .bss	0000004c ntp
+0000058c g     F .text	00000154 clock_set()
+0000cbf0 g     F .text	00000ad2 usb_isr
+0000eea4 g     F .text	0000000c __cxa_atexit
+000004ac  w    F .text	0000000c SdFatBase::writeBlock(unsigned long, unsigned char const*)
+00008a68 g     F .text	00000034 EthernetUDP::read()
+00006f64 g     F .text	0000003e FatVolume::freeChain(unsigned long)
+00006868 g     F .text	000003e8 FatFile::open(FatFile*, fname_t*, unsigned char)
+0000e7d4 g     F .text	00000022 .hidden __aeabi_i2d
+00008948  w    F .text	00000010 EthernetUDP::remoteIP()
+00001b50 g     F .text	00000048 set_fram_crc(unsigned char, unsigned short)
+0000e150 g     F .text	00000018 random(unsigned long)
+1fff9c80 g     O .data	00000038 SPI
+0000f5d0 g     F .text	00000062 memcmp
+00017938  w    O .text	00000028 vtable for usb_serial_class
+0000b4e0 g     F .text	0000002e teensyMAC(unsigned char*)
+0000b680  w    F .text	00000006 uart3_error_isr
+0000bc18 g     F .text	0000005c serial_format
+0000e0ec g     F .text	00000064 random()
+00000474  w    F .text	0000000e SALT_JX::~SALT_JX()
+200029f0 g     O .bss	00000004 MillisTimer::listActive
+000156fc  w    F .text	00000002 .hidden __aeabi_ldiv0
+0000ef0c g     F .text	00000012 isalpha
+0000b680  w    F .text	00000006 porta_isr
+0000eaf4 g     F .text	000001d0 .hidden __divdf3
+1fff8ddc g     O .data	00000138 habitat_B_heat_settings
+00015184 g     F .text	00000046 __copybits
+1fff83bc g     O .usbbuffers	00000360 usb_buffer_memory
+0000b680  w    F .text	00000006 low_voltage_isr
+1fffa418 g     O .data	00000408 __malloc_av_
+0000b680  w    F .text	00000006 can0_error_isr
+1fff9798 g     O .data	00000008 system_dst
+0000bf84 g     F .text	000000c0 serial_write
+0000ba88 g     F .text	000000bc _init_Teensyduino_internal_
+00002c64 g     F .text	0000003a Systronix_MB85RC256V::ping_eeprom()
+0000e8a0 g     F .text	00000254 .hidden __muldf3
+000018a0 g     F .text	00000180 write_settings_to_out_buf(char*)
+00006ef8 g     F .text	0000006c FatVolume::allocateCluster(unsigned long, unsigned long*)
+00006cec g     F .text	00000038 FatFile::printFatTime(Print*, unsigned short)
+0000da80 g     F .text	00000064 usb_serial_flush_output
+0000b680  w    F .text	00000006 dma_ch12_isr
+0000f798 g     F .text	00000002 __malloc_lock
+1fff96f8 g     O .data	00000008 system_tz
+000004d0  w    F .text	0000000a PrintFile::write(unsigned char const*, unsigned int)
+00000000  w      *UND*	00000000 __fini_array_start
+00006518 g     F .text	0000027c FatFile::parsePathName(char const*, fname_t*, char const**)
+0000b680  w    F .text	00000006 can1_wakeup_isr
+1fff8200 g     O .dmabuffers	000001bc _VectorsRam
+000055b4 g     F .text	0000007c Systronix_PCA9557::default_read(unsigned char*)
+0000bdec g     F .text	00000058 serial_set_rx
+00015388 g     F .text	0000005e _calloc_r
+0000df50  w    F .text	00000016 HardwareSerial2::begin(unsigned long)
+0000b680  w    F .text	00000006 pit3_isr
+00002b90 g     F .text	0000000e Systronix_MB85RC256V::~Systronix_MB85RC256V()
+00005960 g     F .text	00000084 SPIClass::begin()
+000053e8 g     F .text	00000040 Systronix_PCA9557::begin()
+1fffdba8 g     O .bss	00002000 rx_buf
+00007b20 g     F .text	00000020 DhcpClass::printByte(char*, unsigned char)
+0000b680  w    F .text	00000006 enet_rx_isr
+1fff95b8 g     O .data	00000008 system_dawn
+0000b680  w    F .text	00000006 portc_isr
+000074ac g     F .text	00000026 SdSpiCard::readStop()
+0000f6fc g     F .text	0000009a memset
+00006e24 g     F .text	0000000c FatVolume::clusterStartBlock(unsigned long) const
+0000e17c g     F .text	00000010 main
+00005ed4 g     F .text	000000b8 FatFile::openCachedEntry(FatFile*, unsigned short, unsigned char, unsigned char)
+00008d4c g     F .text	00000360 EthernetClass::socketBegin(unsigned char, unsigned short)
+20002a90 g     O .bss	00000004 __malloc_max_total_mem
+0000c894 g     F .text	00000034 serial2_peek
+0000c5cc g     F .text	00000044 serial2_set_rts
+20002038 g     O .bss	00000002 total_errs
+0000b644  w    F .text	0000003c memmanage_fault_isr
+000096a4 g     F .text	000000f0 EthernetClass::socketRecvAvailable(unsigned char)
+000037e8 g     F .text	0000001c i2c_t3::beginTransmission(unsigned char)
+0000e4a0 g     F .text	0000008c usb_init_serialnumber
+00004ae8 g     F .text	00000018 SALT_settings::str_to_lower(char*)
+00017dc8 g       .text	00000000 __init_array_end
+200021cc g     O .bss	0000007e pins
+000130f0 g     F .text	00000e56 _dtoa_r
+00015718  w    O .text	00000018 vtable for SdFat
+0000ef88 g     F .text	00000570 _malloc_r
+1fff8dc8 g     O .data	00000008 system_pwrfru
+0000b680  w    F .text	00000006 debugmonitor_isr
+00012eb8 g     F .text	0000001a __ascii_wctomb
+0000e844 g     F .text	0000005a .hidden __aeabi_l2d
+000078dc g     F .text	00000060 Systronix_NTP::setup(unsigned char)
+1fff9d78 g     O .data	00000020 isr_table_portD
+0000c610 g     F .text	00000044 serial2_set_cts
+00001a68 g     F .text	00000094 write_settings(unsigned char, char*)
+1fff9700 g     O .data	00000048 habitat_EC_heat_settings
+6a22d3b4 g       *ABS*	00000000 __rtc_localtime
+00005a34 g     F .text	0000009c SdFatBase::initErrorPrint(Print*)
+0000ba14 g     F .text	00000048 micros
+00000000  w      *UND*	00000000 __libc_fini
+0000b680  w    F .text	00000006 cmp1_isr
+0000893c  w    F .text	0000000a EthernetUDP::read(char*, unsigned int)
+0000b680  w    F .text	00000006 ftm0_isr
+0000df04  w    F .text	00000010 HardwareSerial2::attachCts(unsigned char)
+000048f4 g     F .text	000000ae SALT_settings::revision_check(char*)
+00013f70 g     F .text	0000009c _malloc_trim_r
+1fff9e64 g     O .data	00000004 string0
+0000d91c g     F .text	000000f8 usb_serial_write
+00003330 g     F .text	000000a8 i2c_t3::setRate_(i2cStruct*, unsigned long, unsigned long)
+0000b694  w    F .text	00000002 startup_late_hook
+000004dc  w    F .text	0000001a PrintFile::write(unsigned char)
+0000e1b4  w    F .text	00000008 usb_serial_class::available()
+0000fd28 g     F .text	000002dc strcmp
+00006c94 g     F .text	00000058 FatFile::printFatDate(Print*, unsigned short)
+00006030 g     F .text	00000080 FatFile::sync()
+00003dd4 g     F .text	00000036 i2c_t3::requestFrom_(i2cStruct*, unsigned char, unsigned char, unsigned int, i2c_stop, unsigned long)
+00003e88 g     F .text	000005d0 i2c_isr_handler
+00007d54 g     F .text	000002dc DhcpClass::parseDHCPResponse(unsigned long, unsigned long&)
+1fff9e4c  w    O .data	00000016 usb_string_product_name
+0000be44 g     F .text	00000044 serial_set_rts
+00000474  w    F .text	0000000e SALT_JX::~SALT_JX()
+0000bc74 g     F .text	000000c8 serial_end
+0000ba5c g     F .text	0000002a delay
+0000ecd4 g     F .text	0000007a .hidden __nedf2
+0000b680  w    F .text	00000006 tpm0_isr
+200029e6 g     O .bss	00000002 dma_channel_allocated_mask
+00017dc8 g     F .fini	00000000 _fini
+0000dd7c  w    F .text	0000000c HardwareSerial::write(unsigned int)
+200026e4 g     O .bss	00000001 RTC
+000098a0 g     F .text	000000fc EthernetClass::socketBufferData(unsigned char, unsigned short, unsigned char const*, unsigned short)
+0000128c g     F .text	0000020c check_ini_habitat_EC(char*)
+00005348 g     F .text	00000008 SALT_FETs::begin()
+00007484 g     F .text	00000028 SdSpiCard::readStart(unsigned long)
+00002b4c g     F .text	00000044 Systronix_MB85RC256V::Systronix_MB85RC256V()
+0000fba4 g     F .text	0000004c sprintf
+0000e058 g     F .text	0000001c Print::printf(char const*, ...)
+0000b680  w    F .text	00000006 i2s0_rx_isr
+0000b680  w    F .text	00000006 uart4_error_isr
+000060b0 g     F .text	0000000e FatFile::close()
+00012fb8 g     F .text	0000000c atexit
+20002274 g     O .bss	00000470 sd
+0000b6dc  w    F .text	00000006 __cxa_guard_release
+00012ed4 g     F .text	0000002c _write_r
+1fff904c g     O .data	00000008 system_dhcp
+1fffa8dc g     O .bss	00000470 SD
+00000484  w    F .text	0000000e SALT_FETs::~SALT_FETs()
+00003e58  w    F .text	0000000a i2c_t3::peek()
+0000b040 g     F .text	0000040c W5100Class::init()
+00004a1c g     F .text	00000044 SALT_settings::strip_white_space(char*)
+1fffc758 g     O .bss	00000080 coreJ3
+0000b680  w    F .text	00000006 can0_message_isr
+200027c8 g     O .bss	00000002 W5100Class::SMASK
+1fffa2a8 g     O .data	00000004 _impure_ptr
+00016864  w    O .text	00000024 vtable for Stream
+0000b680  w    F .text	00000006 can1_message_isr
+0000b680  w    F .text	00000006 nmi_isr
+20002260 g     O .bss	00000014 Wire
+0000df88  w    F .text	00000008 HardwareSerial2::peek()
+00006794 g     F .text	000000d4 FatFile::lfnUniqueSfn(fname_t*)
+00009d44 g     F .text	00000654 W5100Class::write(unsigned short, unsigned char const*, unsigned short)
+00017da4 g       .text	00000000 __preinit_array_end
+1fff9068 g     O .data	0000008c kv_habitat_EC
+0000b680  w    F .text	00000006 sdhc_isr
+000008b8 g     F .text	00000030 warn_msg(char*)
+00005678 g     F .text	00000058 Systronix_PCA9557::pin_pulse(unsigned char, bool)
+0000f4f8 g     F .text	0000002a __ascii_mbtowc
+00014f60 g     F .text	00000044 __ulp
+00001750 g     F .text	0000008c zero_pad_setting(char*)
+1fffad4c g     O .bss	00001900 file_list
+00001e8c g     F .text	00000230 setup
+00017964 g     O .text	00000054 usb_descriptor_list
+0000ca38 g     F .text	0000003c usb_rx
+1fff8dd4 g     O .data	00000008 system_dusk
+1ffffba8 g     O .bss	000000a8 utils
+1ffffc60 g     O .bss	00000010 system_ip
+0000b680  w    F .text	00000006 dma_ch10_isr
+0000dd88  w    F .text	0000000c HardwareSerial::write(int)
+00000470  w    F .text	00000002 Print::flush()
+0000ee50 g     F .text	00000040 .hidden __aeabi_d2uiz
+0000777c g     F .text	000000a0 SdSpi::receive(unsigned char*, unsigned int)
+0000b680  w    F .text	00000006 uart0_error_isr
+0000ae54 g     F .text	00000094 W5100Class::isW5100()
+00005adc g     F .text	00000028 SdFatBase::initErrorHalt(Print*, char const*)
+200027c0 g     O .bss	00000008 W5100Class::SBASE
+0000d79c g     F .text	00000040 usb_malloc
+00005c58 g     F .text	000001a0 FatFile::read(void*, unsigned int)
+20002784 g     O .bss	00000008 EthernetClass::_dnsServerAddress
+0000b680  w    F .text	00000006 i2s0_isr
+000004b8  w    F .text	0000000c SdFatBase::readBlock(unsigned long, unsigned char*)
+00005c20 g     F .text	00000038 FatFile::openRoot(FatVolume*)
+00003138 g     F .text	00000030 i2c_t3::~i2c_t3()
+20008000 g       .bss	00000000 _estack
+0000dbe8 g     F .text	00000034 DMAChannel::release()
+00005810 g     F .text	0000000a SALT_JX::update()
+0000da2c g     F .text	00000054 usb_serial_write_buffer_free
+0000723c g     F .text	00000038 SdSpiCard::waitNotBusy(unsigned short)
+0000b680  w    F .text	00000006 enet_timer_isr
+0000ed70 g     F .text	00000012 .hidden __aeabi_dcmpeq
+00005204 g     F .text	000000f8 makeTime(tmElements_t const&)
+0000e048  w    F .text	0000000e _write
+1fffa828 g       .data	00000000 _edata
+1fff8800 g     O .data	000002e4 kv_habitat_A
+0000b680  w    F .text	00000006 i2s0_tx_isr
+0000b680  w    F .text	00000006 adc1_isr
+00005b1c g     F .text	00000088 FatFile::addDirCluster()
+0000e1c4  w    F .text	00000008 usb_serial_class::availableForWrite()
+00000f3c g     F .text	000001a8 check_ini_habitat_A(char*)
+0000b680  w    F .text	00000006 cmp0_isr
+00004c20 g     F .text	0000006c SALT_utilities::fram_fill(unsigned char, unsigned short, unsigned int)
+00002be0 g     F .text	00000030 Systronix_MB85RC256V::begin()
+00008030 g     F .text	00000174 DhcpClass::request_DHCP_lease()
+00003168 g     F .text	0000002c i2c_t3::i2c_t3(unsigned char)
+00003994 g     F .text	000002f2 i2c_t3::sendRequest_(i2cStruct*, unsigned char, unsigned char, unsigned int, i2c_stop, unsigned long)
+0000b724 g     F .text	00000052 ultoa
+00015700  w    O .text	00000018 vtable for SdFile
+00000484  w    F .text	0000000e SALT_FETs::~SALT_FETs()
+1ffffca0 g     O .bss	00002000 out_buf
+0000c570 g     F .text	0000005c serial2_set_rx
+0000e18c g     F .text	00000008 operator new(unsigned int)
+0000dc1c g     F .text	00000044 EventResponder::runFromInterrupt()
+1fffa820 g     O .data	00000004 __malloc_trim_threshold
+0000e1a4  w    F .text	00000008 usb_serial_class::peek()
+00002d4c g     F .text	00000098 Systronix_MB85RC256V::page_write()
+00014e4c g     F .text	00000114 __mdiff
+000093c4 g     F .text	000000dc EthernetClass::socketClose(unsigned char)
+0000ee00 g     F .text	0000004e .hidden __aeabi_d2iz
+00006e30 g     F .text	0000006e FatVolume::fatGet(unsigned long, unsigned long*)
+0000de68  w    F .text	00000008 HardwareSerial::read()
+00008a9c g     F .text	0000002e EthernetUDP::read(unsigned char*, unsigned int)
+0000df90  w    F .text	00000008 HardwareSerial2::read()
+200029d4 g     O .bss	00000001 usb_cdc_transmit_flush_timer
+200020bc g     O .bss	00000100 ln_buf
+00007a98 g     F .text	0000000e DhcpClass::reset_DHCP_lease()
+0000b680  w    F .text	00000006 pit_isr
+000033d8 g     F .text	00000138 i2c_t3::pinConfigure_(i2cStruct*, unsigned char, i2c_pins, i2c_pullup, unsigned char)
+00008978 g     F .text	00000002 EthernetUDP::flush()
+0000ee9c g     F .text	00000008 atoi
+1fffa8d8 g     O .bss	00000001 i2c_common
+00017a84 g     O .text	00000101 _ctype_
+0000b680  w    F .text	00000006 dac0_isr
+0000c7b8 g     F .text	00000024 serial2_flush
+000156fc  w    F .text	00000002 .hidden __aeabi_idiv0
+00017da4 g       .text	00000000 __init_array_start
+0000b680  w    F .text	00000006 can1_tx_warn_isr
+0000edd4 g     F .text	0000002c .hidden __unorddf2
+0000df3c  w    F .text	0000000a HardwareSerial2::transmitterEnable(unsigned char)
+20002790 g     O .bss	00000008 EthernetServer::server_port
+0000c1a0 g     F .text	00000124 uart0_status_isr
+00008a34 g     F .text	00000010 EthernetUDP::beginPacket(IPAddress, unsigned short)
+0000b680  w    F .text	00000006 mcg_isr
+00005748 g     F .text	0000000a SALT_JX::begin()
+00000400 g     O .text	00000010 flashconfigbytes
+000049a4 g     F .text	00000076 SALT_settings::trim(char*)
+0000db2c g     F .text	000000bc DMAChannel::begin(bool)
+000100c0 g     F .text	000000dc strlen
+000063f0 g     F .text	0000002c FatFile::openCluster(FatFile*)
+00004ef8 g     F .text	0000003c DS1307RTC::DS1307RTC()
+0000ef4c g     F .text	00000006 __locale_ctype_ptr_l
+00005bc8 g     F .text	00000056 FatFile::dirName(directoryEntry const*, char*)
+000004c4  w    F .text	0000000a PrintFile::flush()
+00012e38 g     F .text	0000001c toupper
+0000ed60 g     F .text	00000010 .hidden __aeabi_cdcmpeq
+00003194 g     F .text	0000000a i2c_t3::getDefaultPins_(unsigned char)
+0000ecc4 g     F .text	0000008a .hidden __gedf2
+00005e38 g     F .text	0000009a FatFile::seekSet(unsigned long)
+00014284 g     F .text	00000510 __gethex
+1fff9e4c g     O .data	00000016 usb_string_product_name_default
+1fff9cba g     O .data	00000001 W5100Class::ss_pin
+000085d0 g     F .text	000000cc DNSClient::getHostByName(char const*, IPAddress&)
+0000ddc4  w    F .text	00000010 HardwareSerial::write(unsigned char const*, unsigned int)
+00012ea0 g     F .text	00000018 vdprintf
+0000b680  w    F .text	00000006 dma_ch1_isr
+0000ca74 g     F .text	0000002c usb_tx_packet_count
+00003e0c g     F .text	00000024 i2c_t3::read_(i2cStruct*)
+0000de98  w    F .text	0000000c HardwareSerial2::write(long)
+0000fc38 g     F .text	000000ce strchr
+00008250 g     F .text	00000108 DNSClient::BuildRequest(char const*)
+000008e8 g     F .text	00000040 is_good_user_name(char*)
+00004ec8 g     F .text	00000030 SALT_utilities::is_valid_date(unsigned short, unsigned char, unsigned char)
+0000e7f8 g     F .text	0000003a .hidden __aeabi_f2d
+0000b680  w    F .text	00000006 dma_ch5_isr
+1fffa844 g     O .bss	00000004 manufacture_date
+0000641c g     F .text	000000fc FatFile::getName(char*, unsigned int)
+0000b680  w    F .text	00000006 can0_rx_warn_isr
+00001c74 g     F .text	000000bc set_fram_habitat_rev()
+00008a44 g     F .text	0000000a EthernetUDP::endPacket()
+0000c0ac g     F .text	00000074 serial_getchar
+00004808 g     F .text	0000009c SALT_settings::string_to_time_stamp(char*)
+000075d4 g     F .text	00000048 SdSpiCard::writeStart(unsigned long, unsigned long)
+0000b680  w    F .text	00000006 can0_tx_warn_isr
+0000b680  w    F .text	00000006 uart4_status_isr
+00000000  w      *UND*	00000000 _Jv_RegisterClasses
+0000e538 g     F .text	0000027a .hidden __subdf3
+00017da4 g       .text	00000000 __preinit_array_start
+200021bc g     O .bss	00000010 system_server_ip
+00002fc0 g     F .text	0000001c Systronix_MB85RC256V::int16_read()
+0000be88 g     F .text	00000058 serial_set_cts
+00014b1c g     F .text	0000005a __lo0bits
+0000c120 g     F .text	00000034 serial_peek
+00005764 g     F .text	000000ac SALT_JX::ACDC_read_write(bool)
+000059e4 g     F .text	00000050 SdFatBase::errorPrint(Print*)
+0000477c g     F .text	0000008a SALT_settings::fahrenheit_string_to_SALT_temp(char*)
+0000e52c  w    F .text	00000002 serialEvent3()
+0000ee90 g     F .text	0000000a __aeabi_atexit
+000004f8 g     F .text	00000094 iso_date_get(char*, long*)
+0000b6d0  w    F .text	0000000a __cxa_guard_acquire
+00000000  w      *UND*	00000000 __register_frame_info
+00004a60 g     F .text	00000024 SALT_settings::is_section_header(char*)
+0000bd3c g     F .text	00000038 serial_set_transmit_pin
+00007ae0 g     F .text	0000001c DhcpClass::getGatewayIp()
+0000897c g     F .text	00000018 EthernetUDP::stop()
+0000b680  w    F .text	00000006 cmp2_isr
+0000dc60 g     F .text	00000008 pendablesrvreq_isr
+0000451c g     F .text	00000010 i2c_t3::sda0_rising_isr()
+0000dfa8  w    F .text	00000008 HardwareSerial2::availableForWrite()
+0000999c g     F .text	00000134 EthernetClass::socketStartUDP(unsigned char, unsigned char*, unsigned short)
+0000046c  w    F .text	00000004 Print::availableForWrite()
+1fffa2ac g     O .data	0000016c __global_locale
+1fff9cf8 g     O .data	00000050 isr_table_portB
+0000b680  w    F .text	00000006 wakeup_isr
+00004e0c g     F .text	0000007c SALT_utilities::fram_hex_dump(unsigned short)
+0000b680  w    F .text	00000006 cmp3_isr
+00005044 g     F .text	000001c0 breakTime(long, tmElements_t&)
+0000e074 g     F .text	00000078 Print::printNumber(unsigned long, unsigned char, unsigned char)
+200027ba g     O .bss	00000001 W5100Class::chip
+0000ef78 g     F .text	00000010 free
+0000b680  w    F .text	00000006 tpm2_isr
+000149c4 g     F .text	00000080 __multadd
+00003e64 g     F .text	00000022 i2c_t3::readByte_(i2cStruct*)
+000149b0 g     F .text	00000012 _Bfree
+1fff9db8 g     O .data	00000010 Serial2
+200027cc g     O .bss	00000008 W5100Class::RBASE
+0000b680  w    F .text	00000006 dma_ch0_isr
+1fff9e68  w    O .data	00000016 usb_string_serial_number
+00001de4 g     F .text	000000a8 file_get_chars(char*)
+0000b680  w    F .text	00000006 enet_tx_isr
+
+
